@@ -1,0 +1,4869 @@
+{
+  "feature_cols": [
+    "STARS_NORM",
+    "TEMP_NORM",
+    "RAIN_RISK_NUM",
+    "BEACH",
+    "MOUNTAIN",
+    "HERITAGE",
+    "PRICE_LEVEL",
+    "GASTRONOMY",
+    "CLIMATE_ATLANTIC",
+    "CLIMATE_CONTINENTAL",
+    "CLIMATE_MEDITERRANEAN"
+  ],
+  "feature_labels": {
+    "STARS_NORM": "Estrellas",
+    "TEMP_NORM": "Temperatura",
+    "RAIN_RISK_NUM": "Riesgo de lluvia",
+    "BEACH": "Playa",
+    "MOUNTAIN": "Montaña",
+    "HERITAGE": "Patrimonio histórico",
+    "PRICE_LEVEL": "Nivel de precio",
+    "GASTRONOMY": "Gastronomía",
+    "CLIMATE_ATLANTIC": "Clima atlántico",
+    "CLIMATE_CONTINENTAL": "Clima continental",
+    "CLIMATE_MEDITERRANEAN": "Clima mediterráneo"
+  },
+  "hotel_embeddings": {
+    "243": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "281": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "247": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "315": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "041": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "026": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "255": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "208": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "011": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "231": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    }
+  },
+  "hotel_info": {
+    "243": {
+      "HOTEL_NAME": "Eurostars Torre Sevilla",
+      "CITY_NAME": "SEVILLA",
+      "BRAND": "EUROSTARS",
+      "STARS": 5,
+      "COUNTRY_ID": "ES"
+    },
+    "281": {
+      "HOTEL_NAME": "Aurea Catedral",
+      "CITY_NAME": "GRANADA",
+      "BRAND": "AUREA",
+      "STARS": 4,
+      "COUNTRY_ID": "ES"
+    },
+    "247": {
+      "HOTEL_NAME": "Aurea Museum",
+      "CITY_NAME": "LISBOA",
+      "BRAND": "AUREA",
+      "STARS": 5,
+      "COUNTRY_ID": "PT"
+    },
+    "315": {
+      "HOTEL_NAME": "Eurostars Aliados",
+      "CITY_NAME": "OPORTO",
+      "BRAND": "EUROSTARS",
+      "STARS": 5,
+      "COUNTRY_ID": "PT"
+    },
+    "041": {
+      "HOTEL_NAME": "Exe International Palace",
+      "CITY_NAME": "ROMA",
+      "BRAND": "EXE",
+      "STARS": 4,
+      "COUNTRY_ID": "IT"
+    },
+    "026": {
+      "HOTEL_NAME": "Exe Domus Aurea",
+      "CITY_NAME": "ROMA",
+      "BRAND": "EXE",
+      "STARS": 3,
+      "COUNTRY_ID": "IT"
+    },
+    "255": {
+      "HOTEL_NAME": "Exe Madrid Norte",
+      "CITY_NAME": "MADRID",
+      "BRAND": "EXE",
+      "STARS": 4,
+      "COUNTRY_ID": "ES"
+    },
+    "208": {
+      "HOTEL_NAME": "Eurostars Isla de la Toja",
+      "CITY_NAME": "EL GROVE",
+      "BRAND": "EUROSTARS",
+      "STARS": 4,
+      "COUNTRY_ID": "ES"
+    },
+    "011": {
+      "HOTEL_NAME": "Eurostars Madrid Gran Vía",
+      "CITY_NAME": "MADRID",
+      "BRAND": "EUROSTARS",
+      "STARS": 4,
+      "COUNTRY_ID": "ES"
+    },
+    "231": {
+      "HOTEL_NAME": "Eurostars Sevilla Boutique",
+      "CITY_NAME": "SEVILLA",
+      "BRAND": "EUROSTARS",
+      "STARS": 4,
+      "COUNTRY_ID": "ES"
+    }
+  },
+  "user_embeddings": {
+    "1001025656": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1001074021": {
+      "STARS_NORM": 0.25,
+      "TEMP_NORM": 0.222222,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1002050340": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.222222,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1002066717": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1003752586": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1004674619": {
+      "STARS_NORM": 0.7,
+      "TEMP_NORM": 0.466667,
+      "RAIN_RISK_NUM": 0.3,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.6,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1006174937": {
+      "STARS_NORM": 0.25,
+      "TEMP_NORM": 0.222222,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1006569513": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1007094314": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1007250708": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.888889,
+      "RAIN_RISK_NUM": 0.166667,
+      "BEACH": 0.333333,
+      "MOUNTAIN": 0.333333,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.833333,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1007371220": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1007899011": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1007899014": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1008189175": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1008922782": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1009884845": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.055556,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.75,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.75,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1009955073": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1010221099": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1010619685": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.222222,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1010709238": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.666666,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1011105329": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.666666,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1012706996": {
+      "STARS_NORM": 0.875,
+      "TEMP_NORM": 0.527778,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.75,
+      "MOUNTAIN": 0.75,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.25,
+      "CLIMATE_MEDITERRANEAN": 0.75
+    },
+    "1012907995": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013165610": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.703704,
+      "RAIN_RISK_NUM": 0.166667,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.833333,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.333333,
+      "CLIMATE_MEDITERRANEAN": 0.666667
+    },
+    "1013308570": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.055556,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.75,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.75,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013400808": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013471617": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013518998": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013530969": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013545260": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013580011": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013584674": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013616405": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013616575": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013643641": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013700087": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1013847409": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1013890717": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014270020": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1014279270": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014309501": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014393564": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014395679": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014419889": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1014514961": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014534690": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014566918": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014618023": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1014628774": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014637059": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014687307": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1014698209": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1014768582": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014870045": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1014907189": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.222222,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1014974075": {
+      "STARS_NORM": 0.333333,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015003269": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015033900": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015105542": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015181886": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015214270": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015223976": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015224019": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015245921": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015267928": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015320875": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015426341": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015428618": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015475708": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.833334,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.5,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015567009": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015587355": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015618139": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015632862": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015637242": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015647249": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015681908": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015702788": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015706998": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015721200": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015748511": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015755635": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015763805": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015827023": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015853478": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015873048": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015908731": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015940055": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1015947162": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015949976": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1015950321": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016005813": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016025279": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016025280": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016064888": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016064891": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016075127": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016094371": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016281139": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016315019": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016486255": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016515083": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016518794": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016530069": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016530109": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1016721082": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016721941": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016773489": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016865415": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1016908207": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.037037,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.666667,
+      "MOUNTAIN": 0.333333,
+      "HERITAGE": 0.666667,
+      "PRICE_LEVEL": 0.666667,
+      "GASTRONOMY": 0.666667,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.666667,
+      "CLIMATE_MEDITERRANEAN": 0.333333
+    },
+    "1016992945": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017009766": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017172546": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017215394": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017274997": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017274998": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017276634": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017308262": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017352380": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017382324": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017402306": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017409116": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017472527": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017481330": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017486911": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017500387": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017578791": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017584158": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017658486": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017754446": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1017790273": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017838744": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017893618": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017897456": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1017904880": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.555556,
+      "RAIN_RISK_NUM": 0.25,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.5,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1018091353": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018115558": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018218156": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018251040": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018323024": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018325275": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018327847": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018340111": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018435793": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018436365": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018440736": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018449824": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018480671": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018562355": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018597189": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.5,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.5,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018604026": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018608505": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018639567": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018650666": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.0,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 0.5,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 0.5,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018654404": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018667145": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018684959": {
+      "STARS_NORM": 0.75,
+      "TEMP_NORM": 0.5,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.5,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.75,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018692171": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018695023": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018702070": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018770623": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018795995": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018796015": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018801904": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018808811": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018809217": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.388889,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1018816567": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018837704": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018846248": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018854169": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018854653": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018884990": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.388889,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1018885005": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.388889,
+      "RAIN_RISK_NUM": 0.75,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.5,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.5,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.5
+    },
+    "1018914183": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018922044": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1018975140": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1018982655": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019003850": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019013464": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019042328": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019055165": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019094169": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019124975": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019131256": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019142516": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019146657": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019202900": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019229194": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019269143": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 1.0,
+      "BEACH": 1.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 1.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019301218": {
+      "STARS_NORM": 0.0,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019370402": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019380354": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019408431": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 0.666667,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 1.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019453177": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019477002": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    },
+    "1019630853": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019639162": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019671446": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.333333,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019673879": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 1.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019677924": {
+      "STARS_NORM": 1.0,
+      "TEMP_NORM": 1.0,
+      "RAIN_RISK_NUM": 0.0,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 1.0,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 0.0,
+      "CLIMATE_MEDITERRANEAN": 1.0
+    },
+    "1019682167": {
+      "STARS_NORM": 0.5,
+      "TEMP_NORM": 0.111111,
+      "RAIN_RISK_NUM": 0.5,
+      "BEACH": 0.0,
+      "MOUNTAIN": 0.0,
+      "HERITAGE": 1.0,
+      "PRICE_LEVEL": 0.5,
+      "GASTRONOMY": 1.0,
+      "CLIMATE_ATLANTIC": 0.0,
+      "CLIMATE_CONTINENTAL": 1.0,
+      "CLIMATE_MEDITERRANEAN": 0.0
+    }
+  },
+  "user_info": [
+    {
+      "id": 1001025656,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        231,
+        315
+      ]
+    },
+    {
+      "id": 1001074021,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11,
+        26
+      ]
+    },
+    {
+      "id": 1002050340,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        41,
+        315
+      ]
+    },
+    {
+      "id": 1002066717,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1003752586,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1004674619,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        243,
+        281
+      ]
+    },
+    {
+      "id": 1006174937,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        26,
+        281
+      ]
+    },
+    {
+      "id": 1006569513,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        231,
+        281
+      ]
+    },
+    {
+      "id": 1007094314,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1007250708,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243,
+        247
+      ]
+    },
+    {
+      "id": 1007371220,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        11,
+        231
+      ]
+    },
+    {
+      "id": 1007899011,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        231,
+        243
+      ]
+    },
+    {
+      "id": 1007899014,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        231,
+        243
+      ]
+    },
+    {
+      "id": 1008189175,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.9,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1008922782,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        243,
+        255
+      ]
+    },
+    {
+      "id": 1009884845,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208,
+        315
+      ]
+    },
+    {
+      "id": 1009955073,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.8,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1010221099,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        243,
+        281
+      ]
+    },
+    {
+      "id": 1010619685,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        11,
+        41
+      ]
+    },
+    {
+      "id": 1010709238,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        41,
+        243
+      ]
+    },
+    {
+      "id": 1011105329,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.5,
+      "HOTELS_VISITED": [
+        41,
+        231
+      ]
+    },
+    {
+      "id": 1012706996,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.5,
+      "HOTELS_VISITED": [
+        11,
+        247
+      ]
+    },
+    {
+      "id": 1012907995,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.2,
+      "HOTELS_VISITED": [
+        11,
+        255
+      ]
+    },
+    {
+      "id": 1013165610,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 5.5,
+      "HOTELS_VISITED": [
+        231,
+        255
+      ]
+    },
+    {
+      "id": 1013308570,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.7,
+      "HOTELS_VISITED": [
+        11,
+        208
+      ]
+    },
+    {
+      "id": 1013400808,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1013471617,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1013518998,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1013530969,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1013545260,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1013580011,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11,
+        315
+      ]
+    },
+    {
+      "id": 1013584674,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 2.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1013616405,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1013616575,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1013643641,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1013700087,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1013847409,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1013890717,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1014270020,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.5,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1014279270,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1014309501,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1014393564,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 2.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1014395679,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1014419889,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1014514961,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1014534690,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1014566918,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1014618023,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 3.0,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1014628774,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1014637059,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.5,
+      "HOTELS_VISITED": [
+        255,
+        315
+      ]
+    },
+    {
+      "id": 1014687307,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1014698209,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1014768582,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1014870045,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1014907189,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41,
+        315
+      ]
+    },
+    {
+      "id": 1014974075,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        26,
+        41
+      ]
+    },
+    {
+      "id": 1015003269,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        255,
+        315
+      ]
+    },
+    {
+      "id": 1015033900,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1015105542,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1015181886,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015214270,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015223976,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015224019,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015245921,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1015267928,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015320875,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015426341,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015428618,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015475708,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        231,
+        247
+      ]
+    },
+    {
+      "id": 1015567009,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015587355,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1015618139,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015632862,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1015637242,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015647249,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015681908,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1015702788,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1015706998,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015721200,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015748511,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1015755635,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.5,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1015763805,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1015827023,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1015853478,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1015873048,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1015908731,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1015940055,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1015947162,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015949976,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1015950321,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1016005813,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1016025279,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1016025280,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1016064888,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1016064891,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1016075127,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1016094371,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1016281139,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 4.5,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1016315019,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1016486255,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1016515083,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.5,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1016518794,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1016530069,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1016530109,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1016721082,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1016721941,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1016773489,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1016865415,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1016908207,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        208,
+        281
+      ]
+    },
+    {
+      "id": 1016992945,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017009766,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1017172546,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1017215394,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017274997,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1017274998,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1017276634,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1017308262,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1017352380,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1017382324,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1017402306,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1017409116,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1017472527,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017481330,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1017486911,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1017500387,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1017578791,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        231
+      ]
+    },
+    {
+      "id": 1017584158,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1017658486,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1017754446,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1017790273,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1017838744,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017893618,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017897456,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1017904880,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243,
+        255
+      ]
+    },
+    {
+      "id": 1018091353,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018115558,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018218156,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1018251040,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018323024,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018325275,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1018327847,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018340111,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1018435793,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1018436365,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 9.5,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018440736,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1018449824,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018480671,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018562355,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018597189,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        41,
+        247
+      ]
+    },
+    {
+      "id": 1018604026,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1018608505,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018639567,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018650666,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        208
+      ]
+    },
+    {
+      "id": 1018654404,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    },
+    {
+      "id": 1018667145,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 5.5,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1018684959,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        41,
+        247
+      ]
+    },
+    {
+      "id": 1018692171,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018695023,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1018702070,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018770623,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018795995,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.5,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018796015,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.5,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018801904,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018808811,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1018809217,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.666666666666666,
+      "HOTELS_VISITED": [
+        247,
+        315
+      ]
+    },
+    {
+      "id": 1018816567,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018837704,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1018846248,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1018854169,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1018854653,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1018884990,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        247,
+        315
+      ]
+    },
+    {
+      "id": 1018885005,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        247,
+        315
+      ]
+    },
+    {
+      "id": 1018914183,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1018922044,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1018975140,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1018982655,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019003850,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 1.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019013464,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1019042328,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019055165,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1019094169,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1019124975,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019131256,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 7.5,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019142516,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1019146657,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019202900,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019229194,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019269143,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "46-65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        315
+      ]
+    },
+    {
+      "id": 1019301218,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 8.708333333333332,
+      "HOTELS_VISITED": [
+        26
+      ]
+    },
+    {
+      "id": 1019370402,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "46-65",
+      "AVG_SCORE": 8.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019380354,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "36-45",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019408431,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "36-45",
+      "AVG_SCORE": 5.0,
+      "HOTELS_VISITED": [
+        247
+      ]
+    },
+    {
+      "id": 1019453177,
+      "COUNTRY": "IT",
+      "GENDER": "Femenino",
+      "AGE": ">65",
+      "AVG_SCORE": 6.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1019477002,
+      "COUNTRY": "IT",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        11
+      ]
+    },
+    {
+      "id": 1019630853,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019639162,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1019671446,
+      "COUNTRY": "PT",
+      "GENDER": "Femenino",
+      "AGE": "19-25",
+      "AVG_SCORE": 9.0,
+      "HOTELS_VISITED": [
+        41
+      ]
+    },
+    {
+      "id": 1019673879,
+      "COUNTRY": "ES",
+      "GENDER": "Femenino",
+      "AGE": "26-35",
+      "AVG_SCORE": 7.0,
+      "HOTELS_VISITED": [
+        281
+      ]
+    },
+    {
+      "id": 1019677924,
+      "COUNTRY": "PT",
+      "GENDER": "Masculino",
+      "AGE": ">65",
+      "AVG_SCORE": 4.0,
+      "HOTELS_VISITED": [
+        243
+      ]
+    },
+    {
+      "id": 1019682167,
+      "COUNTRY": "ES",
+      "GENDER": "Masculino",
+      "AGE": "26-35",
+      "AVG_SCORE": 10.0,
+      "HOTELS_VISITED": [
+        255
+      ]
+    }
+  ]
+}

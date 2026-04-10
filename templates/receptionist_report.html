@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Recepción — {{ profile.guest_id }}</title>
+    <style>
+        @media print {
+            body { font-size: 13px; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; max-width: 800px; margin: 0 auto;">
+
+    <!-- HEADER -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-bottom: 3px solid #1a1a2e; margin-bottom: 20px;">
+        <tr>
+            <td style="padding: 12px 0;">
+                <p style="margin: 0; font-size: 22px; font-weight: 300; color: #1a1a2e; letter-spacing: 3px; text-transform: uppercase;">
+                    EUROSTARS
+                </p>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 2px;">
+                    Informe de Recepción · Confidencial
+                </p>
+            </td>
+            <td align="right" style="padding: 12px 0; vertical-align: bottom;">
+                <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+                    Generado: {{ generated_date or 'hoy' }}
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- GUEST IDENTITY -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+        <tr>
+            <td style="padding: 16px; background-color: #f8fafc; border-left: 4px solid #1a1a2e; border-radius: 0 8px 8px 0;">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td width="60%">
+                            <p style="margin: 0 0 4px 0; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;">
+                                Huésped
+                            </p>
+                            <p style="margin: 0 0 6px 0; font-size: 20px; font-weight: 700; color: #1a1a2e;">
+                                Guest #{{ profile.guest_id }}
+                            </p>
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                {{ profile.gender or '' }} · {{ profile.age_range or '' }} años · País: {{ profile.country or '' }}
+                            </p>
+                        </td>
+                        <td width="40%" align="right" valign="top">
+                            <!-- Value badge -->
+                            {% if segment.client_value == 'HIGH_VALUE' %}
+                            <span style="display: inline-block; padding: 6px 14px; background-color: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;">
+                                ★ HIGH VALUE
+                            </span>
+                            {% elif segment.client_value == 'MID_VALUE' %}
+                            <span style="display: inline-block; padding: 6px 14px; background-color: #dbeafe; color: #1e40af; font-size: 11px; font-weight: 700; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;">
+                                MID VALUE
+                            </span>
+                            {% else %}
+                            <span style="display: inline-block; padding: 6px 14px; background-color: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;">
+                                STANDARD
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- KEY METRICS — 4 columns -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+        <tr>
+            <td width="25%" style="padding: 12px; text-align: center; background-color: #f1f5f9; border-radius: 8px 0 0 8px;">
+                <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a2e;">{{ profile.total_stays }}</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Estancias</p>
+            </td>
+            <td width="25%" style="padding: 12px; text-align: center; background-color: #f8fafc;">
+                <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a2e;">{{ profile.distinct_hotels }}</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Hoteles</p>
+            </td>
+            <td width="25%" style="padding: 12px; text-align: center; background-color: #f1f5f9;">
+                <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a2e;">{{ "%.0f"|format(profile.avg_daily_rate) }}€</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">ADR medio</p>
+            </td>
+            <td width="25%" style="padding: 12px; text-align: center; background-color: #f8fafc; border-radius: 0 8px 8px 0;">
+                <p style="margin: 0; font-size: 22px; font-weight: 700; color: #1a1a2e;">{{ "%.1f"|format(profile.avg_score_given) }}</p>
+                <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Nota media</p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- TWO COLUMNS: Preferences + Segments -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+        <tr>
+            <!-- Preferences -->
+            <td width="50%" valign="top" style="padding: 0 8px 0 0;">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                       style="border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <tr>
+                        <td style="padding: 14px 16px 8px 16px; border-bottom: 1px solid #f1f5f9;">
+                            <p style="margin: 0; font-size: 12px; font-weight: 700; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px;">
+                                Qué valora este cliente
+                            </p>
+                        </td>
+                    </tr>
+                    {% for pref in preferences %}
+                    <tr>
+                        <td style="padding: 8px 16px {{ '14px' if loop.last else '0' }};">
+                            <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.4;">
+                                • {{ pref|capitalize }}
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+            <!-- Segments -->
+            <td width="50%" valign="top" style="padding: 0 0 0 8px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                       style="border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <tr>
+                        <td style="padding: 14px 16px 8px 16px; border-bottom: 1px solid #f1f5f9;">
+                            <p style="margin: 0; font-size: 12px; font-weight: 700; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px;">
+                                Segmentación
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 16px;">
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                <strong>Perfil:</strong> {{ segment.travel_profile }}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 16px;">
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                <strong>Edad:</strong> {{ segment.age_segment }}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 16px;">
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                <strong>Patrón:</strong> {{ segment.travel_pattern }}
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 4px 16px 14px 16px;">
+                            <p style="margin: 0; font-size: 13px; color: #475569;">
+                                <strong>Estancia media:</strong> {{ "%.1f"|format(profile.avg_stay_length) }} noches
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- UPSELL RECOMMENDATIONS -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+        <tr>
+            <td style="padding: 16px; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;">
+                <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: 1px;">
+                    💡 Recomendaciones de upsell
+                </p>
+                {% for rec in upsell_recommendations %}
+                <p style="margin: 0 0 {{ '0' if loop.last else '6px' }} 0; font-size: 13px; color: #78350f; line-height: 1.4;">
+                    → {{ rec }}
+                </p>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+
+    <!-- EMPATHIC NOTE -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+        <tr>
+            <td style="padding: 14px 16px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;">
+                <p style="margin: 0; font-size: 13px; color: #166534; line-height: 1.5; font-style: italic;">
+                    💬 Este cliente valora <strong>{{ preferences[0] if preferences else 'experiencias únicas' }}</strong>
+                    {% if preferences|length > 1 %} y <strong>{{ preferences[1] }}</strong>{% endif %}.
+                    {% if segment.travel_profile == 'GASTRONOMIA_CIUDAD' %}
+                    Puede interesarle el restaurante del hotel o una recomendación de mercado local.
+                    {% elif segment.travel_profile == 'EXPLORADOR_CULTURAL' %}
+                    Sugiérale visitas a museos, edificios históricos o rutas culturales cercanas.
+                    {% elif segment.travel_profile == 'LUJO' %}
+                    Asegúrese de ofrecer la mejor habitación disponible y servicios premium.
+                    {% elif segment.travel_profile == 'SOL_Y_PLAYA' %}
+                    Infórmele sobre acceso a playa, piscina y actividades al aire libre.
+                    {% elif segment.travel_profile == 'AVENTURERO' %}
+                    Puede interesarle rutas de senderismo o excursiones en la naturaleza cercana.
+                    {% endif %}
+                </p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- VISIT HISTORY (compact) -->
+    {% if visit_history %}
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+           style="border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 16px;">
+        <tr>
+            <td style="padding: 14px 16px 8px 16px;">
+                <p style="margin: 0; font-size: 12px; font-weight: 700; color: #1a1a2e; text-transform: uppercase; letter-spacing: 1px;">
+                    Historial de estancias
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 0 16px 14px 16px;">
+                <table role="presentation" cellpadding="4" cellspacing="0" width="100%" style="font-size: 12px; color: #475569;">
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="font-weight: 700; color: #1a1a2e; padding-bottom: 6px;">Hotel</td>
+                        <td style="font-weight: 700; color: #1a1a2e; padding-bottom: 6px;">Check-in</td>
+                        <td style="font-weight: 700; color: #1a1a2e; padding-bottom: 6px;">Check-out</td>
+                    </tr>
+                    {% for visit in visit_history[-5:] %}
+                    <tr>
+                        <td style="padding-top: 4px;">{{ visit.hotel_name }}</td>
+                        <td style="padding-top: 4px;">{{ visit.checkin }}</td>
+                        <td style="padding-top: 4px;">{{ visit.checkout }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    </table>
+    {% endif %}
+
+    <!-- FOOTER -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #e2e8f0;">
+        <tr>
+            <td style="padding: 12px 0;">
+                <p style="margin: 0; font-size: 10px; color: #94a3b8; text-align: center;">
+                    Documento interno · No compartir con el huésped · Generado por Eurostars AI Personalization Engine
+                </p>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
