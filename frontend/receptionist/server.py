@@ -12,6 +12,7 @@ PORT = 3002
 BASE_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = BASE_DIR.parents[1]
 REPORT_DIR = PROJECT_ROOT / "output"
+MAIL_PROFILES_PATH = PROJECT_ROOT / "frontend" / "mail" / "profiles.json"
 
 MIME_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -93,10 +94,36 @@ def extract_guest_data(html_content: str, guest_id: str) -> dict:
     return data
 
 
+def load_guest_profiles() -> dict[str, dict]:
+    """Load synthetic guest identities used in the Gmail demo."""
+    if not MAIL_PROFILES_PATH.exists():
+        return {}
+
+    try:
+        payload = json.loads(MAIL_PROFILES_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        print(f"  ⚠ Error loading mail profiles: {exc}")
+        return {}
+
+    profiles = {}
+    for profile in payload.get("profiles", []):
+        guest_id = str(profile.get("guest_id", "")).strip()
+        if not guest_id:
+            continue
+        profiles[guest_id] = {
+            "name": profile.get("name", ""),
+            "email": profile.get("email", ""),
+            "first_name": profile.get("first_name", ""),
+            "last_name": profile.get("last_name", ""),
+        }
+    return profiles
+
+
 def build_guest_index() -> list:
     """Scan all checkin_report HTML files and extract guest summaries."""
     guests = []
     report_files = sorted(REPORT_DIR.glob("checkin_report_*.html"))
+    profiles_by_guest = load_guest_profiles()
     print(f"  📂 Indexing {len(report_files)} guest reports...")
 
     for f in report_files:
@@ -104,6 +131,7 @@ def build_guest_index() -> list:
         try:
             content = f.read_text(encoding="utf-8")
             guest = extract_guest_data(content, guest_id)
+            guest.update(profiles_by_guest.get(guest_id, {}))
             guests.append(guest)
         except Exception as e:
             print(f"  ⚠ Error parsing {f.name}: {e}")
@@ -151,6 +179,10 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
                     g for g in results
                     if search in g.get("id", "").lower()
                     or search in g.get("guest_number", "").lower()
+                    or search in g.get("name", "").lower()
+                    or search in g.get("email", "").lower()
+                    or search in g.get("first_name", "").lower()
+                    or search in g.get("last_name", "").lower()
                     or search in g.get("profile", "").lower()
                     or search in g.get("country", "").lower()
                     or search in g.get("value", "").lower()

@@ -6,23 +6,23 @@
     'use strict';
 
     // ── DOM references ──────────────────────────────────
-    const searchInput   = document.getElementById('searchInput');
-    const scanBtn       = document.getElementById('scanBtn');
-    const guestList     = document.getElementById('guestList');
-    const guestCount    = document.getElementById('guestCount');
-    const quickFilters  = document.getElementById('quickFilters');
-    const emptyState    = document.getElementById('emptyState');
-    const loadingState  = document.getElementById('loadingState');
-    const reportViewer  = document.getElementById('reportViewer');
-    const reportFrame   = document.getElementById('reportFrame');
-    const toolbarTitle  = document.getElementById('toolbarTitle');
-    const backBtn       = document.getElementById('backBtn');
-    const printBtn      = document.getElementById('printBtn');
-    const checkinBtn    = document.getElementById('checkinBtn');
+    const searchInput = document.getElementById('searchInput') || document.getElementById('globalSearch');
+    const scanBtn = document.getElementById('scanBtn');
+    const guestList = document.getElementById('guestList');
+    const guestCount = document.getElementById('guestCount');
+    const quickFilters = document.getElementById('quickFilters');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+    const reportViewer = document.getElementById('reportViewer');
+    const reportFrame = document.getElementById('reportFrame');
+    const toolbarTitle = document.getElementById('toolbarTitle');
+    const backBtn = document.getElementById('backBtn');
+    const printBtn = document.getElementById('printBtn');
+    const checkinBtn = document.getElementById('checkinBtn');
     const checkinOverlay = document.getElementById('checkinOverlay');
     const successGuestName = document.getElementById('successGuestName');
-    const successCloseBtn  = document.getElementById('successCloseBtn');
-    const clockEl       = document.getElementById('clock');
+    const successCloseBtn = document.getElementById('successCloseBtn');
+    const clockEl = document.getElementById('clock');
 
     // ── State ───────────────────────────────────────────
     let allGuests = [];
@@ -31,15 +31,20 @@
     let activeFilter = '';
 
     // ── Clock ───────────────────────────────────────────
+    const clockDateEl = document.getElementById('clockDate');
+
     function updateClock() {
+        if (!clockEl) return;
         const now = new Date();
         const h = String(now.getHours()).padStart(2, '0');
         const m = String(now.getMinutes()).padStart(2, '0');
         const s = String(now.getSeconds()).padStart(2, '0');
-        const day = now.toLocaleDateString('es-ES', {
-            weekday: 'short', day: 'numeric', month: 'short'
-        });
-        clockEl.textContent = `${day} · ${h}:${m}:${s}`;
+        clockEl.textContent = `${h}:${m}:${s}`;
+        if (clockDateEl) {
+            clockDateEl.textContent = now.toLocaleDateString('es-ES', {
+                weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+            });
+        }
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -62,7 +67,9 @@
     // ── Render guest list ───────────────────────────────
     function renderGuestList(guests) {
         filteredGuests = guests;
-        guestCount.textContent = `${guests.length} huéspedes`;
+        if (guestCount) {
+            guestCount.textContent = `${guests.length} huéspedes`;
+        }
 
         if (guests.length === 0) {
             guestList.innerHTML = `
@@ -75,29 +82,34 @@
         }
 
         guestList.innerHTML = guests.map(g => {
-            const initials = getInitials(g);
             const tagClass = getValueTagClass(g.value);
             const tagLabel = g.value || 'STANDARD';
             const meta = [g.gender, g.age_range, g.country]
                 .filter(Boolean).join(' · ');
             const isActive = g.id === activeGuestId;
+            const displayName = g.name || `Huésped ${g.id.toString().slice(-4)}`;
+            const subMeta = [meta, g.profile, g.email || `ID ${g.id}`]
+                .filter(Boolean)
+                .join(' · ');
 
             return `
                 <li class="guest-card ${isActive ? 'active' : ''}"
                     data-id="${g.id}"
                     onclick="window.__selectGuest('${g.id}')">
-                    <div class="guest-avatar">${initials}</div>
-                    <div class="guest-info">
-                        <div class="guest-id">Guest #${g.id}</div>
-                        <div class="guest-meta">${meta}${g.profile ? ' · ' + g.profile : ''}</div>
+                    <div style="flex: 1;">
+                        <div class="guest-id">#${g.id}</div>
+                        <div class="guest-name">${displayName}</div>
+                        <div class="guest-meta">${subMeta}</div>
                     </div>
-                    <span class="guest-value-tag ${tagClass}">${tagLabel}</span>
                 </li>`;
         }).join('');
     }
 
     function getInitials(guest) {
-        // Use profile first letter + country
+        if (guest.name) {
+            const parts = guest.name.trim().split(/\s+/).filter(Boolean);
+            return parts.slice(0, 2).map(p => p[0].toUpperCase()).join('');
+        }
         const p = (guest.profile || 'G')[0];
         const c = (guest.country || 'X')[0];
         return p + c;
@@ -113,7 +125,7 @@
     }
 
     // ── Select guest ────────────────────────────────────
-    window.__selectGuest = async function(id) {
+    window.__selectGuest = async function (id) {
         activeGuestId = id;
 
         // Update sidebar active state
@@ -129,7 +141,10 @@
 
         // Load the report
         const guest = allGuests.find(g => g.id === id);
-        toolbarTitle.textContent = `Informe de Recepción — Guest #${id}`;
+        const displayName = guest && guest.name ? guest.name : `Guest #${id}`;
+        if (toolbarTitle) {
+            toolbarTitle.textContent = `Informe de Recepción — ${displayName}`;
+        }
 
         reportFrame.srcdoc = '';
         try {
@@ -156,25 +171,32 @@
 
     // ── Search handling ─────────────────────────────────
     let searchTimeout;
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(async () => {
-            const query = searchInput.value.trim();
-            let results;
-            if (query) {
-                results = allGuests.filter(g =>
-                    matchGuest(g, query.toLowerCase())
-                );
-            } else {
-                results = applyActiveFilter(allGuests);
-            }
-            renderGuestList(results);
-        }, 200);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                const query = searchInput.value.trim();
+                let results;
+                if (query) {
+                    results = allGuests.filter(g =>
+                        matchGuest(g, query.toLowerCase())
+                    );
+                } else {
+                    results = applyActiveFilter(allGuests);
+                }
+                renderGuestList(results);
+            }, 200);
+        });
+    }
 
     function matchGuest(g, q) {
         return (
             (g.id && g.id.toLowerCase().includes(q)) ||
+            (g.guest_number && g.guest_number.toLowerCase().includes(q)) ||
+            (g.name && g.name.toLowerCase().includes(q)) ||
+            (g.email && g.email.toLowerCase().includes(q)) ||
+            (g.first_name && g.first_name.toLowerCase().includes(q)) ||
+            (g.last_name && g.last_name.toLowerCase().includes(q)) ||
             (g.profile && g.profile.toLowerCase().includes(q)) ||
             (g.country && g.country.toLowerCase().includes(q)) ||
             (g.value && g.value.toLowerCase().includes(q)) ||
@@ -185,17 +207,19 @@
     }
 
     // ── Filter chips ────────────────────────────────────
-    quickFilters.addEventListener('click', (e) => {
-        const chip = e.target.closest('.filter-chip');
-        if (!chip) return;
+    if (quickFilters) {
+        quickFilters.addEventListener('click', (e) => {
+            const chip = e.target.closest('.filter-chip');
+            if (!chip) return;
 
-        quickFilters.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
+            quickFilters.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
 
-        activeFilter = chip.dataset.filter || '';
-        const results = applyActiveFilter(allGuests);
-        renderGuestList(results);
-    });
+            activeFilter = chip.dataset.filter || '';
+            const results = applyActiveFilter(allGuests);
+            renderGuestList(results);
+        });
+    }
 
     function applyActiveFilter(guests) {
         if (!activeFilter) return guests;
@@ -209,54 +233,67 @@
     }
 
     // ── Scan button (simulated random guest) ────────────
-    scanBtn.addEventListener('click', async () => {
-        // Visual feedback
-        scanBtn.style.transform = 'scale(0.9)';
-        setTimeout(() => scanBtn.style.transform = '', 200);
+    if (scanBtn) {
+        scanBtn.addEventListener('click', async () => {
+            scanBtn.style.transform = 'scale(0.9)';
+            setTimeout(() => scanBtn.style.transform = '', 200);
 
-        if (allGuests.length === 0) return;
+            if (allGuests.length === 0) return;
 
-        // Pick a random guest to simulate scanning
-        const randomGuest = allGuests[randomInt(0, allGuests.length - 1)];
+            const randomGuest = allGuests[randomInt(0, allGuests.length - 1)];
 
-        // Focus the search
-        searchInput.value = randomGuest.id;
-        const results = allGuests.filter(g => g.id === randomGuest.id);
-        renderGuestList(results);
+            if (searchInput) {
+                searchInput.value = randomGuest.name || randomGuest.id;
+            }
+            const results = allGuests.filter(g => g.id === randomGuest.id);
+            renderGuestList(results);
 
-        // Auto-select
-        await sleep(300);
-        window.__selectGuest(randomGuest.id);
-    });
+            await sleep(300);
+            window.__selectGuest(randomGuest.id);
+        });
+    }
 
     // ── Toolbar buttons ─────────────────────────────────
-    backBtn.addEventListener('click', () => {
-        activeGuestId = null;
-        showView('empty');
-        searchInput.value = '';
-        renderGuestList(applyActiveFilter(allGuests));
-    });
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            activeGuestId = null;
+            showView('empty');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            renderGuestList(applyActiveFilter(allGuests));
+        });
+    }
 
-    printBtn.addEventListener('click', () => {
-        if (reportFrame.contentWindow) {
-            reportFrame.contentWindow.print();
-        }
-    });
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            if (reportFrame.contentWindow) {
+                reportFrame.contentWindow.print();
+            }
+        });
+    }
 
     // ── Check-in confirmation ───────────────────────────
-    checkinBtn.addEventListener('click', () => {
-        if (!activeGuestId) return;
-        successGuestName.textContent = `Guest #${activeGuestId}`;
-        checkinOverlay.classList.remove('hidden');
-    });
+    if (checkinBtn) {
+        checkinBtn.addEventListener('click', () => {
+            if (!activeGuestId) return;
+            const guest = allGuests.find(g => g.id === activeGuestId);
+            successGuestName.textContent = guest && guest.name ? guest.name : `Guest #${activeGuestId}`;
+            checkinOverlay.classList.remove('hidden');
+        });
+    }
 
-    successCloseBtn.addEventListener('click', () => {
-        checkinOverlay.classList.add('hidden');
-        activeGuestId = null;
-        showView('empty');
-        searchInput.value = '';
-        renderGuestList(applyActiveFilter(allGuests));
-    });
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', () => {
+            checkinOverlay.classList.add('hidden');
+            activeGuestId = null;
+            showView('empty');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            renderGuestList(applyActiveFilter(allGuests));
+        });
+    }
 
     // Close overlay on backdrop click
     checkinOverlay.addEventListener('click', (e) => {
@@ -272,13 +309,17 @@
             if (!checkinOverlay.classList.contains('hidden')) {
                 checkinOverlay.classList.add('hidden');
             } else if (!reportViewer.classList.contains('hidden')) {
-                backBtn.click();
+                if (backBtn) {
+                    backBtn.click();
+                }
             }
         }
         // Ctrl+K to focus search
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
-            searchInput.focus();
+            if (searchInput) {
+                searchInput.focus();
+            }
         }
     });
 

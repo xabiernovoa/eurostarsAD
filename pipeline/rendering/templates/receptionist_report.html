@@ -1,405 +1,573 @@
 <!DOCTYPE html>
-<html lang="es" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Informe de Recepción — {{ profile.guest_id }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', Helvetica, Arial, sans-serif;
+            background: #f5f4f1;
+            color: #1a1a1a;
+            padding: 0;
+            margin: 0;
+        }
+
+        .report-wrap {
+            max-width: 820px;
+            margin: 0 auto;
+            background: #ffffff;
+        }
+
+        /* ==========  HEADER  ========== */
+        .report-header {
+            padding: 40px 48px 32px;
+            border-bottom: 1px solid #ebebeb;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 42px;
+            font-weight: 400;
+            line-height: 1.1;
+            color: #1a1a1a;
+        }
+
+        .header-meta {
+            text-align: right;
+        }
+
+        .header-meta-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #999999;
+            margin-bottom: 6px;
+        }
+
+        .header-last-stay {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: #1a1a1a;
+        }
+
+        .header-guest-id {
+            margin-top: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #888888;
+            letter-spacing: 0.5px;
+        }
+
+        .header-guest-id span {
+            font-weight: 700;
+            color: #8a754b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-left: 12px;
+        }
+
+        /* ==========  METRICS  ========== */
+        .metrics-bar {
+            display: flex;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .metric-cell {
+            flex: 1;
+            padding: 32px 24px;
+            border-right: 1px solid #ebebeb;
+        }
+
+        .metric-cell:last-child {
+            border-right: none;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 36px;
+            font-weight: 400;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        /* ==========  INTELLIGENCE / SEGMENTATION  ========== */
+        .intel-section {
+            display: flex;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .intel-col {
+            flex: 1;
+            padding: 36px 48px;
+        }
+
+        .intel-col:first-child {
+            border-right: 1px solid #ebebeb;
+        }
+
+        .intel-col-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ebebeb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Preferences List */
+        .pref-list {
+            list-style: none;
+        }
+
+        .pref-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 13px;
+            color: #3a3a3a;
+        }
+
+        .pref-item:last-child {
+            border-bottom: none;
+        }
+
+        .pref-tag {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            color: #666666;
+            border-radius: 2px;
+        }
+
+        /* Segmentation analytics */
+        .seg-metric {
+            margin-bottom: 20px;
+        }
+
+        .seg-metric:last-child {
+            margin-bottom: 0;
+        }
+
+        .seg-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .seg-key {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #888888;
+        }
+
+        .seg-pct {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .seg-bar-track {
+            height: 4px;
+            background: #eeeeee;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .seg-bar-fill {
+            height: 100%;
+            background: #8a754b;
+            border-radius: 2px;
+        }
+
+        .propension-block {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #ebebeb;
+        }
+
+        .propension-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+
+        .propension-text {
+            font-size: 13px;
+            color: #3a3a3a;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        /* ==========  UPSELL BLOCK  ========== */
+        .upsell-block {
+            background: #1e1e1e;
+            padding: 36px 48px;
+        }
+
+        .upsell-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 28px;
+        }
+
+        .upsell-header-left {}
+
+        .upsell-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .upsell-subtitle {
+            font-size: 11px;
+            color: #666666;
+        }
+
+        .checkin-btn {
+            display: inline-block;
+            background: #8a754b;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 14px 24px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 2px;
+        }
+
+        /* Upsell Cards */
+        .upsell-cards {
+            display: flex;
+            gap: 16px;
+        }
+
+        .upsell-card {
+            flex: 1;
+            background: #2a2a2a;
+            padding: 24px;
+        }
+
+        .card-price {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #8a754b;
+            margin-bottom: 14px;
+        }
+
+        .card-name {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: 1.2;
+            margin-bottom: 10px;
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: #888888;
+            line-height: 1.55;
+        }
+
+        /* ==========  HISTORY TABLE  ========== */
+        .history-section {
+            padding: 36px 48px;
+            border-top: 1px solid #ebebeb;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .history-table th {
+            text-align: left;
+            font-weight: 600;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaaaaa;
+            padding: 0 0 12px 0;
+            border-bottom: 1px solid #ebebeb;
+        }
+
+        .history-table td {
+            padding: 12px 0;
+            color: #3a3a3a;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ==========  FOOTER  ========== */
+        .report-footer {
+            padding: 16px 48px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .report-footer p {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #cccccc;
+        }
+
         @media print {
             body {
-                font-size: 13px;
+                background: white;
             }
 
-            .no-print {
-                display: none;
+            .upsell-block {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
         }
     </style>
 </head>
 
-<body
-    style="margin: 0; padding: 40px 20px; background-color: #f4f4f5; font-family: 'Inter', Helvetica, Arial, sans-serif; color: #000000; line-height: 1.5;">
+<body>
+    <div class="report-wrap">
 
-    <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
-        style="max-width: 800px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e4e4e7; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
-
-        <!-- HEADER WITH SVG LOGO -->
-        <tr>
-            <td style="padding: 40px; border-bottom: 2px solid #000000;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <td width="50%">
-                            <!-- SVG LOGO -->
-                            <div style="color: #000000;">
-                                <svg role="img" aria-label="Eurostars Hotel Company" xmlns="http://www.w3.org/2000/svg"
-                                    version="1.1" viewBox="0 0 253.8 63.5" height="18px" fill="currentColor">
-                                    <g>
-                                        <g>
-                                            <path
-                                                d="M10.9,32.1h16.9v-1.9H11.1v-13.7h13.1v-1.9h-13.1V2.1h16.7V.2H0c0,.3.1.6.4.8.2.2,1.4.8,1.8,1.4.2.2.6,1,.6,2h0v27.8h8.2Z">
-                                            </path>
-                                            <path
-                                                d="M45.5,32.3c7.8,0,12-4.4,12-11.5V.4h-2.3v19.9c0,4.7-1.9,8.8-7.5,8.8s-7.7-4.1-7.7-8.8V.4h-6.5v20.4c0,7.1,4.1,11.5,12,11.5h0Z">
-                                            </path>
-                                            <path
-                                                d="M79.4,17.3c4.6-1.1,7.6-3.7,7.6-8.1S81.6.4,74.1.4h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6ZM72.8,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M123.3,16.2C123.3,6.4,117.1,0,107.7,0s-15.6,6.3-15.6,16.2,6.1,16.2,15.6,16.2,15.6-6.4,15.6-16.2ZM99.2,16.1c0-9,2.6-14.3,8.6-14.3s8.5,5.4,8.5,14.4-2.6,14.4-8.5,14.4-8.6-5-8.6-14.5Z">
-                                            </path>
-                                            <path
-                                                d="M147.9,23c0-11-14.5-9.9-14.5-16.6s2.4-4.5,5.2-4.5,5,.8,7,2.6l.9-.8c-1.9-1.9-4.2-3.7-8.3-3.7-6.6,0-10.2,3.3-10.2,8.3,0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4h0Z">
-                                            </path>
-                                            <polygon
-                                                points="172.8 .4 150.2 .4 150.2 2.3 158.4 2.3 158.4 31.9 165.1 31.9 165.1 2.3 172.8 2.3 172.8 .4">
-                                            </polygon>
-                                            <path
-                                                d="M182.8.4l-11.3,31.5h2.2l3.4-9.4h12.7l3,9.5h6.8L189.6.4h-6.8ZM177.8,20.6l6-16.8,5.4,16.8h-11.4Z">
-                                            </path>
-                                            <path
-                                                d="M228.2,9.2c0-6.1-5.4-8.8-12.8-8.8h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6c4.6-1.1,7.6-3.7,7.6-8.1ZM214.1,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M239.3,6.4c0-3.1,2.4-4.5,5.2-4.5s5,.8,7,2.6l.9-.8C250.5,1.8,248.2,0,244.1,0,237.5,0,233.9,3.3,233.9,8.3c0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4c0-11-14.5-9.9-14.5-16.6h0Z">
-                                            </path>
-                                            <polygon
-                                                points="12.5 53.3 5.8 53.3 5.8 46.5 2.9 46.5 2.9 63.3 5.8 63.3 5.8 55.8 12.5 55.8 12.5 63.3 15.5 63.3 15.5 46.5 12.5 46.5 12.5 53.3">
-                                            </polygon>
-                                            <path
-                                                d="M26.7,46.3c-5.2,0-7.4,4.3-7.4,8.5s2.2,8.7,7.2,8.7,7.4-3.9,7.4-8.7-2.3-8.5-7.2-8.5ZM26.6,61.1c-2.9,0-4.3-2.8-4.3-6.3s1.3-6.1,4.3-6.1,4.3,2.8,4.3,6.1-1.2,6.3-4.3,6.3Z">
-                                            </path>
-                                            <polygon
-                                                points="35.4 49 40.1 49 40.1 63.3 43.1 63.3 43.1 49 47.8 49 47.8 46.5 35.4 46.5 35.4 49">
-                                            </polygon>
-                                            <polygon
-                                                points="53.5 55.8 60.8 55.8 60.8 53.3 53.5 53.3 53.5 49 61.1 49 61.1 46.5 50.6 46.5 50.6 63.3 61.2 63.3 61.6 60.8 53.5 60.8 53.5 55.8">
-                                            </polygon>
-                                            <polygon
-                                                points="67.7 46.5 64.7 46.5 64.7 63.3 75 63.3 75.4 60.8 67.7 60.8 67.7 46.5">
-                                            </polygon>
-                                            <path
-                                                d="M89.4,61.1c-3.1,0-4.1-3-4.1-6.3s1.1-6.2,4-6.2,3.1,1.4,3.5,3h2.9c-.2-2.7-2-5.4-6.3-5.4s-7.2,3.9-7.2,8.6,1.9,8.7,7,8.7,6-2.6,6.5-5.4h-2.9c-.4,1.5-1.2,3-3.5,3Z">
-                                            </path>
-                                            <path
-                                                d="M106.1,46.3c-5.2,0-7.4,4.3-7.4,8.5s2.2,8.7,7.2,8.7,7.4-3.9,7.4-8.7-2.3-8.5-7.2-8.5ZM106,61.1c-2.9,0-4.3-2.8-4.3-6.3s1.3-6.1,4.3-6.1,4.3,2.8,4.3,6.1-1.2,6.3-4.3,6.3Z">
-                                            </path>
-                                            <path
-                                                d="M125,59.4h0c-.5-2.5-2.3-8.6-3.6-12.9h-4.4v16.7h2.7v-6.2c0-2.9,0-6.5-.2-8.5h.1c.7,3.3,2.8,10.7,3.9,14.7h2.6c1.6-4.8,3.6-11.4,4.3-14.7h.1c0,1.8-.1,5.2-.1,8.1v6.5h2.9v-16.7h-4.3c-1.4,4.3-3.6,10.9-4,12.9h0Z">
-                                            </path>
-                                            <path
-                                                d="M143.8,46.5h-6v16.7h3v-6.7h2.7c3.6,0,6-1.7,6-5.2s-2.6-4.9-5.7-4.9h0ZM143.3,54.2h-2.6v-5.3h2.6c1.8,0,3.1.8,3.1,2.6s-1.2,2.7-3.2,2.7Z">
-                                            </path>
-                                            <path
-                                                d="M155,46.5c-.6,1.8-4.7,15.1-5.2,16.7h2.9l1.3-4.4h5.7l1.4,4.4h3.1l-5.5-16.7s-3.8,0-3.8,0ZM154.6,56.4c1-3.1,1.8-5.7,2.2-7.6h0c.4,1.5,1.1,3.9,2.3,7.6h-4.5,0Z">
-                                            </path>
-                                            <path
-                                                d="M177.4,52.2c0,2.7,0,5.5.2,7.5h0c-.3-.8-1.1-2.4-6.7-13.2h-3.8v16.7h2.7v-5.7c0-3,0-5.9-.1-8h0c.3.7.9,1.9,6.8,13.7h3.6v-16.7h-2.7v5.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M189.6,54.1c-.7-1.5-2.5-5-3.8-7.5h-3.3l5.4,9.8c.1.2.1.3.1.5v6.4h2.9v-6.5c0-.2,0-.3.1-.5l5.4-9.8h-3.1c-1.2,2.4-2.6,5.2-3.8,7.5h0Z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                    <g>
-                                        <g>
-                                            <path
-                                                d="M10.9-60.6h16.9v-1.9H11.1v-13.7h13.1v-1.9h-13.1v-12.6h16.7v-1.9H0c0,.3.1.6.4.8.2.2,1.4.8,1.8,1.4.2.2.6,1,.6,2h0v27.8h8.2Z">
-                                            </path>
-                                            <path
-                                                d="M45.5-60.4c7.8,0,12-4.4,12-11.5v-20.4h-2.3v19.9c0,4.7-1.9,8.8-7.5,8.8s-7.7-4.1-7.7-8.8v-19.9h-6.5v20.4c0,7.1,4.1,11.5,12,11.5h0Z">
-                                            </path>
-                                            <path
-                                                d="M79.4-75.4c4.6-1.1,7.6-3.7,7.6-8.1s-5.4-8.8-12.8-8.8h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6ZM72.8-76.7h-2.2v-13.8h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M123.3-76.5c0-9.8-6.2-16.2-15.6-16.2s-15.6,6.3-15.6,16.2,6.1,16.2,15.6,16.2,15.6-6.4,15.6-16.2ZM99.2-76.6c0-9,2.6-14.3,8.6-14.3s8.5,5.4,8.5,14.4-2.6,14.4-8.5,14.4-8.6-5-8.6-14.5Z">
-                                            </path>
-                                            <path
-                                                d="M147.9-69.7c0-11-14.5-9.9-14.5-16.6s2.4-4.5,5.2-4.5,5,.8,7,2.6l.9-.8c-1.9-1.9-4.2-3.7-8.3-3.7-6.6,0-10.2,3.3-10.2,8.3,0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4h0Z">
-                                            </path>
-                                            <polygon
-                                                points="172.8 -92.3 150.2 -92.3 150.2 -90.5 158.4 -90.5 158.4 -60.8 165.1 -60.8 165.1 -90.5 172.8 -90.5 172.8 -92.3">
-                                            </polygon>
-                                            <path
-                                                d="M182.8-92.3l-11.3,31.5h2.2l3.4-9.4h12.7l3,9.5h6.8l-10.1-31.5h-6.8ZM177.8-72.2l6-16.8,5.4,16.8h-11.4Z">
-                                            </path>
-                                            <path
-                                                d="M228.2-83.5c0-6.1-5.4-8.8-12.8-8.8h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6c4.6-1.1,7.6-3.7,7.6-8.1ZM214.1-76.7h-2.2v-13.8h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M239.3-86.3c0-3.1,2.4-4.5,5.2-4.5s5,.8,7,2.6l.9-.8c-1.9-1.9-4.2-3.7-8.3-3.7-6.6,0-10.2,3.3-10.2,8.3,0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4c0-11-14.5-9.9-14.5-16.6h0Z">
-                                            </path>
-                                            <polygon
-                                                points="12.5 -39.5 5.8 -39.5 5.8 -46.2 2.9 -46.2 2.9 -29.5 5.8 -29.5 5.8 -37 12.5 -37 12.5 -29.5 15.5 -29.5 15.5 -46.2 12.5 -46.2 12.5 -39.5">
-                                            </polygon>
-                                            <path
-                                                d="M26.7-46.5c-5.2,0-7.4,4.3-7.4,8.5s2.2,8.7,7.2,8.7,7.4-3.9,7.4-8.7-2.3-8.5-7.2-8.5ZM26.6-31.6c-2.9,0-4.3-2.8-4.3-6.3s1.3-6.1,4.3-6.1,4.3,2.8,4.3,6.1-1.2,6.3-4.3,6.3Z">
-                                            </path>
-                                            <polygon
-                                                points="35.4 -43.8 40.1 -43.8 40.1 -29.5 43.1 -29.5 43.1 -43.8 47.8 -43.8 47.8 -46.2 35.4 -46.2 35.4 -43.8">
-                                            </polygon>
-                                            <polygon
-                                                points="53.5 -37 60.8 -37 60.8 -39.5 53.5 -39.5 53.5 -43.8 61.1 -43.8 61.1 -46.2 50.6 -46.2 50.6 -29.5 61.2 -29.5 61.6 -31.9 53.5 -31.9 53.5 -37">
-                                            </polygon>
-                                            <polygon
-                                                points="67.7 -46.2 64.7 -46.2 64.7 -29.5 75 -29.5 75.4 -31.9 67.7 -31.9 67.7 -46.2">
-                                            </polygon>
-                                            <path
-                                                d="M89.4-31.6c-3.1,0-4.1-3-4.1-6.3s1.1-6.2,4-6.2,3.1,1.4,3.5,3h2.9c-.2-2.7-2-5.4-6.3-5.4s-7.2,3.9-7.2,8.6,1.9,8.7,7,8.7,6-2.6,6.5-5.4h-2.9c-.4,1.5-1.2,3-3.5,3Z">
-                                            </path>
-                                            <path
-                                                d="M106.1-46.5c-5.2,0-7.4,4.3-7.4,8.5s2.2,8.7,7.2,8.7,7.4-3.9,7.4-8.7-2.3-8.5-7.2-8.5ZM106-31.6c-2.9,0-4.3-2.8-4.3-6.3s1.3-6.1,4.3-6.1,4.3,2.8,4.3,6.1-1.2,6.3-4.3,6.3Z">
-                                            </path>
-                                            <path
-                                                d="M125-33.3h0c-.5-2.5-2.3-8.6-3.6-12.9h-4.4v16.7h2.7v-6.2c0-2.9,0-6.5-.2-8.5h.1c.7,3.3,2.8,10.7,3.9,14.7h2.6c1.6-4.8,3.6-11.4,4.3-14.7h.1c0,1.8-.1,5.2-.1,8.1v6.5h2.9v-16.7h-4.3c-1.4,4.3-3.6,10.9-4,12.9h0Z">
-                                            </path>
-                                            <path
-                                                d="M143.8-46.2h-6v16.7h3v-6.7h2.7c3.6,0,6-1.7,6-5.2s-2.6-4.9-5.7-4.9h0ZM143.3-38.6h-2.6v-5.3h2.6c1.8,0,3.1.8,3.1,2.6s-1.2,2.7-3.2,2.7Z">
-                                            </path>
-                                            <path
-                                                d="M155-46.2c-.6,1.8-4.7,15.1-5.2,16.7h2.9l1.3-4.4h5.7l1.4,4.4h3.1l-5.5-16.7s-3.8,0-3.8,0ZM154.6-36.3c1-3.1,1.8-5.7,2.2-7.6h0c.4,1.5,1.1,3.9,2.3,7.6h-4.5,0Z">
-                                            </path>
-                                            <path
-                                                d="M177.4-40.6c0,2.7,0,5.5.2,7.5h0c-.3-.8-1.1-2.4-6.7-13.2h-3.8v16.7h2.7v-5.7c0-3,0-5.9-.1-8h0c.3.7.9,1.9,6.8,13.7h3.6v-16.7h-2.7v5.7h0Z">
-                                            </path>
-                                            <path
-                                                d="M189.6-38.7c-.7-1.5-2.5-5-3.8-7.5h-3.3l5.4,9.8c.1.2.1.3.1.5v6.4h2.9v-6.5c0-.2,0-.3.1-.5l5.4-9.8h-3.1c-1.2,2.4-2.6,5.2-3.8,7.5h0Z">
-                                            </path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </td>
-                        <td width="50%" align="right">
-                            <p
-                                style="margin: 0; font-size: 11px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px;">
-                                INFORME DE RECEPCIÓN
-                            </p>
-                            <p style="margin: 4px 0 0 0; font-size: 11px; color: #a1a1aa;">
-                                Generado: {{ generated_date or 'hoy' }}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        <!-- GUEST IDENTITY - ENTERPRISE TABLE -->
-        <tr>
-            <td style="padding: 40px; border-bottom: 1px solid #e4e4e7;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <td width="65%" valign="top">
-                            <p
-                                style="margin: 0 0 4px 0; font-size: 11px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">
-                                Identificación de Huésped
-                            </p>
-                            <p
-                                style="margin: 0 0 8px 0; font-size: 28px; font-weight: 800; color: #000000; letter-spacing: -0.5px;">
-                                Guest #{{ profile.guest_id }}
-                            </p>
-                            <p style="margin: 0; font-size: 14px; color: #52525b;">
-                                {{ profile.gender or '' }} · {{ profile.age_range or '' }} AÑOS · PAÍS: {{
-                                profile.country or ''|upper }}
-                            </p>
-                        </td>
-                        <td width="35%" align="right" valign="top">
-                            <!-- Clean minimal tag for value -->
-                            <div style="display: inline-block; border: 1px solid #000000; padding: 6px 12px;">
-                                <p
-                                    style="margin: 0; font-size: 11px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px;">
-                                    {% if segment.client_value == 'HIGH_VALUE' %}
-                                    HIGH VALUE CLIENT
-                                    {% elif segment.client_value == 'MID_VALUE' %}
-                                    MID VALUE CLIENT
-                                    {% else %}
-                                    STANDARD CLIENT
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        <!-- METRICS ROW (4 COLS STRICT) -->
-        <tr>
-            <td style="padding: 40px; border-bottom: 1px solid #e4e4e7; background-color: #fafafa;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <td width="25%" style="border-right: 1px solid #e4e4e7; padding: 0 10px;">
-                            <p style="margin: 0; font-size: 24px; font-weight: 800; color: #000000;">{{
-                                profile.total_stays }}</p>
-                            <p
-                                style="margin: 4px 0 0 0; font-size: 10px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">
-                                ESTANCIAS</p>
-                        </td>
-                        <td width="25%" style="border-right: 1px solid #e4e4e7; padding: 0 10px 0 20px;">
-                            <p style="margin: 0; font-size: 24px; font-weight: 800; color: #000000;">{{
-                                profile.distinct_hotels }}</p>
-                            <p
-                                style="margin: 4px 0 0 0; font-size: 10px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">
-                                HOTELES</p>
-                        </td>
-                        <td width="25%" style="border-right: 1px solid #e4e4e7; padding: 0 10px 0 20px;">
-                            <p style="margin: 0; font-size: 24px; font-weight: 800; color: #000000;">{{
-                                "%.0f"|format(profile.avg_daily_rate) }}€</p>
-                            <p
-                                style="margin: 4px 0 0 0; font-size: 10px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">
-                                ADR MEDIO</p>
-                        </td>
-                        <td width="25%" style="padding: 0 10px 0 20px;">
-                            <p style="margin: 0; font-size: 24px; font-weight: 800; color: #000000;">{{
-                                "%.1f"|format(profile.avg_score_given) }}</p>
-                            <p
-                                style="margin: 4px 0 0 0; font-size: 10px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 1px;">
-                                NOTA MEDIA</p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        <!-- TWO COLUMNS: INTELLIGENCE & SEGMENTATION -->
-        <tr>
-            <td style="padding: 40px; border-bottom: 1px solid #e4e4e7;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <!-- 1. AI Insights -->
-                        <td width="50%" valign="top" style="padding-right: 20px;">
-                            <p
-                                style="margin: 0 0 16px 0; font-size: 11px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #000000; padding-bottom: 8px;">
-                                PREFERENCIAS DETECTADAS
-                            </p>
-                            <ul style="margin: 0; padding-left: 16px; color: #3f3f46; font-size: 13px;">
-                                {% for pref in preferences %}
-                                <li style="margin-bottom: 8px;">{{ pref|capitalize }}</li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                        <!-- 2. Technical Segments -->
-                        <td width="50%" valign="top" style="padding-left: 20px;">
-                            <p
-                                style="margin: 0 0 16px 0; font-size: 11px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #000000; padding-bottom: 8px;">
-                                SEGMENTACIÓN ANALÍTICA
-                            </p>
-                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
-                                style="font-size: 13px; color: #3f3f46;">
-                                <tr>
-                                    <td style="padding: 4px 0; font-weight: 600;">PERFIL:</td>
-                                    <td style="padding: 4px 0;" align="right">{{ segment.travel_profile }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px 0; font-weight: 600;" width="50%">EDAD:</td>
-                                    <td style="padding: 4px 0;" align="right">{{ segment.age_segment }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px 0; font-weight: 600;">PATRÓN:</td>
-                                    <td style="padding: 4px 0;" align="right">{{ segment.travel_pattern }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 4px 0; font-weight: 600;">ESTANCIA MEDIA:</td>
-                                    <td style="padding: 4px 0;" align="right">{{ "%.1f"|format(profile.avg_stay_length)
-                                        }} NOCHES</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        <!-- ACTIONABLE INSIGHTS (NO EMOJIS, SHARP LINES) -->
-        <tr>
-            <td style="padding: 40px; border-bottom: 1px solid #e4e4e7; background-color: #000000; color: #ffffff;">
-                <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
-                    <tr>
-                        <td valign="top" style="padding-bottom: 24px;">
-                            <p
-                                style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px;">
-                                RECOMENDACIONES DE UPSELL ESTRATÉGICO
-                            </p>
-                            {% for rec in upsell_recommendations %}
-                            <p
-                                style="margin: 0 0 {{ '0' if loop.last else '8px' }} 0; font-size: 14px; font-weight: 400; color: #ffffff; line-height: 1.5;">
-                                — {{ rec }}
-                            </p>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td valign="top" style="border-top: 1px solid #3f3f46; padding-top: 24px;">
-                            <p
-                                style="margin: 0 0 12px 0; font-size: 11px; font-weight: 800; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px;">
-                                NOTA DE ATENCIÓN AL CLIENTE
-                            </p>
-                            <p
-                                style="margin: 0; font-size: 14px; color: #d4d4d8; line-height: 1.6; font-style: italic;">
-                                Este cliente valora "{{ preferences[0] if preferences else 'experiencias únicas' }}"
-                                {% if preferences|length > 1 %} y "{{ preferences[1] }}"{% endif %}.
-                                {% if segment.travel_profile == 'GASTRONOMIA_CIUDAD' %}
-                                Sugerir reservas prioritarias en el restaurante principal o recomendaciones de mercado
-                                local.
-                                {% elif segment.travel_profile == 'EXPLORADOR_CULTURAL' %}
-                                Maximizar satisfacción recomendando rutas históricas o facilitando entradas a museos.
-                                {% elif segment.travel_profile == 'LUJO' %}
-                                Atención suprema requerida. Ofrecer upgrades directos si hay disponibilidad y servicios
-                                premium.
-                                {% elif segment.travel_profile == 'SOL_Y_PLAYA' %}
-                                Orientar sobre accesos privados, spa y amenities recreativos.
-                                {% elif segment.travel_profile == 'AVENTURERO' %}
-                                Destacar turismo activo, transporte a rutas naturales y horarios de gimnasio.
-                                {% endif %}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-
-        <!-- HISTORY TABLE STRICT -->
-        {% if visit_history %}
-        <tr>
-            <td style="padding: 40px;">
-                <p
-                    style="margin: 0 0 16px 0; font-size: 11px; font-weight: 800; color: #000000; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #000000; padding-bottom: 8px;">
-                    HISTORIAL DE VISITAS (ÚLTIMAS 5)
+        <!-- HEADER -->
+        <div class="report-header">
+            <div>
+                <h1 class="header-title">Informe de Recepción</h1>
+                <p class="header-guest-id">
+                    GUEST ID: {{ profile.guest_id }}
+                    <span>
+                        {% if segment.client_value == 'HIGH_VALUE' %}PERFIL VIP ELITE
+                        {% elif segment.client_value == 'MID_VALUE' %}PERFIL MID VALUE
+                        {% else %}PERFIL STANDARD{% endif %}
+                    </span>
                 </p>
-                <table role="presentation" cellpadding="8" cellspacing="0" width="100%"
-                    style="font-size: 13px; color: #3f3f46; border-collapse: collapse;">
-                    <tr style="border-bottom: 1px solid #e4e4e7; background-color: #fafafa;">
-                        <td align="left" style="font-weight: 600; padding: 12px 8px;">HOTEL</td>
-                        <td align="center" style="font-weight: 600; padding: 12px 8px;">CHECK-IN</td>
-                        <td align="right" style="font-weight: 600; padding: 12px 8px;">CHECK-OUT</td>
+            </div>
+            <div class="header-meta">
+                <p class="header-meta-label">Última Estancia</p>
+                <p class="header-last-stay">
+                    {% if profile.last_checkin %}
+                    {{ profile.last_checkin }}{% if profile.last_hotel %}, {{ profile.last_hotel }}{% endif %}
+                    {% else %}
+                    Sin datos de estancia
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- METRICS BAR -->
+        <div class="metrics-bar">
+            <div class="metric-cell">
+                <p class="metric-label">Estancias Totales</p>
+                <p class="metric-value">{{ profile.total_stays }}</p>
+            </div>
+            <div class="metric-cell">
+                <p class="metric-label">Hoteles Visitados</p>
+                <p class="metric-value">{{ profile.distinct_hotels }}</p>
+            </div>
+            <div class="metric-cell">
+                <p class="metric-label">ADR Promedio</p>
+                <p class="metric-value">{{ "%.0f"|format(profile.avg_daily_rate) }}€</p>
+            </div>
+            <div class="metric-cell">
+                <p class="metric-label">Net Score</p>
+                <p class="metric-value">{{ "%.1f"|format(profile.avg_score_given) }}</p>
+            </div>
+        </div>
+
+        <!-- INTELLIGENCE + SEGMENTATION -->
+        <div class="intel-section">
+            <!-- Left: Preferences -->
+            <div class="intel-col">
+                <p class="intel-col-title">Preferencias Detectadas</p>
+                <ul class="pref-list">
+                    {% set pref_tags = ['HABITACION', 'DESAYUNO', 'ROOM SERVICE', 'SPA', 'RESTAURANTE', 'SERVICIO'] %}
+                    {% for pref in preferences %}
+                    <li class="pref-item">
+                        <span>{{ pref|capitalize }}</span>
+                        <span class="pref-tag">{{ pref_tags[loop.index0 % pref_tags|length] }}</span>
+                    </li>
+                    {% endfor %}
+                    {% if not preferences %}
+                    <li class="pref-item"><span>Sin preferencias registradas</span></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Right: Analytics -->
+            <div class="intel-col">
+                <p class="intel-col-title">Segmentación Analítica</p>
+
+                {% set loyalty_pct = [(profile.total_stays * 4)|int, 100]|min %}
+                <div class="seg-metric">
+                    <div class="seg-row">
+                        <span class="seg-key">Lealtad Eurostars</span>
+                        <span class="seg-pct">{{ loyalty_pct }}%</span>
+                    </div>
+                    <div class="seg-bar-track">
+                        <div class="seg-bar-fill" style="width: {{ loyalty_pct }}%;"></div>
+                    </div>
+                </div>
+
+                {% set spend_pct = [((profile.avg_daily_rate / 5)|int), 100]|min %}
+                <div class="seg-metric">
+                    <div class="seg-row">
+                        <span class="seg-key">Gasto Auxiliar</span>
+                        <span class="seg-pct">{{ spend_pct }}%</span>
+                    </div>
+                    <div class="seg-bar-track">
+                        <div class="seg-bar-fill" style="width: {{ spend_pct }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="propension-block">
+                    <p class="propension-label">Propension</p>
+                    <p class="propension-text">
+                        {% if segment.travel_profile == 'LUJO' %}
+                        Cliente muy propenso a servicios premium, upgrade de suite y amenities de alta gama.
+                        {% elif segment.travel_profile == 'GASTRONOMIA_CIUDAD' %}
+                        Cliente muy propenso a reservas en restaurantes destacados y experiencias vinculadas a la
+                        gastronomia.
+                        {% elif segment.travel_profile == 'EXPLORADOR_CULTURAL' %}
+                        Cliente muy propenso a rutas culturales, visitas guiadas a museos y patrimonio.
+                        {% elif segment.travel_profile == 'SOL_Y_PLAYA' %}
+                        Cliente muy propenso a servicios de bienestar, spa nocturno y accesos recreativos.
+                        {% elif segment.travel_profile == 'AVENTURERO' %}
+                        Cliente muy propenso a turismo activo, rutas naturales y actividades deportivas.
+                        {% else %}
+                        Cliente muy propenso a servicios de bienestar y spa nocturno.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPSELL BLOCK -->
+        <div class="upsell-block">
+            {% set price_tags = ['+45€ / Noche', 'Oferta 80€', 'Reserva VIP'] %}
+            <div class="upsell-header-row">
+                <div class="upsell-header-left">
+                    <p class="upsell-title">Recomendaciones de Upsell Estrategico</p>
+                    <p class="upsell-subtitle">Generadas por motor de inteligencia predictiva basado en historial
+                        historico</p>
+                </div>
+                <a href="#" class="checkin-btn">Confirmar Check-In</a>
+            </div>
+
+            <div class="upsell-cards">
+
+                {% for rec in upsell_recommendations[:3] %}
+                <div class="upsell-card">
+                    <p class="card-price">{{ price_tags[loop.index0 % 3] }}</p>
+                    <p class="card-name">{{ rec.split(':')[0] if ':' in rec else rec[:24] }}</p>
+                    <p class="card-desc">{{ rec.split(':')[1].strip() if ':' in rec else rec }}</p>
+                </div>
+                {% endfor %}
+                {% if upsell_recommendations|length == 0 %}
+                <div class="upsell-card">
+                    <p class="card-price">+45€ / Noche</p>
+                    <p class="card-name">Suite Superior</p>
+                    <p class="card-desc">Habitacion con vistas panoramicas y check-out extendido.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- HISTORY TABLE -->
+        {% if visit_history %}
+        <div class="history-section">
+            <p class="section-title">Historial de Visitas (Ultimas 5)</p>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
                     </tr>
+                </thead>
+                <tbody>
                     {% for visit in visit_history[-5:] %}
-                    <tr style="border-bottom: 1px solid #f4f4f5;">
-                        <td align="left" style="padding: 12px 8px;">{{ visit.hotel_name }}</td>
-                        <td align="center" style="padding: 12px 8px;">{{ visit.checkin }}</td>
-                        <td align="right" style="padding: 12px 8px;">{{ visit.checkout }}</td>
+                    <tr>
+                        <td>{{ visit.hotel_name }}</td>
+                        <td>{{ visit.checkin }}</td>
+                        <td>{{ visit.checkout }}</td>
                     </tr>
                     {% endfor %}
-                </table>
-            </td>
-        </tr>
+                </tbody>
+            </table>
+        </div>
         {% endif %}
 
         <!-- FOOTER -->
-        <tr>
-            <td
-                style="padding: 20px 40px; border-top: 1px solid #e4e4e7; background-color: #f4f4f5; text-align: center;">
-                <p
-                    style="margin: 0; font-size: 10px; font-weight: 600; color: #a1a1aa; text-transform: uppercase; letter-spacing: 1px;">
-                    SISTEMA INTERNO EUROSTARS · DOCUMENTO CONFIDENCIAL
-                </p>
-            </td>
-        </tr>
+        <div class="report-footer">
+            <p>Sistema Interno Eurostars · Documento Confidencial · {{ generated_date or '' }}</p>
+        </div>
 
-    </table>
-
+    </div>
 </body>
 
 </html>
