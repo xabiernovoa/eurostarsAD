@@ -35,7 +35,7 @@
     'GASTRONOMIA_CIUDAD': 'Edición Urbana',
     'LUJO': 'Colección Exclusiva'
     } %}
-    {% set profile_label = labels.get(profile, 'Edición Especial') %}
+    {% set profile_label = labels.get(profile, '') %}
 
     <link href="{{ theme.font_url }}" rel="stylesheet">
 
@@ -75,7 +75,7 @@
                                                 style="cursor: default; color: inherit; text-decoration: none;">
                                                 <svg role="img" aria-label="Eurostars Hotel Company"
                                                     xmlns="http://www.w3.org/2000/svg" version="1.1"
-                                                    viewBox="0 0 253.8 63.5" height="1em" fill="currentColor">
+                                                    viewBox="0 0 253.8 63.5" height="1.1em" fill="currentColor">
                                                     <g>
                                                         <g>
                                                             <path
@@ -214,12 +214,14 @@
                                             </a>
                                         </p>
                                     </td>
+                                    {% if profile_label %}
                                     <td align="right">
                                         <p
                                             style="margin: 0; font-size: 12px; font-weight: 700; color: {{ theme.bg }}; text-transform: uppercase; font-family: {{ theme.font }}; letter-spacing: 2px;">
                                             {{ profile_label }}
                                         </p>
                                     </td>
+                                    {% endif %}
                                 </tr>
                             </table>
                         </td>
@@ -338,7 +340,7 @@
                                     style="cursor: default; color: inherit; text-decoration: none;">
                                     <svg role="img" aria-label="Eurostars Hotel Company"
                                         xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 253.8 63.5"
-                                        height="1em" fill="currentColor">
+                                        height="1.1em" fill="currentColor">
                                         <g>
                                             <g>
                                                 <path
