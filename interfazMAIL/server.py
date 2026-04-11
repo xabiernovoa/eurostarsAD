@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gmail Demo Server — serves the fake Gmail interface and Eurostars email HTML files."""
+"""Gmail Demo Server — serves the multi-profile Gmail interface for Eurostars demo."""
 
 import http.server
 import json
@@ -9,8 +9,10 @@ import urllib.parse
 from pathlib import Path
 
 PORT = 3001
-EMAIL_DIR = Path(__file__).parent.resolve()
-EUROSTARS_IMAGES = Path("/home/xabier/Documentos/eurostars/images")
+BASE_DIR = Path(__file__).parent.resolve()
+EUROSTARS_DIR = Path("/home/xabier/Documentos/eurostars")
+EMAIL_OUTPUT_DIR = EUROSTARS_DIR / "output"
+EUROSTARS_IMAGES = EUROSTARS_DIR / "images"
 
 MIME_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -22,8 +24,6 @@ MIME_TYPES = {
     ".png": "image/png",
     ".svg": "image/svg+xml",
     ".ico": "image/x-icon",
-    ".woff2": "font/woff2",
-    ".woff": "font/woff",
 }
 
 
@@ -47,52 +47,24 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
             return
         ext = filepath.suffix.lower()
         mime = MIME_TYPES.get(ext, "application/octet-stream")
-        data = filepath.read_bytes()
-        self._send(200, mime, data)
+        self._send(200, mime, filepath.read_bytes())
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         pathname = urllib.parse.unquote(parsed.path)
 
-        # API: list email HTML files
-        if pathname == "/api/emails":
-            files = sorted(
-                f for f in os.listdir(EMAIL_DIR)
-                if f.endswith(".html") and f != "index.html"
-            )
-            emails = []
-            for idx, filename in enumerate(files):
-                content = (EMAIL_DIR / filename).read_text(encoding="utf-8")
-                # Extract title
-                m = re.search(r"<title>(.*?)</title>", content, re.IGNORECASE)
-                title = m.group(1) if m else filename
-                # Extract preheader
-                m = re.search(
-                    r'<div[^>]*style="display:\s*none[^"]*"[^>]*>([\s\S]*?)</div>',
-                    content, re.IGNORECASE,
-                )
-                preheader = m.group(1).strip() if m else ""
-                # Determine type
-                is_post = filename.startswith("post_stay")
-                etype = "post_stay" if is_post else "pre_arrival"
-                # Extract numeric ID
-                id_m = re.search(r"(\d+)", filename)
-                eid = id_m.group(1) if id_m else str(idx)
-
-                emails.append({
-                    "id": eid,
-                    "filename": filename,
-                    "title": title,
-                    "preheader": preheader,
-                    "type": etype,
-                })
-            self._send(200, "application/json", json.dumps(emails))
+        # API: profiles.json
+        if pathname == "/api/profiles":
+            self._send_file(BASE_DIR / "profiles.json")
             return
 
-        # API: get single email HTML (rewrite image paths)
+        # API: get email HTML content (rewrite image paths)
         if pathname.startswith("/api/email/"):
             filename = pathname[len("/api/email/"):]
-            filepath = EMAIL_DIR / filename
+            # Try output dir first, then base dir
+            filepath = EMAIL_OUTPUT_DIR / filename
+            if not filepath.exists():
+                filepath = BASE_DIR / filename
             if not filepath.exists():
                 self._send(404, "text/plain", "Not found")
                 return
@@ -110,11 +82,11 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
             self._send_file(EUROSTARS_IMAGES / img_rel)
             return
 
-        # Serve static files
+        # Serve static files from BASE_DIR
         if pathname == "/":
-            self._send_file(EMAIL_DIR / "index.html")
+            self._send_file(BASE_DIR / "index.html")
         else:
-            self._send_file(EMAIL_DIR / pathname.lstrip("/"))
+            self._send_file(BASE_DIR / pathname.lstrip("/"))
 
     def do_OPTIONS(self):
         self.send_response(204)
