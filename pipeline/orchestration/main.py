@@ -62,6 +62,21 @@ def phase_auto_tag():
     auto_tag_images.generate_metadata()
 
 
+def phase_marketing():
+    """Build a marketing dashboard snapshot."""
+    logger.info("=" * 60)
+    logger.info("PHASE 9 — Building marketing dashboard snapshot")
+    logger.info("=" * 60)
+    from pipeline.marketing import dashboard_engine
+
+    payload = dashboard_engine.build_dashboard_data()
+    snapshot_path = DATA_DIR / "marketing_dashboard_snapshot.json"
+    with open(snapshot_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+    logger.info("Saved marketing dashboard snapshot to %s", snapshot_path)
+    return payload
+
+
 def phase_campaign(moment: str, guest_id: str | None = None, dry_run: bool = True):
     """Phase 3-8: Run campaign pipeline for a specific moment."""
     logger.info("=" * 60)
@@ -169,6 +184,9 @@ def run_all(dry_run: bool = True):
     for moment in ["pre_arrival", "checkin_report", "post_stay"]:
         phase_campaign(moment, guest_id=None, dry_run=dry_run)
 
+    # Phase 9
+    phase_marketing()
+
     logger.info("*" * 60)
     logger.info("Pipeline complete!")
     logger.info("*" * 60)
@@ -185,12 +203,13 @@ Examples:
   python main.py --phase campaign --moment pre_arrival
   python main.py --phase campaign --moment checkin_report --guest_id 1014907189
   python main.py --phase campaign --moment post_stay
+  python main.py --phase marketing
   python main.py --dry-run
         """,
     )
     parser.add_argument(
         "--phase",
-        choices=["all", "embeddings", "segment", "auto_tag", "campaign"],
+        choices=["all", "embeddings", "segment", "auto_tag", "campaign", "marketing"],
         default="all",
         help="Which phase to run (default: all)",
     )
@@ -233,6 +252,8 @@ Examples:
         if not args.moment:
             parser.error("--moment is required when --phase=campaign")
         phase_campaign(args.moment, args.guest_id, dry_run=dry_run)
+    elif args.phase == "marketing":
+        phase_marketing()
 
 
 if __name__ == "__main__":

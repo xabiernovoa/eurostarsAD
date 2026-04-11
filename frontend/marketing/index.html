@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eurostars · Marketing Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="halo halo-a"></div>
+        <div class="halo halo-b"></div>
+
+        <header class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow">Eurostars · Marketing Command Center</div>
+                <h1>Decisiones de marketing unificadas entre campañas, recepción y contexto externo.</h1>
+                <p class="hero-text">
+                    El dashboard consolida resultados operativos del pipeline actual y los transforma en prioridades por segmento,
+                    acciones para RRSS, activación dentro del hotel y palancas de publicidad externa.
+                </p>
+                <div class="hero-meta">
+                    <span class="meta-pill">IA aplicada a decisiones</span>
+                    <span class="meta-pill meta-pill-soft">Índices estimados, no telemetría real</span>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <button class="action-btn secondary" id="refreshBtn">Actualizar lectura</button>
+                <button class="action-btn" id="saveBtn">Guardar contexto</button>
+                <p class="status-line" id="statusLine">Cargando dashboard…</p>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <section class="panel kpi-panel">
+                <div class="panel-header">
+                    <h2>Señales clave</h2>
+                    <span class="panel-tag" id="generatedAt">Sincronizando</span>
+                </div>
+                <div class="kpi-grid" id="kpiGrid"></div>
+            </section>
+
+            <section class="panel spotlight-panel">
+                <div class="panel-header">
+                    <h2>Foco ejecutivo</h2>
+                    <span class="panel-tag">Destinos y presión estratégica</span>
+                </div>
+                <div class="spotlight-grid">
+                    <div class="spotlight-card">
+                        <div class="spotlight-label">Prioridad actual</div>
+                        <p class="spotlight-text" id="priorityText"></p>
+                    </div>
+                    <div class="spotlight-card">
+                        <div class="spotlight-label">Ciudades en foco</div>
+                        <div class="city-list" id="cityList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel breakdown-panel">
+                <div class="panel-header">
+                    <h2>Rendimiento por audiencia</h2>
+                    <span class="panel-tag">Índice estimado por categoría</span>
+                </div>
+                <div class="breakdown-grid">
+                    <div class="breakdown-block">
+                        <h3>Edad</h3>
+                        <div id="ageBreakdown"></div>
+                    </div>
+                    <div class="breakdown-block">
+                        <h3>Perfil de viaje</h3>
+                        <div id="profileBreakdown"></div>
+                    </div>
+                    <div class="breakdown-block">
+                        <h3>Valor cliente</h3>
+                        <div id="valueBreakdown"></div>
+                    </div>
+                    <div class="breakdown-block">
+                        <h3>Momento campaña</h3>
+                        <div id="momentBreakdown"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel recommendations-panel">
+                <div class="panel-header">
+                    <h2>Recomendaciones accionables</h2>
+                    <span class="panel-tag" id="recSource">Motor heurístico</span>
+                </div>
+                <div class="recommendation-grid" id="recommendationGrid"></div>
+            </section>
+
+            <section class="panel segments-panel">
+                <div class="panel-header">
+                    <h2>Segmentos prioritarios</h2>
+                    <span class="panel-tag">Dónde enfocar capacidad creativa y presupuesto</span>
+                </div>
+                <div class="segment-grid" id="segmentGrid"></div>
+            </section>
+
+            <section class="panel campaigns-panel">
+                <div class="panel-header">
+                    <h2>Campañas recientes</h2>
+                    <span class="panel-tag">Últimas 12 campañas deduplicadas</span>
+                </div>
+                <div class="campaign-table-wrap">
+                    <table class="campaign-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Segmento</th>
+                                <th>Canal</th>
+                                <th>Hotel</th>
+                                <th>Índice</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaignTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <aside class="panel context-panel">
+                <div class="panel-header">
+                    <h2>Contexto editable</h2>
+                    <span class="panel-tag">Input del jefe de marketing</span>
+                </div>
+                <form id="contextForm" class="context-form">
+                    <label class="field">
+                        <span>Prioridad estratégica</span>
+                        <textarea id="strategicPriority" rows="3"></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Notas del jefe de marketing</span>
+                        <textarea id="managerNotes" rows="6" placeholder="Una línea por nota"></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Señales de recepción</span>
+                        <textarea id="receptionNotes" rows="6" placeholder="Una línea por señal"></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Señales externas y eventos</span>
+                        <textarea id="externalSignals" rows="6" placeholder="Una línea por evento o insight externo"></textarea>
+                    </label>
+                    <button type="submit" class="action-btn wide">Guardar y recalcular</button>
+                </form>
+                <p class="context-help">
+                    Cada línea se guarda como una señal independiente y alimenta las recomendaciones del dashboard.
+                </p>
+            </aside>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
