@@ -331,6 +331,10 @@ body::-webkit-scrollbar {
     display: none;
 }
 
+.checkin-panel::-webkit-scrollbar {
+    display: none;
+}
+
 .guest-list {
     list-style: none;
     padding: 0;

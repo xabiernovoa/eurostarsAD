@@ -159,7 +159,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
 
 def main():
     server = http.server.HTTPServer(("", PORT), MarketingHandler)
-    print(f"\n  📈 Eurostars Marketing Dashboard running at http://localhost:{PORT}\n")
+    print(f"\n  Eurostars Marketing Dashboard running at http://localhost:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -102,7 +102,7 @@ def load_guest_profiles() -> dict[str, dict]:
     try:
         payload = json.loads(MAIL_PROFILES_PATH.read_text(encoding="utf-8"))
     except Exception as exc:
-        print(f"  ⚠ Error loading mail profiles: {exc}")
+        print(f"  Error loading mail profiles: {exc}")
         return {}
 
     profiles = {}
@@ -124,7 +124,7 @@ def build_guest_index() -> list:
     guests = []
     report_files = sorted(REPORT_DIR.glob("checkin_report_*.html"))
     profiles_by_guest = load_guest_profiles()
-    print(f"  📂 Indexing {len(report_files)} guest reports...")
+    print(f"  Indexing {len(report_files)} guest reports...")
 
     for f in report_files:
         guest_id = f.stem.replace("checkin_report_", "")
@@ -134,9 +134,9 @@ def build_guest_index() -> list:
             guest.update(profiles_by_guest.get(guest_id, {}))
             guests.append(guest)
         except Exception as e:
-            print(f"  ⚠ Error parsing {f.name}: {e}")
+            print(f"  Error parsing {f.name}: {e}")
 
-    print(f"  ✅ Indexed {len(guests)} guests")
+    print(f"  Indexed {len(guests)} guests")
     return guests
 
 
@@ -222,7 +222,7 @@ def main():
     ReceptionHandler.guest_index = build_guest_index()
 
     server = http.server.HTTPServer(("", PORT), ReceptionHandler)
-    print(f"\n  🏨 Eurostars Reception Server running at http://localhost:{PORT}\n")
+    print(f"\n  Eurostars Reception Server running at http://localhost:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

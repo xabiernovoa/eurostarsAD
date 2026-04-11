@@ -7,9 +7,9 @@
         navItems: document.querySelectorAll(".nav-item[data-section]"),
         sectionViews: document.querySelectorAll(".section-view"),
         sidebarUpdated: document.getElementById("sidebarUpdated"),
-        refreshBtn: document.getElementById("refreshBtn"),
-        saveBtn: document.getElementById("saveBtn"),
-        statusLine: document.getElementById("statusLine"),
+        refreshBtn: null,
+        saveBtn: null,
+        statusLine: null,
         kpiGrid: document.getElementById("kpiGrid"),
         priorityText: document.getElementById("priorityText"),
         citiesRow: document.getElementById("citiesRow"),
@@ -22,13 +22,13 @@
         momentBreakdown: document.getElementById("momentBreakdown"),
         donutValue: document.getElementById("donutValue"),
         countryRow: document.getElementById("countryRow"),
-        audienceCount: document.getElementById("audienceCount"),
+        audienceCount: null,
         segmentGrid: document.getElementById("segmentGrid"),
-        campaignCount: document.getElementById("campaignCount"),
+        campaignCount: null,
         campaignCounters: document.getElementById("campaignCounters"),
         campaignFilters: document.getElementById("campaignFilters"),
         campaignTableBody: document.getElementById("campaignTableBody"),
-        recSource: document.getElementById("recSource"),
+        recSource: null,
         actionGrid: document.getElementById("actionGrid"),
         configSaveBtn: document.getElementById("configSaveBtn"),
         contextForm: document.getElementById("contextForm"),
@@ -51,34 +51,8 @@
     var activeCampaignFilter = "all";
     var chatHistory = [];
 
-    /* ── Theme Toggle ────────────────────────────────────── */
-
-    var themeToggle = document.getElementById("themeToggle");
-    var themeIconSun = document.getElementById("themeIconSun");
-    var themeIconMoon = document.getElementById("themeIconMoon");
-    var themeLabel = document.getElementById("themeLabel");
-
-    function applyTheme(theme) {
-        document.documentElement.setAttribute("data-theme", theme);
-        localStorage.setItem("eurostars-theme", theme);
-        if (theme === "light") {
-            themeIconSun.style.display = "none";
-            themeIconMoon.style.display = "block";
-            themeLabel.textContent = "Tema oscuro";
-        } else {
-            themeIconSun.style.display = "block";
-            themeIconMoon.style.display = "none";
-            themeLabel.textContent = "Tema claro";
-        }
-    }
-
-    var savedTheme = localStorage.getItem("eurostars-theme") || "dark";
-    applyTheme(savedTheme);
-
-    themeToggle.addEventListener("click", function () {
-        var current = document.documentElement.getAttribute("data-theme") || "dark";
-        applyTheme(current === "dark" ? "light" : "dark");
-    });
+    /* ── Theme (always light) ────────────────────────────── */
+    document.documentElement.setAttribute("data-theme", "light");
 
     /* ── Navigation ──────────────────────────────────────── */
 
@@ -98,7 +72,7 @@
 
     /* ── Helpers ──────────────────────────────────────────── */
 
-    function setStatus(msg) { refs.statusLine.textContent = msg; }
+    function setStatus(msg) { if (refs.statusLine) refs.statusLine.textContent = msg; }
 
     function esc(v) {
         return String(v != null ? v : "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -123,9 +97,9 @@
     }
     function categoryIcon(cat) {
         return {
-            rrss: "\ud83d\udcf1", hotel: "\ud83c\udfe8", local: "\ud83d\udccd", branding: "\ud83c\udfa8",
-            geolocalizacion: "\ud83d\udce1", evento: "\ud83c\udf89", decoracion: "\ud83d\uddbc\ufe0f"
-        }[cat] || "\ud83d\udce6";
+            rrss: "RRSS", hotel: "Hotel", local: "Local", branding: "Brand",
+            geolocalizacion: "Geo", evento: "Evento", decoracion: "Deco"
+        }[cat] || cat || "";
     }
 
     function linesFromTextarea(ta) {
@@ -173,7 +147,7 @@
             { label: "Presión estratégica", value: kpis.priority_pressure + "/100", note: "Intensidad señales", indicator: kpis.priority_pressure >= 70 ? "good" : "neutral" },
         ];
         refs.kpiGrid.innerHTML = items.map(function (k) {
-            return '<article class="kpi-card"><div class="kpi-header"><div class="kpi-label">' + k.label + '</div><div class="kpi-indicator ' + k.indicator + '"></div></div><div class="kpi-value">' + k.value + '</div><div class="kpi-footnote">' + k.note + '</div></article>';
+            return '<article class="kpi-card"><div class="kpi-header"><div class="kpi-label">' + k.label + '</div></div><div class="kpi-value">' + k.value + '</div><div class="kpi-footnote">' + k.note + '</div></article>';
         }).join("");
     }
 
@@ -202,9 +176,9 @@
         });
 
         refs.opportunityRow.innerHTML =
-            '<div class="opportunity-card"><div class="opportunity-icon seg">&#9733;</div><div><div class="opportunity-label">Segmento top</div><div class="opportunity-value">' + esc(topSeg.segment_label || "—") + '</div><div class="opportunity-detail">' + (topSeg.users || 0) + ' usuarios · ' + fmtPct(topSeg.avg_engagement_index) + ' engagement · ' + Math.round(topSeg.avg_adr || 0) + '€ ADR</div></div></div>' +
-            '<div class="opportunity-card"><div class="opportunity-icon city">&#9673;</div><div><div class="opportunity-label">Ciudad con más tracción</div><div class="opportunity-value">' + esc(topCity) + '</div><div class="opportunity-detail">Destino con mayor concentración de campañas y señales externas activas</div></div></div>' +
-            '<div class="opportunity-card"><div class="opportunity-icon channel">&#9889;</div><div><div class="opportunity-label">Mejor canal</div><div class="opportunity-value">' + esc(bestChannel) + '</div><div class="opportunity-detail">Engagement medio ' + fmtPct(bestChAvg) + ' sobre ' + (channelMap[bestChannel] ? channelMap[bestChannel].count : 0) + ' campañas recientes</div></div></div>';
+            '<div class="opportunity-card"><div><div class="opportunity-label">Segmento top</div><div class="opportunity-value">' + esc(topSeg.segment_label || "—") + '</div><div class="opportunity-detail">' + (topSeg.users || 0) + ' usuarios · ' + fmtPct(topSeg.avg_engagement_index) + ' engagement · ' + Math.round(topSeg.avg_adr || 0) + '€ ADR</div></div></div>' +
+            '<div class="opportunity-card"><div><div class="opportunity-label">Ciudad con más tracción</div><div class="opportunity-value">' + esc(topCity) + '</div><div class="opportunity-detail">Destino con mayor concentración de campañas y señales externas activas</div></div></div>' +
+            '<div class="opportunity-card"><div><div class="opportunity-label">Mejor canal</div><div class="opportunity-value">' + esc(bestChannel) + '</div><div class="opportunity-detail">Engagement medio ' + fmtPct(bestChAvg) + ' sobre ' + (channelMap[bestChannel] ? channelMap[bestChannel].count : 0) + ' campañas recientes</div></div></div>';
     }
 
     /* ── Render: Focus ───────────────────────────────────── */
@@ -319,9 +293,9 @@
 
     function renderSegments(cards) {
         refs.segmentGrid.innerHTML = cards.map(function (c) {
-            return '<article class="segment-card"><h3>' + esc(c.segment_label) + '</h3><div class="segment-meta">Canal: ' + esc(c.dominant_channel) + ' · Momento: ' + esc(c.dominant_moment) + '</div><div class="segment-chips"><span class="segment-chip">' + c.users + ' usuarios</span><span class="segment-chip">' + c.campaigns + ' campañas</span><span class="segment-chip">' + fmtPct(c.avg_engagement_index) + ' índice</span><span class="segment-chip">' + Math.round(c.avg_adr) + '€ ADR</span></div></article>';
+            return '<article class="segment-card"><h3>' + esc(c.segment_label) + '</h3><div class="segment-meta">Canal: ' + esc(c.dominant_channel) + ' · Momento: ' + esc(c.dominant_moment) + '</div><div class="segment-meta" style="margin-top:8px">' + c.users + ' usuarios · ' + c.campaigns + ' campañas · ' + fmtPct(c.avg_engagement_index) + ' índice · ' + Math.round(c.avg_adr) + '€ ADR</div></article>';
         }).join("");
-        refs.audienceCount.textContent = cards.length + " segmentos activos";
+        if (refs.audienceCount) refs.audienceCount.textContent = cards.length + " segmentos activos";
     }
 
     /* ── Render: Country Stats ───────────────────────────── */
@@ -344,7 +318,7 @@
         var html = "";
         ["ES", "PT", "IT"].forEach(function (code) {
             var count = Math.round(totalUsers * (code === "ES" ? 0.45 : code === "PT" ? 0.28 : 0.27));
-            html += '<div class="country-card"><span class="country-flag">' + (flags[code] || "") + '</span><div class="country-name">' + (names[code] || code) + '</div><div class="country-count">' + count + '</div><div class="country-detail">usuarios activos</div></div>';
+            html += '<div class="country-card"><div class="country-name">' + (names[code] || code) + '</div><div class="country-count">' + count + '</div><div class="country-detail">usuarios activos</div></div>';
         });
         refs.countryRow.innerHTML = html;
     }
@@ -362,7 +336,7 @@
             { label: "Check-in", count: counts.checkin_report, cls: "checkin_report" },
         ];
         refs.campaignCounters.innerHTML = items.map(function (i) {
-            return '<div class="counter-card"><div class="counter-value">' + i.count + '</div><div class="counter-label"><span class="type-tag ' + i.cls + '" style="font-size:10px">' + i.label + '</span></div></div>';
+            return '<div class="counter-card"><div class="counter-value">' + i.count + '</div><div class="counter-label">' + i.label + '</div></div>';
         }).join("");
     }
 
@@ -374,25 +348,25 @@
             filtered = rows.filter(function (r) { return r.campaign_type === filter; });
         }
         refs.campaignTableBody.innerHTML = filtered.map(function (r) {
-            return '<tr><td>' + esc(fmtDate(r.timestamp)) + '</td><td><span class="type-tag ' + r.campaign_type + '">' + typeLabel(r.campaign_type) + '</span></td><td><span class="table-segment">' + esc(r.age_segment) + '</span><span class="table-sub">' + esc(r.travel_profile) + '</span></td><td>' + esc(r.channel) + '<span class="table-sub">' + esc(r.channel_alignment) + '</span></td><td>' + esc(r.hotel || "Sin asignar") + '</td><td><span class="index-badge ' + engClass(r.engagement_index) + '">' + fmtPct(r.engagement_index) + '</span></td></tr>';
+            return '<tr><td>' + esc(fmtDate(r.timestamp)) + '</td><td>' + typeLabel(r.campaign_type) + '</td><td><span class="table-segment">' + esc(r.age_segment) + '</span><span class="table-sub">' + esc(r.travel_profile) + '</span></td><td>' + esc(r.channel) + '<span class="table-sub">' + esc(r.channel_alignment) + '</span></td><td>' + esc(r.hotel || "Sin asignar") + '</td><td>' + fmtPct(r.engagement_index) + '</td></tr>';
         }).join("");
-        refs.campaignCount.textContent = filtered.length + " de " + rows.length + " campañas";
+        if (refs.campaignCount) refs.campaignCount.textContent = filtered.length + " de " + rows.length + " campañas";
     }
 
     /* ── Render: Actions ─────────────────────────────────── */
 
     function renderActions(recommendations) {
         var sourceLabel = recommendations.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
-        refs.recSource.textContent = sourceLabel;
+        if (refs.recSource) refs.recSource.textContent = sourceLabel;
         var cards = [
-            { title: "Redes sociales", key: "rrss", iconClass: "rrss", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>' },
-            { title: "Dentro del hotel", key: "hotel", iconClass: "hotel", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>' },
-            { title: "Publicidad externa", key: "ads", iconClass: "ads", icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>' },
+            { title: "Redes sociales", key: "rrss" },
+            { title: "Dentro del hotel", key: "hotel" },
+            { title: "Publicidad externa", key: "ads" },
         ];
         refs.actionGrid.innerHTML = cards.map(function (c) {
             var block = recommendations[c.key];
             if (!block) return "";
-            return '<article class="action-card"><div class="action-card-header"><div class="action-card-icon ' + c.iconClass + '">' + c.icon + '</div><h3>' + c.title + '</h3></div><p class="action-summary">' + esc(block.summary) + '</p><ul class="action-list">' + block.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join("") + '</ul><div class="action-source">Fuente: ' + sourceLabel + '</div></article>';
+            return '<article class="action-card"><div class="action-card-header"><h3>' + c.title + '</h3></div><p class="action-summary">' + esc(block.summary) + '</p><ul class="action-list">' + block.actions.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join("") + '</ul></article>';
         }).join("");
     }
 
@@ -437,8 +411,8 @@
         renderSegments(dashboard.segment_cards);
 
         // Campaigns
-        renderCampaignCounters(dashboard.recent_campaigns);
-        renderCampaigns(dashboard.recent_campaigns, activeCampaignFilter);
+        renderCampaignCounters(dashboard.campaign_rows || dashboard.recent_campaigns || []);
+        renderCampaigns(dashboard.campaign_rows || dashboard.recent_campaigns || [], activeCampaignFilter);
 
         // Actions
         renderActions(dashboard.recommendations);
@@ -457,7 +431,7 @@
         refs.campaignFilters.querySelectorAll(".filter-chip").forEach(function (c) { c.classList.remove("active"); });
         chip.classList.add("active");
         activeCampaignFilter = chip.dataset.filter;
-        if (currentDashboard) renderCampaigns(currentDashboard.recent_campaigns, activeCampaignFilter);
+        if (currentDashboard) renderCampaigns(currentDashboard.campaign_rows || currentDashboard.recent_campaigns || [], activeCampaignFilter);
     });
 
     /* ── Event Handlers ──────────────────────────────────── */
@@ -467,8 +441,6 @@
         try { var d = await fetchDashboard(); renderDashboard(d); } catch (e) { setStatus(e.message); }
     }
 
-    refs.refreshBtn.addEventListener("click", refreshDashboard);
-    refs.saveBtn.addEventListener("click", function () { refs.contextForm.requestSubmit(); });
     refs.configSaveBtn.addEventListener("click", function () { refs.contextForm.requestSubmit(); });
 
     refs.contextForm.addEventListener("submit", async function (e) {
@@ -603,7 +575,7 @@
 
     function renderProposals(data) {
         currentProposals = data.proposals || [];
-        genSource.textContent = data.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
+        if (genSource) genSource.textContent = data.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
 
         if (!currentProposals.length) {
             proposalGrid.innerHTML = '<p class="form-help" style="text-align:center;padding:32px">No se generaron propuestas. Verifica que el dashboard tenga datos cargados.</p>';
@@ -614,19 +586,17 @@
             var catClass = p.category || 'default';
             return '<article class="proposal-card">' +
                 '<div class="proposal-top">' +
-                '<div class="proposal-number">' + categoryIcon(p.category) + '</div>' +
+                '<div style="font-weight:700;color:var(--text-primary)">' + esc(p.category_label || typeLabel(p.campaign_type)) + '</div>' +
                 '<div class="proposal-info">' +
-                '<div class="proposal-category-badge cat-' + catClass + '">' + esc(p.category_label || typeLabel(p.campaign_type)) + '</div>' +
                 '<div class="proposal-name">' + esc(p.name) + '</div>' +
                 '<div class="proposal-objective">' + esc(p.objective) + '</div>' +
                 '</div>' +
-                '<span class="proposal-priority ' + (p.priority || "media") + '">' + esc(p.priority || "media") + '</span>' +
+                '<span style="font-weight:600;font-size:12px;color:var(--text-secondary)">' + esc(p.priority || "media").toUpperCase() + '</span>' +
                 '</div>' +
                 '<div class="proposal-meta">' +
                 '<span class="proposal-tag">' + esc(p.channel) + '</span>' +
                 '<span class="proposal-tag">' + esc(p.segment) + '</span>' +
                 '<span class="proposal-tag">' + esc(p.timing) + '</span>' +
-                '<span class="proposal-tag">Engagement est. ' + fmtPct(p.estimated_engagement) + '</span>' +
                 '</div>' +
                 '<div class="proposal-message">' +
                 '<div class="proposal-msg-label">Plan de acción</div>' +
@@ -644,14 +614,14 @@
     }
 
     async function loadProposals() {
-        genSource.textContent = "Generando campañas…";
+        if (genSource) genSource.textContent = "Generando campañas…";
         proposalGrid.innerHTML = '<p class="form-help" style="text-align:center;padding:32px">Analizando datos y generando propuestas…</p>';
         try {
             var data = await fetchProposals();
             renderProposals(data);
             generatorLoaded = true;
         } catch (err) {
-            genSource.textContent = "Error";
+            if (genSource) genSource.textContent = "Error";
             proposalGrid.innerHTML = '<p class="form-help" style="text-align:center;padding:32px;color:var(--danger)">' + esc(err.message) + '</p>';
         }
     }

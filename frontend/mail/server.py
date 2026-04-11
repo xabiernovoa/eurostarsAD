@@ -100,7 +100,7 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
 
 def main():
     server = http.server.HTTPServer(("", PORT), GmailDemoHandler)
-    print(f"\n  📧 Gmail Demo Server running at http://localhost:{PORT}\n")
+    print(f"\n  Gmail Demo Server running at http://localhost:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

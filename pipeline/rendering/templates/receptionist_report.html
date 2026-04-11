@@ -515,7 +515,9 @@
                     <p class="upsell-subtitle">Generadas por motor de inteligencia predictiva basado en historial
                         historico</p>
                 </div>
-                <a href="#" class="checkin-btn">Confirmar Check-In</a>
+                <button class="checkin-btn"
+                    onclick="alert('Check-In registrado correctamente.\nEl huesped ha sido procesado y el informe enviado al equipo de planta.')">Confirmar
+                    Check-In</button>
             </div>
 
             <div class="upsell-cards">
@@ -568,6 +570,29 @@
         </div>
 
     </div>
+
+    <!-- CHECK-IN MODAL -->
+    <div id="ciModal"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center;">
+        <div
+            style="background:#ffffff;border-radius:12px;padding:48px 40px;max-width:400px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+            <div
+                style="width:56px;height:56px;border-radius:50%;background:#f0ebe1;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8a754b" stroke-width="2"
+                    stroke-linecap="round">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+            </div>
+            <p
+                style="font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;color:#1a1a1a;margin:0 0 10px;">
+                Check-In Registrado</p>
+            <p style="font-size:13px;color:#666666;line-height:1.6;margin:0 0 28px;">El check-in del hu&eacute;sped ha
+                sido confirmado y el informe ha sido enviado al equipo de planta.</p>
+            <button onclick="document.getElementById('ciModal').style.display='none'"
+                style="background:#8a754b;color:#ffffff;border:none;border-radius:6px;padding:12px 32px;font-size:13px;font-weight:700;letter-spacing:0.5px;cursor:pointer;">Cerrar</button>
+        </div>
+    </div>
+
 </body>
 
 </html>
