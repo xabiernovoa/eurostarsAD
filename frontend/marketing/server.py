@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from pipeline.marketing.dashboard_engine import build_dashboard_data, load_context, save_context
+from pipeline.marketing.chat_engine import handle_chat_message, refresh_dashboard_cache, generate_campaign_proposals, handle_modify_messaging
 
 PORT = 3003
 BASE_DIR = Path(__file__).parent.resolve()
@@ -73,6 +74,11 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
             self._send(200, "application/json; charset=utf-8", json.dumps(load_context(), ensure_ascii=False))
             return
 
+        if pathname == "/api/campaigns":
+            self._send(200, "application/json; charset=utf-8",
+                       json.dumps(generate_campaign_proposals(), ensure_ascii=False))
+            return
+
         if pathname == "/":
             self._send_file(BASE_DIR / "index.html")
             return
@@ -87,6 +93,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
             try:
                 payload = self._read_json_body()
                 context = save_context(payload)
+                refresh_dashboard_cache()
                 response = {
                     "context": context,
                     "dashboard": build_dashboard_data(),
@@ -95,6 +102,46 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
             except Exception as exc:
                 self._send(
                     400,
+                    "application/json; charset=utf-8",
+                    json.dumps({"error": str(exc)}, ensure_ascii=False),
+                )
+            return
+
+        if pathname == "/api/chat":
+            try:
+                payload = self._read_json_body()
+                message = payload.get("message", "").strip()
+                history = payload.get("history", [])
+                if not message:
+                    self._send(400, "application/json; charset=utf-8",
+                               json.dumps({"error": "No message provided"}, ensure_ascii=False))
+                    return
+                result = handle_chat_message(message, history)
+                self._send(200, "application/json; charset=utf-8",
+                           json.dumps(result, ensure_ascii=False))
+            except Exception as exc:
+                self._send(
+                    500,
+                    "application/json; charset=utf-8",
+                    json.dumps({"error": str(exc)}, ensure_ascii=False),
+                )
+            return
+
+        if pathname == "/api/campaigns/modify":
+            try:
+                payload = self._read_json_body()
+                campaign_id = payload.get("campaign_id", "").strip()
+                instructions = payload.get("instructions", "").strip()
+                if not campaign_id or not instructions:
+                    self._send(400, "application/json; charset=utf-8",
+                               json.dumps({"error": "campaign_id and instructions required"}, ensure_ascii=False))
+                    return
+                result = handle_modify_messaging(campaign_id, instructions)
+                self._send(200, "application/json; charset=utf-8",
+                           json.dumps(result, ensure_ascii=False))
+            except Exception as exc:
+                self._send(
+                    500,
                     "application/json; charset=utf-8",
                     json.dumps({"error": str(exc)}, ensure_ascii=False),
                 )
