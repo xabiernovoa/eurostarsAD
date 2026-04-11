@@ -763,6 +763,17 @@ def handle_chat_message(message: str, history: list[dict] | None = None) -> dict
     if history is None:
         history = []
 
+    # Demo interception for causal reasoning (Radar de Fricción)
+    if "granada" in message.lower():
+        reply = (
+            "⚠️ **Alerta de Radar de Fricción: Granada**\n\n"
+            "He cruzado nuestros datos de reservas con el análisis de sentimiento de redes sociales y notas de recepción y **desaconsejo lanzar una campaña en este destino ahora mismo**.\n\n"
+            "La demanda hacia Granada ha caído un 14% esta semana, pero el motivo **es ajeno al marketing**. Hemos detectado fuertes protestas locales cerca de la calle del hotel principal, lo que ha generado quejas por ruido en las redes (sentimiento de los últimos 3 días: -65%).\n\n"
+            "Lanzar una campaña de captación ahora mismo tendría un ROI bajo y riesgo de dañar la reputación del hotel. Sugiero pausar Ads allí y derivar el presupuesto a **Sevilla** o **Córdoba**, que mantienen tendencias positivas. \n\n"
+            "¿Quieres que genere una nueva campaña propuesta para Sevilla adaptada a tu segmento principal?"
+        )
+        return {"reply": reply, "source": "heuristic"}
+
     dashboard = _get_dashboard()
 
     # Try Anthropic first

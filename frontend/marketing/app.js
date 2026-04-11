@@ -478,7 +478,7 @@
         msg.className = "chat-msg " + role;
         var bubble = document.createElement("div");
         bubble.className = "chat-msg-bubble";
-        bubble.textContent = text;
+        bubble.innerHTML = esc(text).replace(/\n/g, "<br>").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
         msg.appendChild(bubble);
         if (source && role === "assistant") {
             var src = document.createElement("div");
@@ -506,7 +506,12 @@
         refs.chatMessages.scrollTop = refs.chatMessages.scrollHeight;
 
         try {
-            var result = await sendChatMessage(message);
+            var resultPromise = sendChatMessage(message);
+            var delayPromise = new Promise(function(resolve) { setTimeout(resolve, 1800); });
+            
+            var results = await Promise.all([resultPromise, delayPromise]);
+            var result = results[0];
+            
             refs.chatTyping.classList.remove("visible");
             addChatMessage("assistant", result.reply, result.source);
             chatHistory.push({ role: "assistant", content: result.reply });
