@@ -67,7 +67,9 @@ El proyecto carga variables desde `.env`. `.env.example` es solo una plantilla.
 
 Variables relevantes:
 
-- `ANTHROPIC_API_KEY`: usada para generar texto real con Anthropic.
+- `OPENAI_API_KEY`: usada para generar texto real con OpenAI.
+- `OPENAI_EMAIL_MODEL`: opcional; por defecto usa `gpt-5.4-nano`.
+- `OPENAI_EMAIL_MAX_OUTPUT_TOKENS`: opcional; limita la longitud de salida del copy.
 - `SENDGRID_API_KEY`: usada para enviar emails reales.
 - `SENDER_EMAIL`: remitente para SendGrid.
 - `EVENTBRITE_API_KEY`: aparece como opcional, pero ahora mismo no se usa en el código.
@@ -75,9 +77,10 @@ Variables relevantes:
 Comportamiento importante:
 
 - Por defecto el proyecto trabaja en `dry-run`.
-- En `dry-run`, el texto no llama a Anthropic: usa copy mock.
+- En `dry-run`, el texto no llama a OpenAI: usa copy mock.
 - Si ejecutas con `--send`, intentará enviar por SendGrid.
-- Si falta `ANTHROPIC_API_KEY`, incluso fuera de `dry-run`, el generador cae a texto mock.
+- Si falta `OPENAI_API_KEY`, incluso fuera de `dry-run`, el generador cae a texto mock.
+- Las campañas se procesan en paralelo con varios hilos; puedes ajustar el límite con `CAMPAIGN_MAX_WORKERS`.
 
 ## Instalación
 
@@ -166,7 +169,7 @@ Ahora mismo los eventos son mock, definidos en el propio código.
 `pipeline/content/text_generator.py` genera el copy del email. Tiene dos modos:
 
 - mock, usado por defecto en `dry-run`
-- real, usando Anthropic si hay `ANTHROPIC_API_KEY`
+- real, usando OpenAI si hay `OPENAI_API_KEY`
 
 También genera SMS cortos cuando el canal principal es `sms`.
 

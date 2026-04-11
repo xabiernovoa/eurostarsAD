@@ -1,18 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gmail</title>
-    <link rel="icon" href="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Eurostars Marketing Panel</title>
+    <link rel="icon" href="https://www.eurostarshotels.com/favicon.ico" type="image/x-icon">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined" rel="stylesheet">
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { font-size: 14px; height: 100%; }
+        :root {
+            --brand-black: #000000;
+            --brand-gold: #8c7b4c;
+            --brand-gold-hover: #7a6b42;
+            --brand-bg: #fdfbf7;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 14px;
+            height: 100%;
+        }
+
         body {
             font-family: 'Roboto', Arial, sans-serif;
-            background: #f6f8fc;
+            background: var(--brand-bg);
             color: #202124;
             height: 100%;
             overflow: hidden;
@@ -20,705 +41,1349 @@
 
         /* ========== TOP BAR ========== */
         .topbar {
-            display: flex; align-items: center;
-            height: 64px; padding: 0 8px;
-            background: #fff; border-bottom: 1px solid #e0e0e0;
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex;
+            align-items: center;
+            height: 64px;
+            padding: 0 16px;
+            background: var(--brand-black);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            color: #fff;
         }
-        .topbar-left { display: flex; align-items: center; min-width: 238px; padding-left: 4px; }
-        .menu-btn, .icon-btn {
-            width: 48px; height: 48px; border: none; background: none;
-            border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: #5f6368; transition: background .15s;
-        }
-        .icon-btn { width: 40px; height: 40px; }
-        .menu-btn:hover, .icon-btn:hover { background: rgba(0,0,0,.06); }
-        .gmail-logo { display: flex; align-items: center; margin-left: 4px; cursor: pointer; }
-        .gmail-logo img { height: 40px; }
 
-        .topbar-search { flex: 1; max-width: 720px; position: relative; }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            min-width: 238px;
+            padding-left: 4px;
+        }
+
+        .menu-btn,
+        .icon-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: background .15s;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+        }
+
+        .menu-btn:hover,
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, .1);
+        }
+
+        .gmail-logo {
+            display: flex;
+            align-items: center;
+            margin-left: 12px;
+            cursor: pointer;
+            color: #fff;
+        }
+
+        .gmail-logo svg {
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .topbar-search {
+            flex: 1;
+            max-width: 720px;
+            position: relative;
+        }
+
         .search-box {
-            display: flex; align-items: center;
-            background: #eaf1fb; border-radius: 28px;
-            padding: 0 16px; height: 48px;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 0 16px;
+            height: 44px;
             transition: background .2s, box-shadow .2s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .search-box:focus-within { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
-        .search-box .material-icons { color: #5f6368; font-size: 20px; margin-right: 12px; }
+
+        .search-box:focus-within {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box .material-icons {
+            color: #fff;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
         .search-box input {
-            flex: 1; border: none; background: none;
-            font-size: 16px; font-family: 'Roboto', sans-serif;
-            outline: none; color: #202124;
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 15px;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            color: #fff;
         }
-        .search-box input::placeholder { color: #5f6368; }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
 
         .topbar-right {
-            display: flex; align-items: center; margin-left: auto;
-            gap: 4px; padding-right: 8px;
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 4px;
+            padding-right: 8px;
         }
 
         /* ========== AVATAR & PROFILE SWITCHER ========== */
         .avatar-btn {
-            width: 36px; height: 36px; border-radius: 50%;
-            border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: 500; color: #fff;
-            margin-left: 8px; transition: box-shadow .2s;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            margin-left: 8px;
+            transition: box-shadow .2s;
             position: relative;
         }
-        .avatar-btn:hover { box-shadow: 0 0 0 3px rgba(0,0,0,.08); }
+
+        .avatar-btn:hover {
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, .08);
+        }
 
         /* Profile Dropdown Panel */
         .profile-panel-overlay {
-            display: none; position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             z-index: 998;
         }
-        .profile-panel-overlay.open { display: block; }
+
+        .profile-panel-overlay.open {
+            display: block;
+        }
+
         .profile-panel {
-            display: none; position: fixed;
-            top: 60px; right: 12px;
-            width: 360px; max-height: 80vh;
-            background: #fff; border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0,0,0,.18);
-            z-index: 999; overflow: hidden;
+            display: none;
+            position: fixed;
+            top: 60px;
+            right: 12px;
+            width: 360px;
+            max-height: 80vh;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .18);
+            z-index: 999;
+            overflow: hidden;
             flex-direction: column;
         }
-        .profile-panel.open { display: flex; }
+
+        .profile-panel.open {
+            display: flex;
+        }
 
         .profile-panel-header {
             padding: 20px 24px 12px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
         }
+
         .profile-panel-header .current-avatar {
-            width: 80px; height: 80px; border-radius: 50%;
-            margin: 0 auto 12px; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 36px; font-weight: 500; color: #fff;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 500;
+            color: #fff;
         }
+
         .profile-panel-header .current-name {
             font-family: 'Google Sans', sans-serif;
-            font-size: 18px; font-weight: 500; color: #202124;
+            font-size: 18px;
+            font-weight: 500;
+            color: #202124;
         }
+
         .profile-panel-header .current-email {
-            font-size: 13px; color: #5f6368; margin-top: 2px;
+            font-size: 13px;
+            color: #5f6368;
+            margin-top: 2px;
         }
+
         .profile-panel-header .current-segment {
-            display: inline-flex; align-items: center; gap: 6px;
-            margin-top: 8px; padding: 4px 12px;
-            background: #f1f3f4; border-radius: 16px;
-            font-size: 12px; color: #5f6368;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 12px;
+            background: #f1f3f4;
+            border-radius: 16px;
+            font-size: 12px;
+            color: #5f6368;
         }
+
         .current-segment .value-badge {
-            padding: 2px 8px; border-radius: 10px;
-            font-size: 11px; font-weight: 500; color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #fff;
         }
-        .value-badge.high { background: #34a853; }
-        .value-badge.mid { background: #fbbc04; color: #202124; }
-        .value-badge.standard { background: #9aa0a6; }
+
+        .value-badge.high {
+            background: #34a853;
+        }
+
+        .value-badge.mid {
+            background: #fbbc04;
+            color: #202124;
+        }
+
+        .value-badge.standard {
+            background: #9aa0a6;
+        }
 
         /* Search inside panel */
         .profile-search {
             padding: 8px 16px;
             border-bottom: 1px solid #f1f3f4;
         }
+
         .profile-search input {
-            width: 100%; border: 1px solid #dadce0;
-            border-radius: 8px; padding: 8px 12px;
-            font-size: 13px; font-family: 'Roboto', sans-serif;
-            outline: none; transition: border-color .2s;
+            width: 100%;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: 'Roboto', sans-serif;
+            outline: none;
+            transition: border-color .2s;
         }
-        .profile-search input:focus { border-color: #1a73e8; }
+
+        .profile-search input:focus {
+            border-color: #1a73e8;
+        }
 
         /* Filter chips */
         .profile-filters {
-            display: flex; gap: 6px; padding: 8px 16px;
-            overflow-x: auto; flex-wrap: nowrap;
+            display: flex;
+            gap: 6px;
+            padding: 8px 16px;
+            overflow-x: auto;
+            flex-wrap: nowrap;
         }
-        .profile-filters::-webkit-scrollbar { display: none; }
+
+        .profile-filters::-webkit-scrollbar {
+            display: none;
+        }
+
         .filter-chip {
-            padding: 4px 12px; border-radius: 14px;
-            border: 1px solid #dadce0; background: #fff;
-            font-size: 12px; color: #5f6368; cursor: pointer;
-            white-space: nowrap; transition: all .15s;
+            padding: 4px 12px;
+            border-radius: 14px;
+            border: 1px solid #dadce0;
+            background: #fff;
+            font-size: 12px;
+            color: #5f6368;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all .15s;
         }
-        .filter-chip:hover { background: #f1f3f4; }
+
+        .filter-chip:hover {
+            background: #f1f3f4;
+        }
+
         .filter-chip.active {
-            background: #e8f0fe; color: #1a73e8;
+            background: #e8f0fe;
+            color: #1a73e8;
             border-color: #1a73e8;
         }
 
         /* Profile list */
         .profile-list {
-            flex: 1; overflow-y: auto;
+            flex: 1;
+            overflow-y: auto;
             max-height: 380px;
         }
-        .profile-list::-webkit-scrollbar { width: 4px; }
-        .profile-list::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+
+        .profile-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .profile-list::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
 
         .profile-item {
-            display: flex; align-items: center;
-            padding: 10px 16px; cursor: pointer;
-            transition: background .1s; gap: 12px;
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background .1s;
+            gap: 12px;
         }
-        .profile-item:hover { background: #f6f8fc; }
-        .profile-item.active-profile { background: #e8f0fe; }
+
+        .profile-item:hover {
+            background: #f6f8fc;
+        }
+
+        .profile-item.active-profile {
+            background: #e8f0fe;
+        }
+
         .profile-item .pi-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 500; color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
             flex-shrink: 0;
         }
-        .profile-item .pi-info { flex: 1; min-width: 0; }
+
+        .profile-item .pi-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .profile-item .pi-name {
-            font-size: 13px; font-weight: 500; color: #202124;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 13px;
+            font-weight: 500;
+            color: #202124;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
         .profile-item .pi-meta {
-            font-size: 11px; color: #5f6368;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            font-size: 11px;
+            color: #5f6368;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
         .profile-item .pi-segment-tag {
-            font-size: 10px; padding: 2px 8px;
-            border-radius: 10px; background: #f1f3f4;
-            color: #5f6368; white-space: nowrap;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f3f4;
+            color: #5f6368;
+            white-space: nowrap;
         }
 
         .profile-count {
-            padding: 8px 16px; font-size: 12px;
-            color: #5f6368; border-top: 1px solid #f1f3f4;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: #5f6368;
+            border-top: 1px solid #f1f3f4;
             text-align: center;
         }
 
         /* ========== MAIN LAYOUT ========== */
-        .main-container { display: flex; height: calc(100vh - 64px); margin-top: 64px; }
+        .main-container {
+            display: flex;
+            height: calc(100vh - 64px);
+            margin-top: 64px;
+        }
 
         /* ========== SIDEBAR ========== */
         .sidebar {
-            width: 256px; min-width: 256px; background: #fff;
-            overflow-y: auto; padding: 8px 0 8px 8px; border-right: none;
+            width: 256px;
+            min-width: 256px;
+            background: transparent;
+            overflow-y: auto;
+            padding: 16px 0 8px 8px;
+            border-right: none;
         }
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
+
         .compose-btn {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0 24px; height: 56px; border: none; border-radius: 16px;
-            background: #c2e7ff; color: #001d35;
-            font-family: 'Google Sans', sans-serif; font-size: 14px;
-            font-weight: 500; cursor: pointer; margin-bottom: 12px;
-            transition: box-shadow .2s; letter-spacing: .25px;
-            width: fit-content; min-width: 160px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            padding: 0 24px;
+            height: 48px;
+            border: none;
+            border-radius: 4px;
+            background: var(--brand-gold);
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            margin-left: 12px;
+            transition: background .2s, box-shadow .2s;
+            width: fit-content;
+            min-width: 200px;
         }
-        .compose-btn:hover { box-shadow: 0 1px 3px rgba(0,0,0,.15); }
-        .compose-btn .material-icons { font-size: 22px; }
+
+        .compose-btn:hover {
+            background: var(--brand-gold-hover);
+            box-shadow: 0 2px 8px rgba(140, 123, 76, .3);
+        }
+
+        .compose-btn .material-icons {
+            font-size: 20px;
+        }
+
         .nav-item {
-            display: flex; align-items: center;
-            height: 32px; padding: 0 12px 0 24px;
-            border-radius: 0 16px 16px 0; cursor: pointer;
-            font-size: 14px; color: #202124;
-            transition: background .1s; user-select: none;
+            display: flex;
+            align-items: center;
+            height: 36px;
+            padding: 0 12px 0 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 12px 4px 12px;
+            font-size: 14px;
+            color: #5f6368;
+            transition: background .1s, color .1s;
+            user-select: none;
         }
-        .nav-item:hover { background: #e8eaed; }
-        .nav-item.active { background: #d3e3fd; font-weight: 700; }
-        .nav-item .material-icons-outlined, .nav-item .material-icons {
-            font-size: 20px; margin-right: 16px; color: #5f6368;
+
+        .nav-item:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: #202124;
         }
-        .nav-item.active .material-icons-outlined, .nav-item.active .material-icons { color: #202124; }
-        .nav-badge { margin-left: auto; font-size: 12px; font-weight: 700; }
-        .nav-separator { height: 1px; background: #e0e0e0; margin: 8px 24px 8px 0; }
+
+        .nav-item.active {
+            background: rgba(140, 123, 76, 0.1);
+            color: var(--brand-gold);
+            font-weight: 600;
+            border-left: 3px solid var(--brand-gold);
+            padding-left: 21px;
+        }
+
+        .nav-item .material-icons-outlined,
+        .nav-item .material-icons {
+            font-size: 20px;
+            margin-right: 16px;
+            color: inherit;
+        }
+
+        .nav-item.active .material-icons-outlined,
+        .nav-item.active .material-icons {
+            color: var(--brand-gold);
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-separator {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 12px 24px 12px 12px;
+        }
+
         .nav-section-title {
-            padding: 12px 24px 4px; font-size: 12px; font-weight: 500;
-            color: #5f6368; text-transform: uppercase; letter-spacing: .5px;
+            padding: 12px 24px 4px 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         /* ========== PROFILE INFO CARD (sidebar) ========== */
         .sidebar-profile-card {
-            margin: 8px 12px 8px 8px; padding: 12px 16px;
+            margin: 8px 12px 8px 8px;
+            padding: 12px 16px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px; color: #fff;
+            border-radius: 12px;
+            color: #fff;
         }
+
         .sidebar-profile-card .spc-header {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
         }
+
         .sidebar-profile-card .spc-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: 500; color: #fff;
-            border: 2px solid rgba(255,255,255,.3);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, .3);
         }
+
         .sidebar-profile-card .spc-name {
             font-family: 'Google Sans', sans-serif;
-            font-size: 13px; font-weight: 500;
+            font-size: 13px;
+            font-weight: 500;
         }
+
         .sidebar-profile-card .spc-details {
-            display: flex; flex-wrap: wrap; gap: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
         }
+
         .sidebar-profile-card .spc-tag {
-            padding: 2px 8px; border-radius: 8px;
-            font-size: 10px; background: rgba(255,255,255,.15);
-            color: rgba(255,255,255,.9);
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            background: rgba(255, 255, 255, .15);
+            color: rgba(255, 255, 255, .9);
         }
 
         /* ========== EMAIL LIST ========== */
         .email-list-container {
-            flex: 1; display: flex; flex-direction: column;
-            background: #fff; border-radius: 16px;
-            margin: 4px 4px 4px 0; overflow: hidden;
-        }
-        .email-toolbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 4px 16px 4px 8px; border-bottom: 1px solid #e0e0e0;
-            min-height: 48px;
-        }
-        .email-toolbar-left { display: flex; align-items: center; gap: 2px; }
-        .email-toolbar-right {
-            display: flex; align-items: center; gap: 2px;
-            color: #5f6368; font-size: 12px;
-        }
-        .toolbar-btn {
-            width: 36px; height: 36px; border: none; background: none;
-            border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            color: #5f6368; transition: background .15s;
-        }
-        .toolbar-btn:hover { background: rgba(0,0,0,.06); }
-        .toolbar-btn .material-icons, .toolbar-btn .material-icons-outlined { font-size: 20px; }
-        .checkbox-btn {
-            width: 20px; height: 20px; border: 2px solid #5f6368;
-            border-radius: 2px; background: none; cursor: pointer; margin-right: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 16px;
+            margin: 4px 4px 4px 0;
+            overflow: hidden;
         }
 
-        .email-tabs { display: flex; border-bottom: 1px solid #e0e0e0; }
+        .email-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 16px 4px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 48px;
+        }
+
+        .email-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .email-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            color: #5f6368;
+            font-size: 12px;
+        }
+
+        .toolbar-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #5f6368;
+            transition: background .15s;
+        }
+
+        .toolbar-btn:hover {
+            background: rgba(0, 0, 0, .06);
+        }
+
+        .toolbar-btn .material-icons,
+        .toolbar-btn .material-icons-outlined {
+            font-size: 20px;
+        }
+
+        .checkbox-btn {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #5f6368;
+            border-radius: 2px;
+            background: none;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .email-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
         .email-tab {
-            display: flex; align-items: center; gap: 8px;
-            padding: 12px 24px; cursor: pointer;
-            font-size: 14px; font-weight: 500; color: #5f6368;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #5f6368;
             border-bottom: 3px solid transparent;
             transition: color .2s, border .2s;
         }
-        .email-tab:hover { color: #202124; background: #f6f8fc; }
-        .email-tab.active { color: #1a73e8; border-bottom-color: #1a73e8; }
-        .email-tab .material-icons-outlined { font-size: 20px; }
-        .email-tab .tab-badge {
-            background: #1a73e8; color: #fff; font-size: 11px;
-            padding: 1px 6px; border-radius: 8px; font-weight: 700;
+
+        .email-tab:hover {
+            color: #202124;
+            background: #fafafa;
         }
 
-        .email-rows { flex: 1; overflow-y: auto; }
-        .email-rows::-webkit-scrollbar { width: 8px; }
-        .email-rows::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+        .email-tab.active {
+            color: var(--brand-gold);
+            border-bottom-color: var(--brand-gold);
+        }
+
+        .email-tab .material-icons-outlined {
+            font-size: 20px;
+        }
+
+        .email-tab .tab-badge {
+            background: var(--brand-gold);
+            color: #fff;
+            font-size: 11px;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .email-rows {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .email-rows::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .email-rows::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
 
         .email-row {
-            display: flex; align-items: center;
-            height: 40px; padding: 0 16px 0 8px;
-            cursor: pointer; border-bottom: 1px solid #f1f3f4;
-            transition: background .1s; font-size: 14px; position: relative;
+            display: flex;
+            align-items: center;
+            height: 44px;
+            padding: 0 16px 0 8px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f4;
+            transition: background .1s;
+            font-size: 14px;
+            position: relative;
         }
-        .email-row:hover { box-shadow: 0 1px 2px rgba(0,0,0,.08) inset; z-index: 1; }
-        .email-row.unread { background: #fff; font-weight: 700; }
-        .email-row.unread .email-sender { font-weight: 700; }
-        .email-row.read { background: #f2f6fc; }
+
+        .email-row:hover {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04) inset;
+            z-index: 1;
+            background: #fafafa;
+            border-left: 3px solid var(--brand-gold);
+            padding-left: 5px;
+        }
+
+        .email-row.unread {
+            background: #fff;
+            font-weight: 700;
+        }
+
+        .email-row.unread .email-sender {
+            font-weight: 700;
+        }
+
+        .email-row.read {
+            background: #fdfdfd;
+        }
 
         .email-row-checkbox {
-            width: 20px; height: 20px; border: 2px solid #b0b5b9;
-            border-radius: 2px; background: none; cursor: pointer;
-            margin-right: 4px; flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #b0b5b9;
+            border-radius: 2px;
+            background: none;
+            cursor: pointer;
+            margin-right: 4px;
+            flex-shrink: 0;
         }
+
         .email-row-star {
-            width: 36px; height: 36px; border: none; background: none;
-            border-radius: 50%; cursor: pointer; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            color: #dadce0; transition: color .1s;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dadce0;
+            transition: color .1s;
         }
-        .email-row-star:hover { color: #f4b400; }
-        .email-row-star.starred { color: #f4b400; }
-        .email-row-star .material-icons-outlined { font-size: 20px; }
+
+        .email-row-star:hover {
+            color: #f4b400;
+        }
+
+        .email-row-star.starred {
+            color: #f4b400;
+        }
+
+        .email-row-star .material-icons-outlined {
+            font-size: 20px;
+        }
 
         .email-sender {
-            width: 200px; min-width: 200px; font-size: 14px;
-            color: #202124; padding-right: 8px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            width: 200px;
+            min-width: 200px;
+            font-size: 14px;
+            color: #202124;
+            padding-right: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
         .email-content {
-            flex: 1; display: flex; overflow: hidden; padding-right: 8px;
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            padding-right: 8px;
         }
+
         .email-subject {
-            color: #202124; white-space: nowrap;
-            overflow: hidden; text-overflow: ellipsis;
+            color: #202124;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
         .email-snippet {
-            color: #5f6368; font-weight: 400 !important;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: #5f6368;
+            font-weight: 400 !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .email-snippet::before { content: ' — '; }
+
+        .email-snippet::before {
+            content: ' — ';
+        }
+
         .email-date {
-            font-size: 12px; color: #5f6368; white-space: nowrap; flex-shrink: 0;
+            font-size: 12px;
+            color: #5f6368;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
-        .email-row.unread .email-date { color: #202124; font-weight: 700; }
+
+        .email-row.unread .email-date {
+            color: #202124;
+            font-weight: 700;
+        }
+
         .label-tag {
-            display: inline-block; padding: 0 6px; border-radius: 4px;
-            font-size: 11px; font-weight: 500; margin-right: 6px;
-            white-space: nowrap; line-height: 18px;
+            display: inline-block;
+            padding: 0 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-right: 6px;
+            white-space: nowrap;
+            line-height: 18px;
         }
-        .label-tag.post_stay { background: #fff3e0; color: #e65100; }
-        .label-tag.pre_arrival { background: #e8f5e9; color: #1b5e20; }
-        .label-tag.checkin_report { background: #e3f2fd; color: #0d47a1; }
+
+        .label-tag.post_stay {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .label-tag.pre_arrival {
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .label-tag.checkin_report {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
 
         /* ========== EMAIL VIEW ========== */
         .email-view {
-            display: none; flex: 1; flex-direction: column;
-            background: #fff; border-radius: 16px;
-            margin: 4px 4px 4px 0; overflow: hidden;
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            background: #fff;
+            border-radius: 16px;
+            margin: 4px 4px 4px 0;
+            overflow: hidden;
         }
-        .email-view.visible { display: flex; }
-        .email-view-toolbar {
-            display: flex; align-items: center;
-            padding: 4px 16px 4px 8px; border-bottom: 1px solid #e0e0e0;
-            min-height: 48px; gap: 4px;
-        }
-        .email-view-header { padding: 16px 72px; }
-        .email-view-subject {
-            font-size: 22px; font-weight: 400; color: #202124;
-            font-family: 'Google Sans', sans-serif; margin-bottom: 16px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .email-view-meta {
-            display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;
-        }
-        .meta-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            color: #fff; display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: 500; flex-shrink: 0;
-        }
-        .meta-info { flex: 1; }
-        .meta-sender { font-weight: 500; color: #202124; font-size: 14px; }
-        .meta-sender .email-addr { font-weight: 400; color: #5f6368; font-size: 12px; }
-        .meta-to { font-size: 12px; color: #5f6368; margin-top: 2px; }
-        .meta-date {
-            font-size: 12px; color: #5f6368; white-space: nowrap;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .meta-actions { display: flex; gap: 4px; }
-        .meta-actions .toolbar-btn { width: 32px; height: 32px; }
 
-        .email-view-body { flex: 1; overflow-y: auto; padding: 0 72px 32px; }
-        .email-view-body::-webkit-scrollbar { width: 8px; }
-        .email-view-body::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
-        .email-iframe-container { width: 100%; }
-        .email-iframe-container iframe {
-            width: 100%; border: none; min-height: 700px;
+        .email-view.visible {
+            display: flex;
         }
+
+        .email-view-toolbar {
+            display: flex;
+            align-items: center;
+            padding: 4px 16px 4px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 48px;
+            gap: 4px;
+        }
+
+        .email-view-header {
+            padding: 24px 72px 16px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 16px;
+        }
+
+        .email-view-subject {
+            font-size: 28px;
+            font-weight: 400;
+            color: #202124;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .email-view-meta {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .meta-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .meta-info {
+            flex: 1;
+        }
+
+        .meta-sender {
+            font-weight: 500;
+            color: #202124;
+            font-size: 14px;
+        }
+
+        .meta-sender .email-addr {
+            font-weight: 400;
+            color: #5f6368;
+            font-size: 12px;
+        }
+
+        .meta-to {
+            font-size: 12px;
+            color: #5f6368;
+            margin-top: 2px;
+        }
+
+        .meta-date {
+            font-size: 12px;
+            color: #5f6368;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meta-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .meta-actions .toolbar-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        .email-view-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 72px 32px;
+        }
+
+        .email-view-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .email-view-body::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 4px;
+        }
+
+        .email-iframe-container {
+            width: 100%;
+        }
+
+        .email-iframe-container iframe {
+            width: 100%;
+            border: none;
+            min-height: 700px;
+        }
+
         .reply-area {
-            margin: 24px 0; border: 1px solid #dadce0; border-radius: 12px;
-            padding: 16px; cursor: pointer; color: #5f6368; font-size: 14px;
+            margin: 24px 0;
+            border: 1px solid #dadce0;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            color: #5f6368;
+            font-size: 14px;
             transition: box-shadow .2s;
         }
-        .reply-area:hover { box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+
+        .reply-area:hover {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+        }
 
         /* ========== LOADING ========== */
         .loading-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: #fff; z-index: 9999;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 24px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
             transition: opacity .4s;
         }
-        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
-        .loading-spinner {
-            width: 48px; height: 48px;
-            border: 3px solid #e0e0e0; border-top: 3px solid #1a73e8;
-            border-radius: 50%; animation: spin .8s linear infinite;
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #e0e0e0;
+            border-top: 3px solid #1a73e8;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* Notification */
         .notification {
-            position: fixed; bottom: 24px; left: 50%;
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: #323232; color: #fff;
-            padding: 12px 24px; border-radius: 8px; font-size: 14px;
-            z-index: 200; transition: transform .3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+            background: #323232;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 200;
+            transition: transform .3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
         }
-        .notification.show { transform: translateX(-50%) translateY(0); }
+
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
 
         /* Empty state */
         .empty-state {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            flex: 1; color: #5f6368; gap: 16px; padding: 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            color: #5f6368;
+            gap: 16px;
+            padding: 48px;
         }
-        .empty-state .material-icons-outlined { font-size: 64px; color: #dadce0; }
-        .empty-state p { font-size: 16px; text-align: center; max-width: 400px; }
+
+        .empty-state .material-icons-outlined {
+            font-size: 64px;
+            color: #dadce0;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            text-align: center;
+            max-width: 400px;
+        }
 
         /* Profile switch animation */
         @keyframes profileSwitch {
-            0% { opacity: .3; transform: translateY(8px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% {
+                opacity: .3;
+                transform: translateY(8px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .profile-switching .email-rows { animation: profileSwitch .3s ease; }
+
+        .profile-switching .email-rows {
+            animation: profileSwitch .3s ease;
+        }
 
         /* Scrollbar */
-        * { scrollbar-width: thin; scrollbar-color: #dadce0 transparent; }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #dadce0 transparent;
+        }
     </style>
 </head>
+
 <body>
 
-<div class="loading-overlay" id="loading">
-    <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail" height="44"
-         onerror="this.outerHTML='<span style=\'font-family:Google Sans;font-size:28px;color:#5f6368\'>Gmail</span>'">
-    <div class="loading-spinner"></div>
-</div>
-
-<div class="notification" id="notification"></div>
-
-<!-- PROFILE PANEL -->
-<div class="profile-panel-overlay" id="profilePanelOverlay"></div>
-<div class="profile-panel" id="profilePanel">
-    <div class="profile-panel-header">
-        <div class="current-avatar" id="panelAvatar">E</div>
-        <div class="current-name" id="panelName">Seleccionar perfil</div>
-        <div class="current-email" id="panelEmail"></div>
-        <div class="current-segment" id="panelSegment" style="display:none">
-            <span id="panelTravelProfile"></span>
-            <span class="value-badge" id="panelValueBadge"></span>
-        </div>
-    </div>
-    <div class="profile-search">
-        <input type="text" placeholder="Buscar perfil por nombre, segmento, país..." id="profileSearchInput">
-    </div>
-    <div class="profile-filters" id="profileFilters">
-        <div class="filter-chip active" data-filter="all">Todos</div>
-        <div class="filter-chip" data-filter="JOVEN">👤 Joven</div>
-        <div class="filter-chip" data-filter="ADULTO">👨 Adulto</div>
-        <div class="filter-chip" data-filter="SENIOR">👴 Senior</div>
-        <div class="filter-chip" data-filter="LUJO">🏨 Lujo</div>
-        <div class="filter-chip" data-filter="EXPLORADOR_CULTURAL">🏛️ Cultural</div>
-        <div class="filter-chip" data-filter="AVENTURERO">🌍 Aventurero</div>
-        <div class="filter-chip" data-filter="GASTRONOMIA_CIUDAD">🍽️ Gastro</div>
-        <div class="filter-chip" data-filter="HIGH_VALUE">⭐ High Value</div>
-    </div>
-    <div class="profile-list" id="profileList"></div>
-    <div class="profile-count" id="profileCount"></div>
-</div>
-
-<!-- ===== TOPBAR ===== -->
-<header class="topbar">
-    <div class="topbar-left">
-        <button class="menu-btn"><span class="material-icons">menu</span></button>
-        <div class="gmail-logo">
-            <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail" height="40"
-                 onerror="this.outerHTML='<span style=\'font-family:Google Sans;font-size:22px;color:#ea4335;font-weight:500\'>Gmail</span>'">
-        </div>
-    </div>
-    <div class="topbar-search">
-        <div class="search-box">
-            <span class="material-icons">search</span>
-            <input type="text" placeholder="Buscar en el correo" id="searchInput">
-            <button class="toolbar-btn" style="margin-left:4px"><span class="material-icons-outlined">tune</span></button>
-        </div>
-    </div>
-    <div class="topbar-right">
-        <button class="icon-btn"><span class="material-icons-outlined">help_outline</span></button>
-        <button class="icon-btn"><span class="material-icons-outlined">settings</span></button>
-        <button class="icon-btn"><span class="material-icons-outlined">apps</span></button>
-        <button class="avatar-btn" id="avatarBtn" title="Cambiar perfil" style="background:#1a73e8">E</button>
-    </div>
-</header>
-
-<!-- ===== MAIN ===== -->
-<div class="main-container">
-    <nav class="sidebar" id="sidebar">
-        <button class="compose-btn">
-            <span class="material-icons">edit</span> Redactar
-        </button>
-        <!-- Profile card in sidebar -->
-        <div class="sidebar-profile-card" id="sidebarCard" style="display:none">
-            <div class="spc-header">
-                <div class="spc-avatar" id="sidebarAvatar">E</div>
-                <div class="spc-name" id="sidebarName">Demo</div>
-            </div>
-            <div class="spc-details" id="sidebarTags"></div>
-        </div>
-
-        <div class="nav-item active" data-nav="inbox">
-            <span class="material-icons">inbox</span> Recibidos
-            <span class="nav-badge" id="inboxBadge">0</span>
-        </div>
-        <div class="nav-item" data-nav="starred">
-            <span class="material-icons-outlined">star_border</span> Destacados
-        </div>
-        <div class="nav-item" data-nav="snoozed">
-            <span class="material-icons-outlined">access_time</span> Pospuestos
-        </div>
-        <div class="nav-item" data-nav="sent">
-            <span class="material-icons-outlined">send</span> Enviados
-        </div>
-        <div class="nav-item" data-nav="drafts">
-            <span class="material-icons-outlined">insert_drive_file</span> Borradores
-        </div>
-        <div class="nav-separator"></div>
-        <div class="nav-item" data-nav="more">
-            <span class="material-icons-outlined">expand_more</span> Más
-        </div>
-        <div class="nav-separator"></div>
-        <div class="nav-section-title">Etiquetas</div>
-        <div class="nav-item" style="color:#e65100">
-            <span class="material-icons" style="color:#e65100">label</span> Eurostars
-        </div>
-        <div class="nav-item" style="color:#1b5e20">
-            <span class="material-icons" style="color:#1b5e20">label</span> Campañas
-        </div>
-    </nav>
-
-    <!-- EMAIL LIST VIEW -->
-    <div class="email-list-container" id="emailListView">
-        <div class="email-toolbar">
-            <div class="email-toolbar-left">
-                <button class="checkbox-btn"></button>
-                <button class="toolbar-btn"><span class="material-icons-outlined">arrow_drop_down</span></button>
-                <button class="toolbar-btn"><span class="material-icons-outlined">refresh</span></button>
-                <button class="toolbar-btn"><span class="material-icons-outlined">more_vert</span></button>
-            </div>
-            <div class="email-toolbar-right">
-                <span id="emailCount"></span>
-                <button class="toolbar-btn"><span class="material-icons-outlined">chevron_left</span></button>
-                <button class="toolbar-btn"><span class="material-icons-outlined">chevron_right</span></button>
-            </div>
-        </div>
-        <div class="email-tabs">
-            <div class="email-tab active" data-tab="primary">
-                <span class="material-icons-outlined">inbox</span> Principal
-            </div>
-            <div class="email-tab" data-tab="promotions">
-                <span class="material-icons-outlined">local_offer</span> Promociones
-                <span class="tab-badge" id="promosBadge">0</span>
-            </div>
-            <div class="email-tab" data-tab="social">
-                <span class="material-icons-outlined">people</span> Social
-            </div>
-        </div>
-        <div class="email-rows" id="emailRows">
-            <div class="empty-state" id="emptyState">
-                <span class="material-icons-outlined">person_search</span>
-                <p>Selecciona un perfil de cliente haciendo clic en el avatar <strong>arriba a la derecha</strong> para ver sus emails personalizados.</p>
-            </div>
-        </div>
+    <div class="loading-overlay" id="loading">
+        <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r5.png" alt="Gmail"
+            height="44"
+            onerror="this.outerHTML='<span style=\'font-family:Google Sans;font-size:28px;color:#5f6368\'>Gmail</span>'">
+        <div class="loading-spinner"></div>
     </div>
 
-    <!-- EMAIL DETAIL VIEW -->
-    <div class="email-view" id="emailView">
-        <div class="email-view-toolbar">
-            <button class="toolbar-btn" id="backBtn" title="Volver">
-                <span class="material-icons">arrow_back</span>
+    <div class="notification" id="notification"></div>
+
+    <!-- PROFILE PANEL -->
+    <div class="profile-panel-overlay" id="profilePanelOverlay"></div>
+    <div class="profile-panel" id="profilePanel">
+        <div class="profile-panel-header">
+            <div class="current-avatar" id="panelAvatar">E</div>
+            <div class="current-name" id="panelName">Seleccionar perfil</div>
+            <div class="current-email" id="panelEmail"></div>
+            <div class="current-segment" id="panelSegment" style="display:none">
+                <span id="panelTravelProfile"></span>
+                <span class="value-badge" id="panelValueBadge"></span>
+            </div>
+        </div>
+        <div class="profile-search">
+            <input type="text" placeholder="Buscar perfil por nombre, segmento, país..." id="profileSearchInput">
+        </div>
+        <div class="profile-filters" id="profileFilters">
+            <div class="filter-chip active" data-filter="all">Todos</div>
+            <div class="filter-chip" data-filter="JOVEN">👤 Joven</div>
+            <div class="filter-chip" data-filter="ADULTO">👨 Adulto</div>
+            <div class="filter-chip" data-filter="SENIOR">👴 Senior</div>
+            <div class="filter-chip" data-filter="LUJO">🏨 Lujo</div>
+            <div class="filter-chip" data-filter="EXPLORADOR_CULTURAL">🏛️ Cultural</div>
+            <div class="filter-chip" data-filter="AVENTURERO">🌍 Aventurero</div>
+            <div class="filter-chip" data-filter="GASTRONOMIA_CIUDAD">🍽️ Gastro</div>
+            <div class="filter-chip" data-filter="HIGH_VALUE">⭐ High Value</div>
+        </div>
+        <div class="profile-list" id="profileList"></div>
+        <div class="profile-count" id="profileCount"></div>
+    </div>
+
+    <!-- ===== TOPBAR ===== -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="menu-btn"><span class="material-icons">menu</span></button>
+            <div class="gmail-logo">
+                <svg viewBox="0 0 252 68" style="height:28px; width:auto; fill:white;" class="eurostars-logo-svg">
+                    <g>
+                        <path
+                            d="M10.9,32.1h16.9v-1.9H11.1v-13.7h13.1v-1.9h-13.1V2.1h16.7V.2H0c0,.3.1.6.4.8.2.2,1.4.8,1.8,1.4.2.2.6,1,.6,2h0v27.8h8.2Z">
+                        </path>
+                        <path
+                            d="M45.5,32.3c7.8,0,12-4.4,12-11.5V.4h-2.3v19.9c0,4.7-1.9,8.8-7.5,8.8s-7.7-4.1-7.7-8.8V.4h-6.5v20.4c0,7.1,4.1,11.5,12,11.5h0Z">
+                        </path>
+                        <path
+                            d="M79.4,17.3c4.6-1.1,7.6-3.7,7.6-8.1S81.6.4,74.1.4h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6ZM72.8,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
+                        </path>
+                        <path
+                            d="M123.3,16.2C123.3,6.4,117.1,0,107.7,0s-15.6,6.3-15.6,16.2,6.1,16.2,15.6,16.2,15.6-6.4,15.6-16.2ZM99.2,16.1c0-9,2.6-14.3,8.6-14.3s8.5,5.4,8.5,14.4-2.6,14.4-8.5,14.4-8.6-5-8.6-14.5Z">
+                        </path>
+                        <path
+                            d="M147.9,23c0-11-14.5-9.9-14.5-16.6s2.4-4.5,5.2-4.5,5,.8,7,2.6l.9-.8c-1.9-1.9-4.2-3.7-8.3-3.7-6.6,0-10.2,3.3-10.2,8.3,0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4h0Z">
+                        </path>
+                        <polygon
+                            points="172.8 .4 150.2 .4 150.2 2.3 158.4 2.3 158.4 31.9 165.1 31.9 165.1 2.3 172.8 2.3 172.8 .4">
+                        </polygon>
+                        <path
+                            d="M182.8.4l-11.3,31.5h2.2l3.4-9.4h12.7l3,9.5h6.8L189.6.4h-6.8ZM177.8,20.6l6-16.8,5.4,16.8h-11.4Z">
+                        </path>
+                        <path
+                            d="M228.2,9.2c0-6.1-5.4-8.8-12.8-8.8h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6c4.6-1.1,7.6-3.7,7.6-8.1ZM214.1,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
+                        </path>
+                        <path
+                            d="M239.3,6.4c0-3.1,2.4-4.5,5.2-4.5s5,.8,7,2.6l.9-.8C250.5,1.8,248.2,0,244.1,0,237.5,0,233.9,3.3,233.9,8.3c0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4c0-11-14.5-9.9-14.5-16.6h0Z">
+                        </path>
+                    </g>
+                </svg>
+            </div>
+        </div>
+        <div class="topbar-search">
+            <div class="search-box">
+                <span class="material-icons">search</span>
+                <input type="text" placeholder="Buscar en el correo" id="searchInput">
+                <button class="toolbar-btn" style="margin-left:4px"><span
+                        class="material-icons-outlined">tune</span></button>
+            </div>
+        </div>
+        <div class="topbar-right">
+            <button class="icon-btn"><span class="material-icons-outlined">help_outline</span></button>
+            <button class="icon-btn"><span class="material-icons-outlined">settings</span></button>
+            <button class="icon-btn"><span class="material-icons-outlined">apps</span></button>
+            <button class="avatar-btn" id="avatarBtn" title="Cambiar perfil"
+                style="background:var(--brand-gold)">E</button>
+        </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main-container">
+        <nav class="sidebar" id="sidebar">
+            <button class="compose-btn">
+                <span class="material-icons">edit</span> Redactar
             </button>
-            <button class="toolbar-btn"><span class="material-icons-outlined">archive</span></button>
-            <button class="toolbar-btn"><span class="material-icons-outlined">report</span></button>
-            <button class="toolbar-btn"><span class="material-icons-outlined">delete</span></button>
-            <span style="flex:1"></span>
-            <button class="toolbar-btn" id="prevEmailBtn"><span class="material-icons-outlined">chevron_left</span></button>
-            <button class="toolbar-btn" id="nextEmailBtn"><span class="material-icons-outlined">chevron_right</span></button>
-        </div>
-        <div class="email-view-body" id="emailViewBody">
-            <div class="email-view-header">
-                <div class="email-view-subject" id="emailViewSubject"></div>
-                <div class="email-view-meta">
-                    <div class="meta-avatar" id="metaAvatar" style="background:#1a1a2e">E</div>
-                    <div class="meta-info">
-                        <div class="meta-sender">
-                            <span id="metaSender">Eurostars Hotel Company</span>
-                            <span class="email-addr" id="metaEmail">&lt;noreply@eurostarshotels.com&gt;</span>
-                        </div>
-                        <div class="meta-to" id="metaTo">para mí</div>
-                    </div>
-                    <div class="meta-date" id="metaDate"></div>
-                    <div class="meta-actions">
-                        <button class="toolbar-btn"><span class="material-icons-outlined">reply</span></button>
-                        <button class="toolbar-btn"><span class="material-icons-outlined">more_vert</span></button>
-                    </div>
+            <!-- Profile card in sidebar -->
+            <div class="sidebar-profile-card" id="sidebarCard" style="display:none">
+                <div class="spc-header">
+                    <div class="spc-avatar" id="sidebarAvatar">E</div>
+                    <div class="spc-name" id="sidebarName">Demo</div>
+                </div>
+                <div class="spc-details" id="sidebarTags"></div>
+            </div>
+
+            <div class="nav-item active" data-nav="inbox">
+                <span class="material-icons">inbox</span> Recibidos
+                <span class="nav-badge" id="inboxBadge">0</span>
+            </div>
+            <div class="nav-item" data-nav="starred">
+                <span class="material-icons-outlined">star_border</span> Destacados
+            </div>
+            <div class="nav-item" data-nav="snoozed">
+                <span class="material-icons-outlined">access_time</span> Pospuestos
+            </div>
+            <div class="nav-item" data-nav="sent">
+                <span class="material-icons-outlined">send</span> Enviados
+            </div>
+            <div class="nav-item" data-nav="drafts">
+                <span class="material-icons-outlined">insert_drive_file</span> Borradores
+            </div>
+            <div class="nav-separator"></div>
+            <div class="nav-item" data-nav="more">
+                <span class="material-icons-outlined">expand_more</span> Más
+            </div>
+            <div class="nav-separator"></div>
+            <div class="nav-section-title">Etiquetas</div>
+            <div class="nav-item" style="color:#e65100">
+                <span class="material-icons" style="color:#e65100">label</span> Eurostars
+            </div>
+            <div class="nav-item" style="color:#1b5e20">
+                <span class="material-icons" style="color:#1b5e20">label</span> Campañas
+            </div>
+        </nav>
+
+        <!-- EMAIL LIST VIEW -->
+        <div class="email-list-container" id="emailListView">
+            <div class="email-toolbar">
+                <div class="email-toolbar-left">
+                    <button class="checkbox-btn"></button>
+                    <button class="toolbar-btn"><span class="material-icons-outlined">arrow_drop_down</span></button>
+                    <button class="toolbar-btn"><span class="material-icons-outlined">refresh</span></button>
+                    <button class="toolbar-btn"><span class="material-icons-outlined">more_vert</span></button>
+                </div>
+                <div class="email-toolbar-right">
+                    <span id="emailCount"></span>
+                    <button class="toolbar-btn"><span class="material-icons-outlined">chevron_left</span></button>
+                    <button class="toolbar-btn"><span class="material-icons-outlined">chevron_right</span></button>
                 </div>
             </div>
-            <div class="email-iframe-container" id="emailContent"></div>
-            <div class="reply-area">
-                <span class="material-icons-outlined" style="vertical-align:middle;margin-right:8px;">reply</span>
-                Haz clic aquí para responder
+            <div class="email-tabs">
+                <div class="email-tab active" data-tab="primary">
+                    <span class="material-icons-outlined">inbox</span> Principal
+                </div>
+                <div class="email-tab" data-tab="promotions">
+                    <span class="material-icons-outlined">local_offer</span> Promociones
+                    <span class="tab-badge" id="promosBadge">0</span>
+                </div>
+                <div class="email-tab" data-tab="social">
+                    <span class="material-icons-outlined">people</span> Social
+                </div>
+            </div>
+            <div class="email-rows" id="emailRows">
+                <div class="empty-state" id="emptyState">
+                    <span class="material-icons-outlined">person_search</span>
+                    <p>Selecciona un perfil de cliente haciendo clic en el avatar <strong>arriba a la derecha</strong>
+                        para ver sus emails personalizados.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EMAIL DETAIL VIEW -->
+        <div class="email-view" id="emailView">
+            <div class="email-view-toolbar">
+                <button class="toolbar-btn" id="backBtn" title="Volver">
+                    <span class="material-icons">arrow_back</span>
+                </button>
+                <button class="toolbar-btn"><span class="material-icons-outlined">archive</span></button>
+                <button class="toolbar-btn"><span class="material-icons-outlined">report</span></button>
+                <button class="toolbar-btn"><span class="material-icons-outlined">delete</span></button>
+                <span style="flex:1"></span>
+                <button class="toolbar-btn" id="prevEmailBtn"><span
+                        class="material-icons-outlined">chevron_left</span></button>
+                <button class="toolbar-btn" id="nextEmailBtn"><span
+                        class="material-icons-outlined">chevron_right</span></button>
+            </div>
+            <div class="email-view-body" id="emailViewBody">
+                <div class="email-view-header">
+                    <div class="email-view-subject" id="emailViewSubject"></div>
+                    <div class="email-view-meta">
+                        <div class="meta-avatar" id="metaAvatar" style="background:#1a1a2e">E</div>
+                        <div class="meta-info">
+                            <div class="meta-sender">
+                                <span id="metaSender">Eurostars Hotel Company</span>
+                                <span class="email-addr" id="metaEmail">&lt;noreply@eurostarshotels.com&gt;</span>
+                            </div>
+                            <div class="meta-to" id="metaTo">para mí</div>
+                        </div>
+                        <div class="meta-date" id="metaDate"></div>
+                        <div class="meta-actions">
+                            <button class="toolbar-btn"><span class="material-icons-outlined">reply</span></button>
+                            <button class="toolbar-btn"><span class="material-icons-outlined">more_vert</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="email-iframe-container" id="emailContent"></div>
+                <div class="reply-area">
+                    <span class="material-icons-outlined" style="vertical-align:middle;margin-right:8px;">reply</span>
+                    Haz clic aquí para responder
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-// ===== STATE =====
-let allProfiles = [];
-let currentProfile = null;
-let emails = [];
-let currentView = 'list';
-let currentEmailIdx = -1;
-let activeFilter = 'all';
+    <script>
+        // ===== STATE =====
+        let allProfiles = [];
+        let currentProfile = null;
+        let emails = [];
+        let currentView = 'list';
+        let currentEmailIdx = -1;
+        let activeFilter = 'all';
 
-const $ = id => document.getElementById(id);
+        const $ = id => document.getElementById(id);
 
-// ===== DATES =====
-const DATES = ['11 abr', '10 abr', '9 abr', '8 abr', '7 abr'];
-const SENDERS = {
-    post_stay: { name: 'Eurostars Hotel Company', email: 'feedback@eurostarshotels.com' },
-    pre_arrival: { name: 'Eurostars Reservas', email: 'reservas@eurostarshotels.com' },
-    checkin_report: { name: 'Eurostars Check-in', email: 'checkin@eurostarshotels.com' }
-};
-const TYPE_LABELS = {
-    post_stay: 'Post-Stay',
-    pre_arrival: 'Pre-Arrival',
-    checkin_report: 'Check-in'
-};
+        // ===== DATES =====
+        const DATES = ['11 abr', '10 abr', '9 abr', '8 abr', '7 abr'];
+        const SENDERS = {
+            post_stay: { name: 'Eurostars Hotel Company', email: 'feedback@eurostarshotels.com' },
+            pre_arrival: { name: 'Eurostars Reservas', email: 'reservas@eurostarshotels.com' },
+            checkin_report: { name: 'Eurostars Check-in', email: 'checkin@eurostarshotels.com' }
+        };
+        const TYPE_LABELS = {
+            post_stay: 'Post-Stay',
+            pre_arrival: 'Pre-Arrival',
+            checkin_report: 'Check-in'
+        };
 
-function showNotification(msg) {
-    const n = $('notification');
-    n.textContent = msg;
-    n.classList.add('show');
-    setTimeout(() => n.classList.remove('show'), 3000);
-}
+        function showNotification(msg) {
+            const n = $('notification');
+            n.textContent = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
+        }
 
-// ===== LOAD PROFILES =====
-async function loadProfiles() {
-    const res = await fetch('/api/profiles');
-    const data = await res.json();
-    allProfiles = data.profiles;
-    renderProfileList();
-    $('profileCount').textContent = `${allProfiles.length} perfiles disponibles`;
-}
+        // ===== LOAD PROFILES =====
+        async function loadProfiles() {
+            const res = await fetch('/api/profiles');
+            const data = await res.json();
+            allProfiles = data.profiles;
+            renderProfileList();
+            $('profileCount').textContent = `${allProfiles.length} perfiles disponibles`;
+        }
 
-// ===== RENDER PROFILE LIST (panel) =====
-function renderProfileList(search = '', filter = 'all') {
-    const list = $('profileList');
-    list.innerHTML = '';
+        // ===== RENDER PROFILE LIST (panel) =====
+        function renderProfileList(search = '', filter = 'all') {
+            const list = $('profileList');
+            list.innerHTML = '';
 
-    let filtered = allProfiles;
-    if (filter !== 'all') {
-        filtered = filtered.filter(p =>
-            p.age_segment === filter || p.travel_profile === filter || p.client_value === filter
-        );
-    }
-    if (search) {
-        const q = search.toLowerCase();
-        filtered = filtered.filter(p =>
-            p.name.toLowerCase().includes(q) ||
-            p.guest_id.includes(q) ||
-            p.country.toLowerCase().includes(q) ||
-            p.travel_profile.toLowerCase().includes(q) ||
-            p.age_segment.toLowerCase().includes(q) ||
-            p.client_value.toLowerCase().includes(q) ||
-            p.email.toLowerCase().includes(q)
-        );
-    }
+            let filtered = allProfiles;
+            if (filter !== 'all') {
+                filtered = filtered.filter(p =>
+                    p.age_segment === filter || p.travel_profile === filter || p.client_value === filter
+                );
+            }
+            if (search) {
+                const q = search.toLowerCase();
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.guest_id.includes(q) ||
+                    p.country.toLowerCase().includes(q) ||
+                    p.travel_profile.toLowerCase().includes(q) ||
+                    p.age_segment.toLowerCase().includes(q) ||
+                    p.client_value.toLowerCase().includes(q) ||
+                    p.email.toLowerCase().includes(q)
+                );
+            }
 
-    $('profileCount').textContent = `${filtered.length} de ${allProfiles.length} perfiles`;
+            $('profileCount').textContent = `${filtered.length} de ${allProfiles.length} perfiles`;
 
-    filtered.forEach(profile => {
-        const item = document.createElement('div');
-        item.className = `profile-item${currentProfile && currentProfile.guest_id === profile.guest_id ? ' active-profile' : ''}`;
-        item.innerHTML = `
+            filtered.forEach(profile => {
+                const item = document.createElement('div');
+                item.className = `profile-item${currentProfile && currentProfile.guest_id === profile.guest_id ? ' active-profile' : ''}`;
+                item.innerHTML = `
             <div class="pi-avatar" style="background:${profile.avatar_color}">${profile.avatar_letter}</div>
             <div class="pi-info">
                 <div class="pi-name">${profile.country_flag} ${profile.name}</div>
@@ -726,129 +1391,129 @@ function renderProfileList(search = '', filter = 'all') {
             </div>
             <div class="pi-segment-tag">${profile.travel_profile_label}</div>
         `;
-        item.addEventListener('click', () => selectProfile(profile));
-        list.appendChild(item);
-    });
-}
+                item.addEventListener('click', () => selectProfile(profile));
+                list.appendChild(item);
+            });
+        }
 
-// ===== SELECT PROFILE =====
-async function selectProfile(profile) {
-    currentProfile = profile;
-    emails = [];
-    currentEmailIdx = -1;
+        // ===== SELECT PROFILE =====
+        async function selectProfile(profile) {
+            currentProfile = profile;
+            emails = [];
+            currentEmailIdx = -1;
 
-    // Update avatar button
-    const avatarBtn = $('avatarBtn');
-    avatarBtn.style.background = profile.avatar_color;
-    avatarBtn.textContent = profile.avatar_letter;
-    avatarBtn.title = profile.name;
+            // Update avatar button
+            const avatarBtn = $('avatarBtn');
+            avatarBtn.style.background = profile.avatar_color;
+            avatarBtn.textContent = profile.avatar_letter;
+            avatarBtn.title = profile.name;
 
-    // Update panel header
-    $('panelAvatar').style.background = profile.avatar_color;
-    $('panelAvatar').textContent = profile.avatar_letter;
-    $('panelName').textContent = profile.name;
-    $('panelEmail').textContent = profile.email;
-    const segDiv = $('panelSegment');
-    segDiv.style.display = '';
-    $('panelTravelProfile').textContent = `${profile.country_flag} ${profile.age_segment_label} · ${profile.travel_profile_label}`;
-    const vb = $('panelValueBadge');
-    vb.textContent = profile.client_value_label;
-    vb.className = 'value-badge ' + (profile.client_value === 'HIGH_VALUE' ? 'high' : profile.client_value === 'MID_VALUE' ? 'mid' : 'standard');
+            // Update panel header
+            $('panelAvatar').style.background = profile.avatar_color;
+            $('panelAvatar').textContent = profile.avatar_letter;
+            $('panelName').textContent = profile.name;
+            $('panelEmail').textContent = profile.email;
+            const segDiv = $('panelSegment');
+            segDiv.style.display = '';
+            $('panelTravelProfile').textContent = `${profile.country_flag} ${profile.age_segment_label} · ${profile.travel_profile_label}`;
+            const vb = $('panelValueBadge');
+            vb.textContent = profile.client_value_label;
+            vb.className = 'value-badge ' + (profile.client_value === 'HIGH_VALUE' ? 'high' : profile.client_value === 'MID_VALUE' ? 'mid' : 'standard');
 
-    // Update sidebar card
-    const card = $('sidebarCard');
-    card.style.display = '';
-    $('sidebarAvatar').style.background = profile.avatar_color;
-    $('sidebarAvatar').textContent = profile.avatar_letter;
-    $('sidebarName').textContent = profile.name;
-    $('sidebarTags').innerHTML = `
+            // Update sidebar card
+            const card = $('sidebarCard');
+            card.style.display = '';
+            $('sidebarAvatar').style.background = profile.avatar_color;
+            $('sidebarAvatar').textContent = profile.avatar_letter;
+            $('sidebarName').textContent = profile.name;
+            $('sidebarTags').innerHTML = `
         <span class="spc-tag">${profile.country_flag} ${profile.country}</span>
         <span class="spc-tag">${profile.age_segment_label}</span>
         <span class="spc-tag">${profile.travel_profile_label}</span>
         <span class="spc-tag">${profile.client_value_label}</span>
     `;
 
-    // Close panel
-    closeProfilePanel();
+            // Close panel
+            closeProfilePanel();
 
-    // Load emails for this user
-    $('emailListView').classList.add('profile-switching');
-    for (const emailInfo of profile.emails) {
-        try {
-            const res = await fetch(`/api/email/${emailInfo.filename}`);
-            if (!res.ok) continue;
-            const html = await res.text();
-            // Extract preheader
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const phEl = doc.querySelector('div[style*="display: none"], div[style*="display:none"]');
-            const preheader = phEl ? phEl.textContent.trim() : '';
+            // Load emails for this user
+            $('emailListView').classList.add('profile-switching');
+            for (const emailInfo of profile.emails) {
+                try {
+                    const res = await fetch(`/api/email/${emailInfo.filename}`);
+                    if (!res.ok) continue;
+                    const html = await res.text();
+                    // Extract preheader
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const phEl = doc.querySelector('div[style*="display: none"], div[style*="display:none"]');
+                    const preheader = phEl ? phEl.textContent.trim() : '';
 
-            const sender = SENDERS[emailInfo.type] || SENDERS.post_stay;
-            emails.push({
-                filename: emailInfo.filename,
-                subject: emailInfo.subject,
-                snippet: preheader,
-                type: emailInfo.type,
-                typeLabel: TYPE_LABELS[emailInfo.type] || emailInfo.type,
-                html,
-                sender: sender.name,
-                emailAddr: sender.email,
-                hotel: emailInfo.hotel,
-                date: DATES[Math.floor(Math.random() * DATES.length)],
-                time: `${8 + Math.floor(Math.random() * 12)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-                unread: true,
-                starred: false
-            });
-        } catch (e) { console.warn('Error loading', emailInfo.filename, e); }
-    }
+                    const sender = SENDERS[emailInfo.type] || SENDERS.post_stay;
+                    emails.push({
+                        filename: emailInfo.filename,
+                        subject: emailInfo.subject,
+                        snippet: preheader,
+                        type: emailInfo.type,
+                        typeLabel: TYPE_LABELS[emailInfo.type] || emailInfo.type,
+                        html,
+                        sender: sender.name,
+                        emailAddr: sender.email,
+                        hotel: emailInfo.hotel,
+                        date: DATES[Math.floor(Math.random() * DATES.length)],
+                        time: `${8 + Math.floor(Math.random() * 12)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+                        unread: true,
+                        starred: false
+                    });
+                } catch (e) { console.warn('Error loading', emailInfo.filename, e); }
+            }
 
-    // Go back to list view if we were viewing an email
-    if (currentView === 'detail') goBackToList();
-    renderEmailList();
-    setTimeout(() => $('emailListView').classList.remove('profile-switching'), 300);
-    showNotification(`📧 Perfil cargado: ${profile.name} — ${emails.length} email(s)`);
-}
+            // Go back to list view if we were viewing an email
+            if (currentView === 'detail') goBackToList();
+            renderEmailList();
+            setTimeout(() => $('emailListView').classList.remove('profile-switching'), 300);
+            showNotification(`📧 Perfil cargado: ${profile.name} — ${emails.length} email(s)`);
+        }
 
-// ===== RENDER EMAIL LIST =====
-function renderEmailList(filter = '') {
-    const rows = $('emailRows');
-    const empty = $('emptyState');
+        // ===== RENDER EMAIL LIST =====
+        function renderEmailList(filter = '') {
+            const rows = $('emailRows');
+            const empty = $('emptyState');
 
-    // Clear rows
-    Array.from(rows.children).forEach(c => { if (c !== empty) c.remove(); });
+            // Clear rows
+            Array.from(rows.children).forEach(c => { if (c !== empty) c.remove(); });
 
-    let list = emails;
-    if (filter) {
-        const q = filter.toLowerCase();
-        list = list.filter(e =>
-            e.subject.toLowerCase().includes(q) ||
-            e.snippet.toLowerCase().includes(q) ||
-            e.type.toLowerCase().includes(q)
-        );
-    }
+            let list = emails;
+            if (filter) {
+                const q = filter.toLowerCase();
+                list = list.filter(e =>
+                    e.subject.toLowerCase().includes(q) ||
+                    e.snippet.toLowerCase().includes(q) ||
+                    e.type.toLowerCase().includes(q)
+                );
+            }
 
-    $('inboxBadge').textContent = emails.filter(e => e.unread).length || '';
-    $('promosBadge').textContent = emails.length;
-    $('emailCount').textContent = list.length ? `1-${list.length} de ${list.length}` : '';
+            $('inboxBadge').textContent = emails.filter(e => e.unread).length || '';
+            $('promosBadge').textContent = emails.length;
+            $('emailCount').textContent = list.length ? `1-${list.length} de ${list.length}` : '';
 
-    if (!list.length) {
-        empty.style.display = 'flex';
-        if (currentProfile) {
-            empty.innerHTML = `
+            if (!list.length) {
+                empty.style.display = 'flex';
+                if (currentProfile) {
+                    empty.innerHTML = `
                 <span class="material-icons-outlined">mark_email_read</span>
                 <p>No se encontraron emails para "${currentProfile.name}".</p>
             `;
-        }
-        return;
-    }
-    empty.style.display = 'none';
+                }
+                return;
+            }
+            empty.style.display = 'none';
 
-    list.forEach((email, idx) => {
-        const row = document.createElement('div');
-        row.className = `email-row ${email.unread ? 'unread' : 'read'}`;
+            list.forEach((email, idx) => {
+                const row = document.createElement('div');
+                row.className = `email-row ${email.unread ? 'unread' : 'read'}`;
 
-        row.innerHTML = `
+                row.innerHTML = `
             <button class="email-row-checkbox"></button>
             <button class="email-row-star ${email.starred ? 'starred' : ''}">
                 <span class="material-icons-outlined">${email.starred ? 'star' : 'star_border'}</span>
@@ -862,127 +1527,128 @@ function renderEmailList(filter = '') {
             <div class="email-date">${email.date}</div>
         `;
 
-        row.addEventListener('click', (e) => {
-            if (e.target.closest('.email-row-star') || e.target.closest('.email-row-checkbox')) return;
-            openEmail(idx);
-        });
+                row.addEventListener('click', (e) => {
+                    if (e.target.closest('.email-row-star') || e.target.closest('.email-row-checkbox')) return;
+                    openEmail(idx);
+                });
 
-        const starBtn = row.querySelector('.email-row-star');
-        starBtn.addEventListener('click', () => {
-            email.starred = !email.starred;
-            renderEmailList($('searchInput').value);
-        });
+                const starBtn = row.querySelector('.email-row-star');
+                starBtn.addEventListener('click', () => {
+                    email.starred = !email.starred;
+                    renderEmailList($('searchInput').value);
+                });
 
-        rows.appendChild(row);
-    });
-}
+                rows.appendChild(row);
+            });
+        }
 
-// ===== OPEN EMAIL =====
-function openEmail(idx) {
-    const email = emails[idx];
-    if (!email) return;
+        // ===== OPEN EMAIL =====
+        function openEmail(idx) {
+            const email = emails[idx];
+            if (!email) return;
 
-    email.unread = false;
-    currentEmailIdx = idx;
+            email.unread = false;
+            currentEmailIdx = idx;
 
-    $('emailViewSubject').innerHTML = `
+            $('emailViewSubject').innerHTML = `
         ${email.subject}
         <span class="label-tag ${email.type}">${email.typeLabel}</span>
     `;
-    $('metaSender').textContent = email.sender;
-    $('metaEmail').textContent = `<${email.emailAddr}>`;
-    $('metaTo').textContent = currentProfile ? `para ${currentProfile.email}` : 'para mí';
-    $('metaDate').textContent = `${email.date}, ${email.time}`;
+            $('metaSender').textContent = email.sender;
+            $('metaEmail').textContent = `<${email.emailAddr}>`;
+            $('metaTo').textContent = currentProfile ? `para ${currentProfile.email}` : 'para mí';
+            $('metaDate').textContent = `${email.date}, ${email.time}`;
 
-    const container = $('emailContent');
-    container.innerHTML = '';
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%;border:none;min-height:700px;border-radius:4px;';
-    container.appendChild(iframe);
+            const container = $('emailContent');
+            container.innerHTML = '';
+            const iframe = document.createElement('iframe');
+            iframe.style.cssText = 'width:100%;border:none;min-height:700px;border-radius:4px;';
+            container.appendChild(iframe);
 
-    iframe.onload = () => {
-        try { iframe.style.height = (iframe.contentDocument.documentElement.scrollHeight + 32) + 'px'; } catch(e){}
-    };
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open(); doc.write(email.html); doc.close();
+            iframe.onload = () => {
+                try { iframe.style.height = (iframe.contentDocument.documentElement.scrollHeight + 32) + 'px'; } catch (e) { }
+            };
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open(); doc.write(email.html); doc.close();
 
-    $('emailListView').style.display = 'none';
-    $('emailView').classList.add('visible');
-    currentView = 'detail';
-    renderEmailList($('searchInput').value);
-}
+            $('emailListView').style.display = 'none';
+            $('emailView').classList.add('visible');
+            currentView = 'detail';
+            renderEmailList($('searchInput').value);
+        }
 
-function goBackToList() {
-    $('emailView').classList.remove('visible');
-    $('emailListView').style.display = '';
-    currentView = 'list';
-}
+        function goBackToList() {
+            $('emailView').classList.remove('visible');
+            $('emailListView').style.display = '';
+            currentView = 'list';
+        }
 
-// ===== PROFILE PANEL TOGGLE =====
-function openProfilePanel() {
-    $('profilePanel').classList.add('open');
-    $('profilePanelOverlay').classList.add('open');
-    $('profileSearchInput').value = '';
-    $('profileSearchInput').focus();
-    renderProfileList();
-}
-function closeProfilePanel() {
-    $('profilePanel').classList.remove('open');
-    $('profilePanelOverlay').classList.remove('open');
-}
+        // ===== PROFILE PANEL TOGGLE =====
+        function openProfilePanel() {
+            $('profilePanel').classList.add('open');
+            $('profilePanelOverlay').classList.add('open');
+            $('profileSearchInput').value = '';
+            $('profileSearchInput').focus();
+            renderProfileList();
+        }
+        function closeProfilePanel() {
+            $('profilePanel').classList.remove('open');
+            $('profilePanelOverlay').classList.remove('open');
+        }
 
-// ===== EVENT LISTENERS =====
-$('avatarBtn').addEventListener('click', () => {
-    $('profilePanel').classList.contains('open') ? closeProfilePanel() : openProfilePanel();
-});
-$('profilePanelOverlay').addEventListener('click', closeProfilePanel);
-$('backBtn').addEventListener('click', goBackToList);
+        // ===== EVENT LISTENERS =====
+        $('avatarBtn').addEventListener('click', () => {
+            $('profilePanel').classList.contains('open') ? closeProfilePanel() : openProfilePanel();
+        });
+        $('profilePanelOverlay').addEventListener('click', closeProfilePanel);
+        $('backBtn').addEventListener('click', goBackToList);
 
-$('profileSearchInput').addEventListener('input', (e) => {
-    renderProfileList(e.target.value, activeFilter);
-});
+        $('profileSearchInput').addEventListener('input', (e) => {
+            renderProfileList(e.target.value, activeFilter);
+        });
 
-// Filter chips
-document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        activeFilter = chip.dataset.filter;
-        renderProfileList($('profileSearchInput').value, activeFilter);
-    });
-});
+        // Filter chips
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeFilter = chip.dataset.filter;
+                renderProfileList($('profileSearchInput').value, activeFilter);
+            });
+        });
 
-$('searchInput').addEventListener('input', () => {
-    if (currentView === 'detail') goBackToList();
-    renderEmailList($('searchInput').value);
-});
+        $('searchInput').addEventListener('input', () => {
+            if (currentView === 'detail') goBackToList();
+            renderEmailList($('searchInput').value);
+        });
 
-// Navigate between emails
-$('prevEmailBtn').addEventListener('click', () => {
-    if (currentEmailIdx > 0) openEmail(currentEmailIdx - 1);
-});
-$('nextEmailBtn').addEventListener('click', () => {
-    if (currentEmailIdx < emails.length - 1) openEmail(currentEmailIdx + 1);
-});
+        // Navigate between emails
+        $('prevEmailBtn').addEventListener('click', () => {
+            if (currentEmailIdx > 0) openEmail(currentEmailIdx - 1);
+        });
+        $('nextEmailBtn').addEventListener('click', () => {
+            if (currentEmailIdx < emails.length - 1) openEmail(currentEmailIdx + 1);
+        });
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        if ($('profilePanel').classList.contains('open')) closeProfilePanel();
-        else if (currentView === 'detail') goBackToList();
-    }
-    if (currentView === 'detail') {
-        if (e.key === 'ArrowLeft' && currentEmailIdx > 0) openEmail(currentEmailIdx - 1);
-        if (e.key === 'ArrowRight' && currentEmailIdx < emails.length - 1) openEmail(currentEmailIdx + 1);
-    }
-});
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if ($('profilePanel').classList.contains('open')) closeProfilePanel();
+                else if (currentView === 'detail') goBackToList();
+            }
+            if (currentView === 'detail') {
+                if (e.key === 'ArrowLeft' && currentEmailIdx > 0) openEmail(currentEmailIdx - 1);
+                if (e.key === 'ArrowRight' && currentEmailIdx < emails.length - 1) openEmail(currentEmailIdx + 1);
+            }
+        });
 
-// ===== INIT =====
-async function init() {
-    await loadProfiles();
-    setTimeout(() => $('loading').classList.add('hidden'), 500);
-}
+        // ===== INIT =====
+        async function init() {
+            await loadProfiles();
+            setTimeout(() => $('loading').classList.add('hidden'), 500);
+        }
 
-init();
-</script>
+        init();
+    </script>
 </body>
+
 </html>

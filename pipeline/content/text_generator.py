@@ -2,7 +2,7 @@
 """
 text_generator.py — Phase 5: AI Text Generation
 
-Generates email copy using the Google AI Studio API (Gemini).
+Generates email copy using the OpenAI API.
 Falls back to structured mock copy in dry-run mode.
 Produces structured JSON output: subject, preheader, headline, body, CTA, etc.
 """
@@ -34,7 +34,45 @@ logging.basicConfig(
 logger = logging.getLogger("text_generator")
 
 # ── Model config ─────────────────────────────────────────────────────────────
-GOOGLE_AI_MODEL = "gemini-2.5-flash"
+OPENAI_EMAIL_MODEL = os.environ.get("OPENAI_EMAIL_MODEL", "gpt-5.4-nano")
+OPENAI_EMAIL_MAX_OUTPUT_TOKENS = int(
+    os.environ.get("OPENAI_EMAIL_MAX_OUTPUT_TOKENS", "320")
+)
+
+EMAIL_COPY_SCHEMA = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "email_copy",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "subject": {"type": "string"},
+                "preheader": {"type": "string"},
+                "headline": {"type": "string"},
+                "subheadline": {"type": "string"},
+                "body_paragraphs": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                },
+                "cta_text": {"type": "string"},
+                "cta_url_suffix": {"type": "string"},
+                "ps_line": {"type": "string"},
+            },
+            "required": [
+                "subject",
+                "preheader",
+                "headline",
+                "subheadline",
+                "body_paragraphs",
+                "cta_text",
+                "cta_url_suffix",
+                "ps_line",
+            ],
+            "additionalProperties": False,
+        },
+    },
+}
 
 # ── Tone instructions by age segment ─────────────────────────────────────
 
@@ -314,58 +352,50 @@ def _default_copy() -> dict:
     }
 
 
-# ── Output helpers ────────────────────────────────────────────────────────────
-
-def _print_api_banner(model: str, guest_id: str, moment: str) -> None:
-    """Print a clear, visible banner indicating the API call details."""
-    width = 70
-    print("\n" + "═" * width)
-    print(f"  🤖  GOOGLE AI STUDIO  ·  {model}")
-    print(f"  Guest: {guest_id}   ·   Moment: {moment}")
-    print("═" * width)
-
-
-def _print_result_banner(copy: dict, source: str) -> None:
-    """Print generated copy in a readable, structured format."""
-    width = 70
-    tag = "✅ API" if source == "api" else "🔶 MOCK"
-    print(f"\n{'─' * width}")
-    print(f"  {tag}  Generated Email Copy")
-    print(f"{'─' * width}")
-    print(f"  Subject    : {copy.get('subject', '')}")
-    print(f"  Preheader  : {copy.get('preheader', '')}")
-    print(f"  Headline   : {copy.get('headline', '')}")
-    print(f"  Subheadline: {copy.get('subheadline', '')}")
-    for i, p in enumerate(copy.get("body_paragraphs", []), 1):
-        print(f"  Body [{i}]    : {p[:120]}{'…' if len(p) > 120 else ''}")
-    print(f"  CTA        : {copy.get('cta_text', '')}")
-    if copy.get("ps_line"):
-        print(f"  P.S.       : {copy.get('ps_line', '')}")
-    print(f"{'─' * width}\n")
-
-
-# ── Google AI Studio API call ─────────────────────────────────────────────────
-
-def _call_google_ai(prompt: str) -> dict:
-    """Call the Google AI Studio API and return parsed JSON copy."""
-    from google import genai  # pip install google-genai
-
-    api_key = os.environ.get("GOOGLE_AI_API_KEY", "")
-    client = genai.Client(api_key=api_key)
-
-    response = client.models.generate_content(
-        model=GOOGLE_AI_MODEL,
-        contents=prompt,
+def _log_generation_source(source: str, guest_id: str, moment: str) -> None:
+    """Keep generation diagnostics off stdout while preserving traceability."""
+    logger.debug(
+        "Generated email copy via %s for guest=%s moment=%s",
+        source,
+        guest_id,
+        moment,
     )
 
-    raw = response.text.strip()
-    # Strip optional ```json ... ``` fences
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
 
+def _call_openai(prompt: str) -> dict:
+    """Call the OpenAI API and return parsed JSON copy."""
+    from openai import OpenAI
+
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    client = OpenAI(api_key=api_key)
+    request = {
+        "model": OPENAI_EMAIL_MODEL,
+        "messages": [
+            {
+                "role": "system",
+                "content": (
+                    "Eres un copywriter de alto rendimiento para emails de Eurostars. "
+                    "Responde solo con JSON válido y conciso."
+                ),
+            },
+            {"role": "user", "content": prompt},
+        ],
+        "response_format": EMAIL_COPY_SCHEMA,
+        "max_completion_tokens": OPENAI_EMAIL_MAX_OUTPUT_TOKENS,
+    }
+
+    try:
+        response = client.chat.completions.create(**request)
+    except TypeError:
+        request.pop("max_completion_tokens", None)
+        response = client.chat.completions.create(**request)
+
+    message = response.choices[0].message
+    refusal = getattr(message, "refusal", None)
+    if refusal:
+        raise ValueError(f"OpenAI refusal: {refusal}")
+
+    raw = message.content or "{}"
     return json.loads(raw)
 
 
@@ -373,7 +403,7 @@ def generate_copy(
     campaign_data: dict,
     moment: str,
     dry_run: bool = True,
-    verbose: bool = True,
+    verbose: bool = False,
 ) -> dict:
     """
     Generate email copy for a campaign.
@@ -387,7 +417,7 @@ def generate_copy(
     dry_run : bool
         If True, skips the API call and returns deterministic mock copy.
     verbose : bool
-        If True, prints a visible banner with source and result details.
+        Deprecated flag kept for backward compatibility.
 
     Returns
     -------
@@ -399,41 +429,33 @@ def generate_copy(
     if dry_run:
         copy = _mock_copy(campaign_data, moment)
         if verbose:
-            _print_result_banner(copy, source="mock")
+            _log_generation_source("mock", guest_id, moment)
         return copy
 
     # ── Validate API key ──────────────────────────────────────────────────
-    api_key = os.environ.get("GOOGLE_AI_API_KEY", "")
-    if not api_key or "XXXXX" in api_key:
-        print(
-            "\n⚠️  GOOGLE_AI_API_KEY no configurada o es un placeholder.\n"
-            "   Edita el archivo .env con tu clave real de https://aistudio.google.com/app/apikey\n"
-            "   Usando mock copy como fallback.\n",
-            file=sys.stderr,
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key or api_key.startswith("sk-xxxxx"):
+        logger.warning(
+            "OPENAI_API_KEY no configurada o es un placeholder; usando mock copy."
         )
         copy = _mock_copy(campaign_data, moment)
         if verbose:
-            _print_result_banner(copy, source="mock")
+            _log_generation_source("mock", guest_id, moment)
         return copy
-
-    # ── Real API call ─────────────────────────────────────────────────────
-    if verbose:
-        _print_api_banner(GOOGLE_AI_MODEL, guest_id, moment)
 
     prompt = _build_prompt(campaign_data, moment)
 
     try:
-        copy = _call_google_ai(prompt)
+        copy = _call_openai(prompt)
         if verbose:
-            _print_result_banner(copy, source="api")
+            _log_generation_source(f"openai:{OPENAI_EMAIL_MODEL}", guest_id, moment)
         return copy
 
     except Exception as exc:
-        print(f"\n❌  API call failed: {exc}\n   Usando mock copy como fallback.\n",
-              file=sys.stderr)
+        logger.warning("OpenAI email generation failed: %s. Using mock copy.", exc)
         copy = _mock_copy(campaign_data, moment)
         if verbose:
-            _print_result_banner(copy, source="mock")
+            _log_generation_source("mock", guest_id, moment)
         return copy
 
 
@@ -467,13 +489,20 @@ def main():
 
     results = campaign_engine.generate_all("pre_arrival", "1014907189")
     if not results:
-        print("No campaign results returned.", file=sys.stderr)
+        logger.warning("No campaign results returned.")
         return
 
     copy = generate_copy(results[0], "pre_arrival", dry_run=dry_run, verbose=True)
-    # Also dump raw JSON for programmatic inspection
-    print(json.dumps(copy, indent=2, ensure_ascii=False))
-    print(f"\nSMS: {generate_sms(results[0])}")
+    sms = generate_sms(results[0])
+    logger.info(
+        "Generated sample assets for guest %s using model %s",
+        results[0].get("guest_id", "?"),
+        OPENAI_EMAIL_MODEL if not dry_run else "mock",
+    )
+    logger.debug("Sample copy: %s", json.dumps(copy, ensure_ascii=False))
+    logger.debug("Sample sms: %s", sms)
+    # print(json.dumps(copy, indent=2, ensure_ascii=False))
+    # print(f"\nSMS: {sms}")
 
 
 if __name__ == "__main__":

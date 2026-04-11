@@ -12,6 +12,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 
 try:
     from dotenv import load_dotenv
@@ -32,6 +33,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
 )
 logger = logging.getLogger("send_campaign")
+_LOG_LOCK = Lock()
 
 def _load_log() -> list[dict]:
     """Load existing campaign log."""
@@ -162,9 +164,10 @@ def send_campaign(
             log_entry["status"] = "push_mock_sent"
 
     # Append to campaign log
-    log = _load_log()
-    log.append(log_entry)
-    _save_log(log)
+    with _LOG_LOCK:
+        log = _load_log()
+        log.append(log_entry)
+        _save_log(log)
 
     return log_entry
 

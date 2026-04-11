@@ -13,9 +13,11 @@ Runs the complete pipeline or individual phases:
 """
 
 import argparse
+import os
 import json
 import logging
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -29,6 +31,19 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
 )
 logger = logging.getLogger("main")
+
+
+def _campaign_worker_count(total_campaigns: int) -> int:
+    """Choose a bounded thread count for mostly I/O-bound campaign work."""
+    configured = os.environ.get("CAMPAIGN_MAX_WORKERS")
+    if configured:
+        try:
+            return max(1, min(total_campaigns, int(configured)))
+        except ValueError:
+            logger.warning("Invalid CAMPAIGN_MAX_WORKERS=%s; using default.", configured)
+
+    default_workers = max(4, (os.cpu_count() or 2) * 2)
+    return max(1, min(total_campaigns, default_workers))
 
 
 def phase_embeddings():
@@ -108,49 +123,80 @@ def phase_campaign(moment: str, guest_id: str | None = None, dry_run: bool = Tru
 
     logger.info("Generated %d campaign(s)", len(campaigns))
 
-    results = []
-    for i, camp in enumerate(campaigns):
+    def process_campaign(index: int, camp: dict) -> tuple[int, dict]:
         gid = camp.get("guest_id", "?")
         seg = camp.get("segment", {})
 
-        if moment == "checkin_report":
-            # Step 6: Render receptionist report (no text gen / images needed)
-            logger.info("[%d/%d] Rendering checkin report for %s...",
-                        i + 1, len(campaigns), gid)
-            html = email_renderer.render_email(camp, {}, [], moment)
-            copy = {"subject": f"Informe de Recepción — Guest #{gid}"}
-            channel = {"primary_channel": "internal_report", "reason": "Informe interno"}
-            sms_text = ""
-        else:
-            # Step 4: Select images
-            logger.info("[%d/%d] Processing guest %s (%s)...",
-                        i + 1, len(campaigns), gid, seg.get("age_segment", "?"))
-            hotel = camp.get("recommended_hotel", camp.get("last_stay", {}))
-            hotel_id = hotel.get("id", hotel.get("hotel_id", ""))
-            user_emb = embeddings["user_embeddings"].get(str(gid), {})
+        try:
+            if moment == "checkin_report":
+                logger.info(
+                    "[%d/%d] Rendering checkin report for %s...",
+                    index + 1,
+                    len(campaigns),
+                    gid,
+                )
+                html = email_renderer.render_email(camp, {}, [], moment)
+                copy = {"subject": f"Informe de Recepción — Guest #{gid}"}
+                channel = {
+                    "primary_channel": "internal_report",
+                    "reason": "Informe interno",
+                }
+                sms_text = ""
+            else:
+                logger.info(
+                    "[%d/%d] Processing guest %s (%s)...",
+                    index + 1,
+                    len(campaigns),
+                    gid,
+                    seg.get("age_segment", "?"),
+                )
+                hotel = camp.get("recommended_hotel", camp.get("last_stay", {}))
+                hotel_id = hotel.get("id", hotel.get("hotel_id", ""))
+                user_emb = embeddings["user_embeddings"].get(str(gid), {})
 
-            images_data = image_selector.select_images(hotel_id, user_emb, seg)
-            image_paths = [img["path"] for img in images_data]
+                images_data = image_selector.select_images(hotel_id, user_emb, seg)
+                image_paths = [img["path"] for img in images_data]
+                copy = text_generator.generate_copy(camp, moment, dry_run=dry_run)
+                html = email_renderer.render_email(camp, copy, image_paths, moment)
+                channel = channel_selector.select_channel(seg, camp)
+                sms_text = ""
+                if channel["primary_channel"] == "sms":
+                    sms_text = text_generator.generate_sms(camp, dry_run=dry_run)
 
-            # Step 5: Generate text
-            copy = text_generator.generate_copy(camp, moment, dry_run=dry_run)
+            result = send_campaign.send_campaign(
+                camp, html, copy, channel, sms_text, dry_run=dry_run
+            )
+            return index, result
+        except Exception as exc:
+            logger.exception(
+                "Campaign processing failed for guest %s (%s): %s",
+                gid,
+                moment,
+                exc,
+            )
+            return index, {
+                "guest_id": gid,
+                "campaign_type": moment,
+                "status": "processing_failed",
+                "dry_run": dry_run,
+                "error": str(exc),
+            }
 
-            # Step 6: Render email
-            html = email_renderer.render_email(camp, copy, image_paths, moment)
+    results = [None] * len(campaigns)
+    max_workers = _campaign_worker_count(len(campaigns))
+    logger.info("Processing %d campaign(s) with %d worker thread(s)", len(campaigns), max_workers)
 
-            # Step 7: Select channel
-            channel = channel_selector.select_channel(seg, camp)
-
-            # Generate SMS if needed
-            sms_text = ""
-            if channel["primary_channel"] == "sms":
-                sms_text = text_generator.generate_sms(camp, dry_run=dry_run)
-
-        # Step 8: Send or save
-        result = send_campaign.send_campaign(
-            camp, html, copy, channel, sms_text, dry_run=dry_run
-        )
-        results.append(result)
+    with ThreadPoolExecutor(
+        max_workers=max_workers,
+        thread_name_prefix=f"campaign-{moment}",
+    ) as executor:
+        futures = [
+            executor.submit(process_campaign, index, camp)
+            for index, camp in enumerate(campaigns)
+        ]
+        for future in as_completed(futures):
+            index, result = future.result()
+            results[index] = result
 
     # Summary
     logger.info("-" * 60)
