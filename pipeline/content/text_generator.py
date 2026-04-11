@@ -2,7 +2,8 @@
 """
 text_generator.py — Phase 5: AI Text Generation
 
-Generates email copy using Anthropic Claude API (or mock copy in dry-run mode).
+Generates email copy using the Google AI Studio API (Gemini).
+Falls back to structured mock copy in dry-run mode.
 Produces structured JSON output: subject, preheader, headline, body, CTA, etc.
 """
 
@@ -24,11 +25,16 @@ except ModuleNotFoundError:
 
 load_dotenv()
 
+# ── Logging — only WARNING+ to stderr to avoid polluting stdout output ───────
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    stream=sys.stderr,
 )
 logger = logging.getLogger("text_generator")
+
+# ── Model config ─────────────────────────────────────────────────────────────
+GOOGLE_AI_MODEL = "gemini-2.5-flash"
 
 # ── Tone instructions by age segment ─────────────────────────────────────
 
@@ -308,44 +314,127 @@ def _default_copy() -> dict:
     }
 
 
-def generate_copy(campaign_data: dict, moment: str, dry_run: bool = True) -> dict:
+# ── Output helpers ────────────────────────────────────────────────────────────
+
+def _print_api_banner(model: str, guest_id: str, moment: str) -> None:
+    """Print a clear, visible banner indicating the API call details."""
+    width = 70
+    print("\n" + "═" * width)
+    print(f"  🤖  GOOGLE AI STUDIO  ·  {model}")
+    print(f"  Guest: {guest_id}   ·   Moment: {moment}")
+    print("═" * width)
+
+
+def _print_result_banner(copy: dict, source: str) -> None:
+    """Print generated copy in a readable, structured format."""
+    width = 70
+    tag = "✅ API" if source == "api" else "🔶 MOCK"
+    print(f"\n{'─' * width}")
+    print(f"  {tag}  Generated Email Copy")
+    print(f"{'─' * width}")
+    print(f"  Subject    : {copy.get('subject', '')}")
+    print(f"  Preheader  : {copy.get('preheader', '')}")
+    print(f"  Headline   : {copy.get('headline', '')}")
+    print(f"  Subheadline: {copy.get('subheadline', '')}")
+    for i, p in enumerate(copy.get("body_paragraphs", []), 1):
+        print(f"  Body [{i}]    : {p[:120]}{'…' if len(p) > 120 else ''}")
+    print(f"  CTA        : {copy.get('cta_text', '')}")
+    if copy.get("ps_line"):
+        print(f"  P.S.       : {copy.get('ps_line', '')}")
+    print(f"{'─' * width}\n")
+
+
+# ── Google AI Studio API call ─────────────────────────────────────────────────
+
+def _call_google_ai(prompt: str) -> dict:
+    """Call the Google AI Studio API and return parsed JSON copy."""
+    from google import genai  # pip install google-genai
+
+    api_key = os.environ.get("GOOGLE_AI_API_KEY", "")
+    client = genai.Client(api_key=api_key)
+
+    response = client.models.generate_content(
+        model=GOOGLE_AI_MODEL,
+        contents=prompt,
+    )
+
+    raw = response.text.strip()
+    # Strip optional ```json ... ``` fences
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
+
+    return json.loads(raw)
+
+
+def generate_copy(
+    campaign_data: dict,
+    moment: str,
+    dry_run: bool = True,
+    verbose: bool = True,
+) -> dict:
     """
     Generate email copy for a campaign.
-    Uses Anthropic API if available, otherwise returns mock copy.
-    """
-    if dry_run:
-        logger.info("Dry-run mode — using mock copy for guest %s",
-                     campaign_data.get("guest_id", "?"))
-        return _mock_copy(campaign_data, moment)
 
-    # Real API call
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key or api_key.startswith("sk-ant-xxxxx"):
-        logger.warning("No valid ANTHROPIC_API_KEY — falling back to mock copy")
-        return _mock_copy(campaign_data, moment)
+    Parameters
+    ----------
+    campaign_data : dict
+        Campaign payload as produced by campaign_engine.
+    moment : str
+        'pre_arrival' or 'post_stay'.
+    dry_run : bool
+        If True, skips the API call and returns deterministic mock copy.
+    verbose : bool
+        If True, prints a visible banner with source and result details.
+
+    Returns
+    -------
+    dict
+        Structured email copy.
+    """
+    guest_id = str(campaign_data.get("guest_id", "?"))
+
+    if dry_run:
+        copy = _mock_copy(campaign_data, moment)
+        if verbose:
+            _print_result_banner(copy, source="mock")
+        return copy
+
+    # ── Validate API key ──────────────────────────────────────────────────
+    api_key = os.environ.get("GOOGLE_AI_API_KEY", "")
+    if not api_key or "XXXXX" in api_key:
+        print(
+            "\n⚠️  GOOGLE_AI_API_KEY no configurada o es un placeholder.\n"
+            "   Edita el archivo .env con tu clave real de https://aistudio.google.com/app/apikey\n"
+            "   Usando mock copy como fallback.\n",
+            file=sys.stderr,
+        )
+        copy = _mock_copy(campaign_data, moment)
+        if verbose:
+            _print_result_banner(copy, source="mock")
+        return copy
+
+    # ── Real API call ─────────────────────────────────────────────────────
+    if verbose:
+        _print_api_banner(GOOGLE_AI_MODEL, guest_id, moment)
+
+    prompt = _build_prompt(campaign_data, moment)
 
     try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        prompt = _build_prompt(campaign_data, moment)
+        copy = _call_google_ai(prompt)
+        if verbose:
+            _print_result_banner(copy, source="api")
+        return copy
 
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt}],
-        )
-
-        response_text = message.content[0].text.strip()
-        # Parse JSON from response
-        if response_text.startswith("```"):
-            response_text = response_text.split("```")[1]
-            if response_text.startswith("json"):
-                response_text = response_text[4:]
-        return json.loads(response_text)
-
-    except Exception as e:
-        logger.error("API call failed: %s — using mock copy", e)
-        return _mock_copy(campaign_data, moment)
+    except Exception as exc:
+        print(f"\n❌  API call failed: {exc}\n   Usando mock copy como fallback.\n",
+              file=sys.stderr)
+        copy = _mock_copy(campaign_data, moment)
+        if verbose:
+            _print_result_banner(copy, source="mock")
+        return copy
 
 
 def generate_sms(campaign_data: dict, dry_run: bool = True) -> str:
@@ -368,12 +457,23 @@ def generate_sms(campaign_data: dict, dry_run: bool = True) -> str:
 
 
 def main():
+    """
+    Quick sanity-check: generates one pre-arrival copy using the real API
+    (set DRY_RUN=1 to force mock mode).
+    """
+    dry_run = os.environ.get("DRY_RUN", "0") == "1"
+
     from pipeline.campaigns import campaign_engine
+
     results = campaign_engine.generate_all("pre_arrival", "1014907189")
-    if results:
-        copy = generate_copy(results[0], "pre_arrival", dry_run=True)
-        print(json.dumps(copy, indent=2, ensure_ascii=False))
-        print(f"\nSMS: {generate_sms(results[0])}")
+    if not results:
+        print("No campaign results returned.", file=sys.stderr)
+        return
+
+    copy = generate_copy(results[0], "pre_arrival", dry_run=dry_run, verbose=True)
+    # Also dump raw JSON for programmatic inspection
+    print(json.dumps(copy, indent=2, ensure_ascii=False))
+    print(f"\nSMS: {generate_sms(results[0])}")
 
 
 if __name__ == "__main__":
