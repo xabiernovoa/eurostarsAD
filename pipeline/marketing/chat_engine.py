@@ -368,143 +368,256 @@ def _anthropic_reply(message: str, history: list[dict], dashboard: dict) -> str 
 # ── Campaign Proposal Generator ──────────────────────────────
 
 def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
-    """Generate structured campaign proposals from dashboard data."""
+    """Generate diverse campaign proposals across all marketing channels."""
     segments = dashboard.get("segment_cards", [])
     context = dashboard.get("context", {})
     kpis = dashboard.get("kpis", {})
     focus_cities = dashboard.get("focus_cities", [])
-    perf_moment = dashboard.get("performance_by_moment", [])
-    perf_profile = dashboard.get("performance_by_profile", [])
     external = context.get("external_signals", [])
     reception = context.get("reception_notes", [])
+    perf_profile = dashboard.get("performance_by_profile", [])
 
     proposals = []
+    city1 = focus_cities[0] if focus_cities else "destino principal"
+    city2 = focus_cities[1] if len(focus_cities) >= 2 else "destino secundario"
+    top_seg = segments[0] if segments else {}
+    cultural_seg = next((s for s in segments if "CULTURAL" in s.get("travel_profile", "")), segments[0] if segments else {})
+    gastro_seg = next((s for s in segments if "GASTRO" in s.get("travel_profile", "")), segments[0] if segments else {})
 
-    # 1. High-engagement segment campaign
+    # ── 1. RRSS: Serie de contenido ──────────────────────────
+    proposals.append({
+        "id": "camp-001",
+        "category": "rrss",
+        "category_label": "Redes sociales",
+        "name": f"Serie «Vive como un local» — {city1}",
+        "objective": "Awareness orgánico y tráfico a web de reserva directa",
+        "segment": cultural_seg.get("segment_label", "CULTURAL"),
+        "segment_users": cultural_seg.get("users", 0),
+        "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
+        "channel": "Instagram + TikTok",
+        "campaign_type": "contenido_rrss",
+        "timing": "4 semanas · 3 piezas/semana",
+        "estimated_engagement": 0.74,
+        "subject_line": "Descubre el barrio como un vecino",
+        "preview_text": "Formato: Reels 30-60s y carruseles con rutas de barrio, restaurantes locales y detrás de cámaras del hotel.",
+        "body_summary": (
+            f"Serie de contenido visual para Instagram Reels y TikTok centrada en la vida local de {city1}. "
+            f"3 pilares de contenido: 1) Ruta a pie por el barrio del hotel (60s), 2) Restaurante local con plato estrella (30s), "
+            f"3) Behind-the-scenes del hotel: rooftop, cocina, preparación de habitación premium. "
+            f"Cada pieza incluye CTA en bio hacia landing de reserva directa. Colaborar con micro-influencer local (5K-20K seguidores) para la serie."
+        ),
+        "deliverables": "12 Reels, 4 carruseles, 1 highlight permanente, 4 stories interactivas",
+        "priority": "alta",
+        "rationale": f"El contenido experiencial orgánico tiene coste bajo y largo recorrido. Alineado con el segmento {cultural_seg.get('segment_label', '')} (engagement {round(cultural_seg.get('avg_engagement_index', 0)*100)}%).",
+    })
+
+    # ── 2. Hotel: Decoración y señalización ──────────────────
+    proposals.append({
+        "id": "camp-002",
+        "category": "hotel",
+        "category_label": "Acción en hotel",
+        "name": f"Rediseño de señalización y experiencia en {city1}",
+        "objective": "Mejorar percepción de marca y facilitar upselling en el hotel",
+        "segment": "Todos los huéspedes in-house",
+        "segment_users": kpis.get("audience_size", 0),
+        "segment_engagement": 0.90,
+        "channel": "Físico / in-hotel",
+        "campaign_type": "hotel_insite",
+        "timing": "Implementación en 3-4 semanas",
+        "estimated_engagement": 0.85,
+        "subject_line": "Programa de experiencia en hotel",
+        "preview_text": "QR interactivos, decoración temática estacional y materiales de upsell en puntos clave del hotel.",
+        "body_summary": (
+            f"Rediseño de la experiencia física dentro de {city1}: "
+            f"1) QR en caballete de recepción: lleva a landing con experiencias locales reservables (rutas, restaurantes, late checkout). "
+            f"2) Decoración estacional en lobby: fotografía gran formato de la ciudad con narrativa 'Eurostars te conecta con la ciudad'. "
+            f"3) Tarjetas en habitación con recomendaciones de barrio personalizadas por perfil (aventurero, cultural, gastronómico). "
+            f"4) Pantalla digital en ascensor con ofertas de upgrade y actividades del día. "
+            f"5) Display en recepción con objetos de artesanía local, reforzando la conexión con el destino."
+        ),
+        "deliverables": "Diseño de QR + landing, 3 formatos de cartelería, tarjetas habitación (3 versiones), contenido pantalla",
+        "priority": "alta",
+        "rationale": f"Recepción detecta: «{reception[0] if reception else 'interés en experiencias locales'}». La señalización convierte un momento pasivo (espera) en oportunidad de venta.",
+    })
+
+    # ── 3. Localización: Partnerships locales ────────────────
+    proposals.append({
+        "id": "camp-003",
+        "category": "local",
+        "category_label": "Localización",
+        "name": f"Programa de partnerships locales — {city1}",
+        "objective": "Crear experiencias diferenciales y contenido auténtico",
+        "segment": gastro_seg.get("segment_label", "GASTRONOMÍA"),
+        "segment_users": gastro_seg.get("users", 0),
+        "segment_engagement": gastro_seg.get("avg_engagement_index", 0.80),
+        "channel": "Presencial + digital",
+        "campaign_type": "local_partnership",
+        "timing": "Activo de mayo a septiembre",
+        "estimated_engagement": 0.80,
+        "subject_line": f"Alianzas locales en {city1}",
+        "preview_text": "Acuerdos con restaurantes, bodegas y galerías locales para crear paquetes exclusivos Eurostars.",
+        "body_summary": (
+            f"Crear una red de partnerships locales en {city1}: "
+            f"1) 3 restaurantes con menú «Selección Eurostars» con descuento para huéspedes (exposición cruzada en ambas marcas). "
+            f"2) Bodega/cata de vinos con visita privada para huéspedes premium y HIGH_VALUE. "
+            f"3) Galería de arte o taller de artesanía local: experiencia reservable desde el QR de habitación. "
+            f"4) Ruta guiada a pie con guía local, exclusiva para huéspedes (sábados por la mañana). "
+            f"Todos los partners deben generar contenido co-branded para RRSS (mínimo 2 posts/mes cada uno). "
+            f"Medir: reservas de experiencias, menciones en RRSS, NPS incremento."
+        ),
+        "deliverables": "3-5 acuerdos firmados, kit co-branding, landing experiencias, material para partners",
+        "priority": "alta",
+        "rationale": f"El segmento gastronómico ({gastro_seg.get('segment_label', '')}) tiene alto ADR ({round(gastro_seg.get('avg_adr', 0))}€) y valor aspiracional. Los partnerships generan contenido auténtico sin coste de producción.",
+    })
+
+    # ── 4. Branding: Imagen corporativa ──────────────────────
+    proposals.append({
+        "id": "camp-004",
+        "category": "branding",
+        "category_label": "Imagen corporativa",
+        "name": "Refresh visual de temporada Eurostars",
+        "objective": "Actualizar presencia visual e identidad de marca en todos los canales",
+        "segment": "Todos los segmentos",
+        "segment_users": kpis.get("audience_size", 0),
+        "segment_engagement": 0.70,
+        "channel": "Todos (digital + físico)",
+        "campaign_type": "branding",
+        "timing": "Desarrollo 2 semanas, roll-out progresivo",
+        "estimated_engagement": 0.68,
+        "subject_line": "Línea visual primavera-verano 2026",
+        "preview_text": "Nueva paleta cromática, fotografía de destino y plantillas de comunicación para la temporada.",
+        "body_summary": (
+            "Crear una línea visual de temporada que unifique todos los puntos de contacto: "
+            "1) Fotografía: nueva sesión en los 3 hoteles en foco con modelo + lifestyle local (no solo habitación vacía). "
+            "2) Paleta estacional: tonos cálidos dorados + verdes mediterráneos para headers, banners y señalización. "
+            "3) Kit de plantillas: email (banner + footer), stories (3 templates), feed (carrusel + single), firma de email corporativa. "
+            "4) Adaptación de portadas de RRSS, headers de Booking/Expedia y web propia. "
+            "5) Guía de tono de voz para la temporada: inspiracional, cercano, basado en experiencia local."
+        ),
+        "deliverables": "Sesión fotográfica (50+ imágenes), kit plantillas (15 formatos), guía de tono, portadas RRSS",
+        "priority": "media",
+        "rationale": "Una imagen de marca cohesiva aumenta el reconocimiento y la confianza. Los activos generados alimentan 3-4 meses de comunicación.",
+    })
+
+    # ── 5. Geolocalización: Push y SMS ───────────────────────
     if segments:
-        top = segments[0]
         proposals.append({
-            "id": "camp-001",
-            "name": f"Escapada premium para {top['segment_label']}",
-            "objective": "Conversión a reserva directa",
-            "segment": top["segment_label"],
-            "segment_users": top["users"],
-            "segment_engagement": top["avg_engagement_index"],
-            "channel": top["dominant_channel"],
-            "campaign_type": "pre_arrival",
-            "timing": "Lanzamiento en próximos 7 días",
-            "estimated_engagement": round(min(top["avg_engagement_index"] + 0.05, 0.98), 2),
-            "subject_line": f"Tu escapada a {focus_cities[0] if focus_cities else 'un destino especial'} te espera",
-            "preview_text": f"Descubre una experiencia diseñada para viajeros como tú. Early check-in incluido.",
+            "id": "camp-005",
+            "category": "geolocalizacion",
+            "category_label": "Geolocalización",
+            "name": f"Campaña de proximidad en {city1}",
+            "objective": "Captar reservas de último minuto y walk-ins premium",
+            "segment": "ADULTO · Todos los perfiles",
+            "segment_users": top_seg.get("users", 0),
+            "segment_engagement": top_seg.get("avg_engagement_index", 0.75),
+            "channel": "Push + SMS + Google Ads local",
+            "campaign_type": "geolocalizacion",
+            "timing": "Activo en continuo (jueves a domingo)",
+            "estimated_engagement": 0.65,
+            "subject_line": f"Estás cerca de {city1} — tu habitación te espera",
+            "preview_text": f"Notificación push y SMS geolocalizado para usuarios en un radio de 50km del hotel.",
             "body_summary": (
-                f"Email visual con itinerario personalizado de 48h en {focus_cities[0] if focus_cities else 'destino principal'}. "
-                f"Incluye recomendaciones de restaurantes, actividades culturales y oferta de upgrade. "
-                f"CTA principal: reserva directa con beneficio exclusivo."
+                f"Campaña de proximidad geolocalizada en {city1}: "
+                f"1) Push notification a usuarios de la app con reserva pasada cuando están en radio <50km: oferta de último minuto con upgrade. "
+                f"2) Google Ads con extensión de ubicación para búsquedas tipo «hotel {city1} esta noche». "
+                f"3) SMS a base de datos de clientes que han visitado la ciudad antes, con oferta relámpago de fin de semana (envío jueves 17h). "
+                f"4) Cartelería digital en estaciones de tren/aeropuerto cercanos con QR directo a reserva. "
+                f"Personalización: el mensaje cambia según el perfil del usuario (aventurero → rooftop, cultural → itinerario, gastro → restaurante partner)."
             ),
-            "priority": "alta",
-            "rationale": f"Segmento con mejor engagement ({round(top['avg_engagement_index']*100)}%) y ADR medio de {round(top['avg_adr'])}€. Máximo potencial de conversión.",
-        })
-
-    # 2. Low-performing segment recovery campaign
-    if len(segments) >= 3:
-        worst = min(segments, key=lambda s: s["avg_engagement_index"])
-        proposals.append({
-            "id": "camp-002",
-            "name": f"Reactivación del segmento {worst['segment_label']}",
-            "objective": "Recuperar engagement y reducir churn",
-            "segment": worst["segment_label"],
-            "segment_users": worst["users"],
-            "segment_engagement": worst["avg_engagement_index"],
-            "channel": "email",
-            "campaign_type": "post_stay",
-            "timing": "Lanzamiento en próximos 14 días",
-            "estimated_engagement": round(min(worst["avg_engagement_index"] + 0.12, 0.85), 2),
-            "subject_line": f"Te echamos de menos, {worst['age_segment'].lower()}",
-            "preview_text": "Hemos preparado algo especial para tu próxima escapada. Solo para clientes como tú.",
-            "body_summary": (
-                f"Email de reactivación con incentivo de reserva directa (descuento o upgrade garantizado). "
-                f"Tono cercano, no agresivo. Incluir selección curada de destinos basada en historial. "
-                f"A/B test del asunto: emocional vs racional."
-            ),
+            "deliverables": "Configuración geofencing, 3 creatividades push, 2 plantillas SMS, campaña Google Ads local, diseño cartelería",
             "priority": "media",
-            "rationale": f"Engagement actual en {round(worst['avg_engagement_index']*100)}%. Margen de mejora alto con campaña específica.",
+            "rationale": "Las reservas de último minuto tienen menor coste de adquisición. El targeting por proximidad alcanza usuarios con intención real de viaje.",
         })
 
-    # 3. Event-driven campaign from external signals
-    if external:
-        signal = external[0]
-        target_seg = segments[1] if len(segments) >= 2 else (segments[0] if segments else None)
-        proposals.append({
-            "id": "camp-003",
-            "name": f"Activación por evento: {signal[:60]}",
-            "objective": "Captar demanda del evento externo",
-            "segment": target_seg["segment_label"] if target_seg else "ADULTO · EXPLORADOR_CULTURAL",
-            "segment_users": target_seg["users"] if target_seg else 0,
-            "segment_engagement": target_seg["avg_engagement_index"] if target_seg else 0.75,
-            "channel": "email",
-            "campaign_type": "pre_arrival",
-            "timing": "Lanzamiento 2 semanas antes del evento",
-            "estimated_engagement": 0.82,
-            "subject_line": f"El momento perfecto para {focus_cities[0] if focus_cities else 'tu próxima escapada'}",
-            "preview_text": f"Un evento especial. Un hotel a la altura. Reserva con ventaja exclusiva.",
-            "body_summary": (
-                f"Email temático vinculado al evento ({signal}). "
-                f"Itinerario que combina el evento con la experiencia del hotel. "
-                f"Oferta limitada en tiempo. CTA a reserva directa."
-            ),
-            "priority": "alta",
-            "rationale": f"Señal externa activa con alta afinidad para el segmento objetivo. Oportunidad de capitalizar demanda.",
-        })
-
-    # 4. Cross-sell / upsell from reception signals
+    # ── 6. Hotel: Upsell pre-arrival automatizado ────────────
     if reception:
         proposals.append({
-            "id": "camp-004",
-            "name": "Campaña de upsell pre-arrival",
-            "objective": "Incrementar revenue por reserva con upgrades",
+            "id": "camp-006",
+            "category": "hotel",
+            "category_label": "Acción en hotel",
+            "name": "Automatización de upsell pre-check-in",
+            "objective": "Incrementar revenue por reserva con upgrades y experiencias",
             "segment": "Todos los segmentos con reserva confirmada",
             "segment_users": kpis.get("audience_size", 0),
             "segment_engagement": kpis.get("avg_engagement_index", 0.75),
-            "channel": "email",
+            "channel": "Email + WhatsApp",
             "campaign_type": "pre_arrival",
-            "timing": "48h antes del check-in",
+            "timing": "48h antes del check-in (automatizado)",
             "estimated_engagement": 0.78,
             "subject_line": "Mejora tu estancia antes de llegar",
-            "preview_text": "Late checkout, upgrade de habitación y experiencias exclusivas a precio especial.",
+            "preview_text": "Late checkout, upgrade y experiencias locales a precio especial para ti.",
             "body_summary": (
-                f"Email automatizado que se envía 48h antes del check-in con opciones de upgrade. "
-                f"Basado en la señal de recepción: '{reception[0]}'. "
-                f"Incluir 3 opciones: upgrade habitación, late checkout, pack experiencia gastronómica."
+                f"Flujo automatizado que se activa 48h antes del check-in: "
+                f"1) Email con 3 opciones de upgrade personalizadas por segmento (habitación superior, late checkout, pack gastronómico). "
+                f"2) Si no abre el email en 12h, enviar recordatorio por WhatsApp Business con carrusel visual. "
+                f"3) Incluir mapa interactivo con los partnerships locales activos y botón de reserva directa. "
+                f"4) Variante para HIGH_VALUE: ofrecer acceso exclusivo a experiencia privada (cata, rooftop sunset). "
+                f"Basado en señal de recepción: «{reception[0]}»."
             ),
+            "deliverables": "Flujo automatizado (email + WhatsApp), 3 plantillas segmentadas, mapa interactivo, landing upsell",
             "priority": "alta",
-            "rationale": f"Recepción detecta demanda real de upgrades. Automatizar la venta antes de la llegada maximiza la conversión.",
+            "rationale": f"Recepción detecta demanda real de upgrades. Automatizar maximiza la conversión sin carga operativa.",
         })
 
-    # 5. Social media content campaign
-    if len(segments) >= 2:
-        cultural_seg = next((s for s in segments if "CULTURAL" in s["travel_profile"]), segments[0])
+    # ── 7. Evento: Activación especial ───────────────────────
+    if external:
+        signal = external[0]
         proposals.append({
-            "id": "camp-005",
-            "name": f"RRSS: Serie 'Vive como un local' en {focus_cities[0] if focus_cities else 'destino'}",
-            "objective": "Awareness y tráfico a web",
-            "segment": cultural_seg["segment_label"],
-            "segment_users": cultural_seg["users"],
-            "segment_engagement": cultural_seg["avg_engagement_index"],
-            "channel": "push",
-            "campaign_type": "pre_arrival",
-            "timing": "3 publicaciones/semana durante 4 semanas",
-            "estimated_engagement": 0.72,
-            "subject_line": "Descubre el barrio como un vecino",
-            "preview_text": "Rutas, restaurantes y secretos locales seleccionados por nuestro equipo.",
+            "id": "camp-007",
+            "category": "evento",
+            "category_label": "Evento",
+            "name": f"Activación 360° — {signal[:55]}",
+            "objective": "Captar demanda del evento y generar contenido de marca",
+            "segment": cultural_seg.get("segment_label", "EXPLORADOR_CULTURAL"),
+            "segment_users": cultural_seg.get("users", 0),
+            "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
+            "channel": "Multicanal (email + RRSS + hotel + partners)",
+            "campaign_type": "evento",
+            "timing": "Pre-evento (2 semanas), durante y post",
+            "estimated_engagement": 0.82,
+            "subject_line": f"Tu hotel para vivir {signal[:40]}",
+            "preview_text": "Paquete exclusivo: alojamiento + itinerario del evento + experiencia Eurostars.",
             "body_summary": (
-                f"Serie de contenido para Instagram y TikTok mostrando la experiencia local en "
-                f"{focus_cities[0] if focus_cities else 'destinos clave'}. Formato: Reels de 30-60s con "
-                f"itinerarios de barrio, recomendaciones gastronómicas y detrás de cámaras del hotel. "
-                f"CTA en bio y stories: link a landing de reserva directa."
+                f"Campaña 360° alrededor de «{signal}»: "
+                f"PRE-EVENTO: Email a base de datos segmentada con paquete hotel+evento. Stories cuenta atrás 5 días. "
+                f"DURANTE: Decoración temática en lobby (roll-up + flores/ambientación del evento). Stories en directo desde el evento. "
+                f"Check-in con welcome gift temático (mapa del evento + posavasos ilustrado). "
+                f"POST-EVENTO: Email UGC recopilando fotos de huéspedes durante el evento. Reels resumen 60s. "
+                f"Cada fase tiene KPIs: reservas (pre), menciones social (durante), reservas futuras (post)."
             ),
-            "priority": "media",
-            "rationale": f"El contenido experiencial genera mejores ratios de engagement orgánico. Target alineado con el segmento {cultural_seg['segment_label']}.",
+            "deliverables": "Pack email (3), 15 stories, roll-up lobby, welcome gift, reels post-evento, UGC email",
+            "priority": "alta",
+            "rationale": f"Señal externa activa. Los eventos generan picos de demanda predecibles y contenido de alto valor para RRSS.",
         })
+
+    # ── 8. Decoración: Rediseño espacios comunes ─────────────
+    proposals.append({
+        "id": "camp-008",
+        "category": "decoracion",
+        "category_label": "Decoración",
+        "name": f"Intervención artística en zonas comunes — {city1}",
+        "objective": "Crear momentos 'Instagrameables' y reforzar identidad de destino",
+        "segment": "JOVEN + ADULTO · Todos los perfiles",
+        "segment_users": kpis.get("audience_size", 0),
+        "segment_engagement": 0.72,
+        "channel": "Físico / in-hotel",
+        "campaign_type": "decoracion",
+        "timing": "Instalación en 2 semanas, rotación trimestral",
+        "estimated_engagement": 0.70,
+        "subject_line": f"El arte de la ciudad, dentro del hotel",
+        "preview_text": f"Intervención artística y fotográfica que conecta {city1} con la experiencia Eurostars.",
+        "body_summary": (
+            f"Programa de intervención artística en {city1}: "
+            f"1) Mural o instalación fotográfica gran formato en el lobby con imágenes icónicas de la ciudad (artista local). "
+            f"2) Rincón 'Instagrameable': esquina decorada con elementos locales (azulejos, cerámicas, plantas autóctonas) + neón con hashtag #EurostarsExperience. "
+            f"3) Rotación trimestral de obras de artistas locales en pasillos y zonas comunes (con ficha y QR a perfil del artista). "
+            f"4) Ambientación olfativa de marca: aroma diferenciado para el lobby que refuerce la memoria sensorial. "
+            f"5) Mesa de revistas y libros curados sobre la ciudad (guías alternativas, fotografía, gastronomía local)."
+        ),
+        "deliverables": "Briefing artista, diseño rincón foto, plan de rotación anual, selección editorial, difusor de aroma",
+        "priority": "media",
+        "rationale": "Los espacios 'Instagrameables' generan UGC gratuito. El 73% de viajeros millennials elige hotel con espacios fotogénicos (Booking Insights 2025).",
+    })
 
     return proposals
 

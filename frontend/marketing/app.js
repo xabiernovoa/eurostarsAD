@@ -113,7 +113,20 @@
 
     function fmtPct(v) { return Math.round((v || 0) * 100) + "%"; }
     function engClass(v) { return v >= 0.85 ? "high" : v >= 0.65 ? "mid" : "low"; }
-    function typeLabel(t) { return { pre_arrival: "Pre-Arrival", post_stay: "Post-Stay", checkin_report: "Check-in" }[t] || t; }
+    function typeLabel(t) {
+        return {
+            pre_arrival: "Pre-Arrival", post_stay: "Post-Stay", checkin_report: "Check-in",
+            contenido_rrss: "Contenido RRSS", hotel_insite: "In-Hotel",
+            local_partnership: "Partnership local", branding: "Branding",
+            geolocalizacion: "Geolocalización", evento: "Evento", decoracion: "Decoración"
+        }[t] || t;
+    }
+    function categoryIcon(cat) {
+        return {
+            rrss: "\ud83d\udcf1", hotel: "\ud83c\udfe8", local: "\ud83d\udccd", branding: "\ud83c\udfa8",
+            geolocalizacion: "\ud83d\udce1", evento: "\ud83c\udf89", decoracion: "\ud83d\uddbc\ufe0f"
+        }[cat] || "\ud83d\udce6";
+    }
 
     function linesFromTextarea(ta) {
         return ta.value.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
@@ -598,28 +611,30 @@
         }
 
         proposalGrid.innerHTML = '<div class="proposal-grid">' + currentProposals.map(function (p, i) {
+            var catClass = p.category || 'default';
             return '<article class="proposal-card">' +
                 '<div class="proposal-top">' +
-                '<div class="proposal-number">' + (i + 1) + '</div>' +
+                '<div class="proposal-number">' + categoryIcon(p.category) + '</div>' +
                 '<div class="proposal-info">' +
+                '<div class="proposal-category-badge cat-' + catClass + '">' + esc(p.category_label || typeLabel(p.campaign_type)) + '</div>' +
                 '<div class="proposal-name">' + esc(p.name) + '</div>' +
                 '<div class="proposal-objective">' + esc(p.objective) + '</div>' +
                 '</div>' +
                 '<span class="proposal-priority ' + (p.priority || "media") + '">' + esc(p.priority || "media") + '</span>' +
                 '</div>' +
                 '<div class="proposal-meta">' +
-                '<span class="proposal-tag">' + esc(p.segment) + '</span>' +
                 '<span class="proposal-tag">' + esc(p.channel) + '</span>' +
-                '<span class="proposal-tag">' + typeLabel(p.campaign_type) + '</span>' +
+                '<span class="proposal-tag">' + esc(p.segment) + '</span>' +
                 '<span class="proposal-tag">' + esc(p.timing) + '</span>' +
                 '<span class="proposal-tag">Engagement est. ' + fmtPct(p.estimated_engagement) + '</span>' +
                 '</div>' +
                 '<div class="proposal-message">' +
-                '<div class="proposal-msg-label">Mensaje propuesto</div>' +
+                '<div class="proposal-msg-label">Plan de acción</div>' +
                 '<div class="proposal-msg-subject">' + esc(p.subject_line) + '</div>' +
                 '<div class="proposal-msg-preview">' + esc(p.preview_text) + '</div>' +
                 '<div class="proposal-msg-body">' + esc(p.body_summary) + '</div>' +
                 '</div>' +
+                (p.deliverables ? '<div class="proposal-deliverables"><span class="proposal-deliv-label">Entregables:</span> ' + esc(p.deliverables) + '</div>' : '') +
                 '<div class="proposal-rationale">' + esc(p.rationale) + '</div>' +
                 '<div class="proposal-actions">' +
                 '<button class="btn btn-secondary modify-btn" data-id="' + esc(p.id) + '">Modificar comunicación</button>' +
