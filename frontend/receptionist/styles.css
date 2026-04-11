@@ -398,8 +398,9 @@ body::-webkit-scrollbar {
 }
 
 .tag-high {
-    background: #262626;
-    color: #ffffff;
+    background: rgba(138, 117, 75, 0.08);
+    color: #8a754b;
+    border: 1px solid rgba(138, 117, 75, 0.2);
 }
 
 .tag-mid {

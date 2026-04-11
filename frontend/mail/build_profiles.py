@@ -7,6 +7,7 @@ Reads customer data, segments, and campaign log to create user profiles.
 import csv
 import json
 import random
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -68,10 +69,10 @@ AVATAR_COLORS = [
 ]
 
 TRAVEL_PROFILE_LABELS = {
-    "LUJO": "🏨 Lujo",
-    "EXPLORADOR_CULTURAL": "🏛️ Explorador Cultural",
-    "AVENTURERO": "🌍 Aventurero",
-    "GASTRONOMIA_CIUDAD": "🍽️ Gastronomía & Ciudad"
+    "LUJO": "Lujo",
+    "EXPLORADOR_CULTURAL": "Explorador Cultural",
+    "AVENTURERO": "Aventurero",
+    "GASTRONOMIA_CIUDAD": "Gastronomía & Ciudad"
 }
 
 AGE_SEGMENT_LABELS = {
@@ -86,8 +87,13 @@ CLIENT_VALUE_LABELS = {
     "HIGH_VALUE": "High Value"
 }
 
-COUNTRY_FLAGS = {"ES": "🇪🇸", "IT": "🇮🇹", "PT": "🇵🇹"}
+COUNTRY_FLAGS = {"ES": "ES", "IT": "IT", "PT": "PT"}
 COUNTRY_DOMAINS = {"ES": "gmail.com", "IT": "gmail.com", "PT": "gmail.com"}
+EMOJI_RE = re.compile(r"[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]+", re.UNICODE)
+
+
+def strip_emojis(value: str) -> str:
+    return re.sub(r"\s{2,}", " ", EMOJI_RE.sub("", value or "")).strip()
 
 
 def generate_name(gender: str, country: str, rng: random.Random) -> tuple[str, str]:
@@ -148,7 +154,7 @@ def main():
                 email_files.append({
                     "filename": c["output_file"],
                     "type": c["campaign_type"],
-                    "subject": c["subject"],
+                    "subject": strip_emojis(c["subject"]),
                     "hotel": c["hotel_recommended"],
                 })
 
@@ -161,7 +167,7 @@ def main():
             "avatar_color": avatar_color,
             "avatar_letter": first_name[0].upper(),
             "country": seg["country"],
-            "country_flag": COUNTRY_FLAGS.get(seg["country"], "🌍"),
+            "country_flag": COUNTRY_FLAGS.get(seg["country"], seg["country"]),
             "gender": seg["gender"],
             "age_range": seg["age_range"],
             "age_segment": seg["age_segment"],
@@ -188,7 +194,7 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Generated {len(profiles)} profiles → {out_path}")
+    print(f"Generated {len(profiles)} profiles -> {out_path}")
     # Stats
     by_segment = defaultdict(int)
     for p in profiles:

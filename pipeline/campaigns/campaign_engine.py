@@ -254,14 +254,16 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
     if user_rows.empty:
         return None
 
-    first = user_rows.iloc[0]
+    ordered_rows = user_rows.sort_values(["CHECKIN_DATE", "CHECKOUT_DATE"])
+    first = ordered_rows.iloc[0]
+    last = ordered_rows.iloc[-1]
     user_emb = embeddings["user_embeddings"].get(str(guest_id), {})
     preferences = _get_embedding_preferences(user_emb)
     upsells = _upsell_recommendations(seg["client_value"], seg["travel_profile"])
 
     # Hotels visited
     visited = []
-    for _, row in user_rows.iterrows():
+    for _, row in ordered_rows.iterrows():
         hinfo = embeddings["hotel_info"].get(str(row["HOTEL_ID"]), {})
         visited.append({
             "hotel_id": str(row["HOTEL_ID"]),
@@ -269,6 +271,8 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
             "checkin": row["CHECKIN_DATE"].strftime("%Y-%m-%d"),
             "checkout": row["CHECKOUT_DATE"].strftime("%Y-%m-%d"),
         })
+
+    last_hotel_info = embeddings["hotel_info"].get(str(last["HOTEL_ID"]), {})
 
     return {
         "campaign_type": "checkin_report",
@@ -283,6 +287,8 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
             "avg_score_given": float(first["AVG_SCORE"]),
             "avg_daily_rate": float(first["CONFIRMED_RESERVATIONS_ADR"]),
             "avg_stay_length": float(first["AVG_LENGTH_STAY"]),
+            "last_checkin": last["CHECKIN_DATE"].strftime("%Y-%m-%d"),
+            "last_hotel": last_hotel_info.get("HOTEL_NAME", ""),
         },
         "preferences": preferences,
         "upsell_recommendations": upsells,

@@ -12,6 +12,7 @@ BASE_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = BASE_DIR.parents[1]
 EMAIL_OUTPUT_DIR = PROJECT_ROOT / "output"
 EUROSTARS_IMAGES = PROJECT_ROOT / "images"
+EMOJI_RE = re.compile(r"[\U0001F1E6-\U0001F1FF\U0001F300-\U0001FAFF\u2600-\u27BF\uFE0F]+", re.UNICODE)
 
 MIME_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -48,13 +49,23 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
         mime = MIME_TYPES.get(ext, "application/octet-stream")
         self._send(200, mime, filepath.read_bytes())
 
+    def _strip_emojis(self, value):
+        if isinstance(value, str):
+            return re.sub(r"\s{2,}", " ", EMOJI_RE.sub("", value)).strip()
+        if isinstance(value, list):
+            return [self._strip_emojis(item) for item in value]
+        if isinstance(value, dict):
+            return {key: self._strip_emojis(item) for key, item in value.items()}
+        return value
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         pathname = urllib.parse.unquote(parsed.path)
 
         # API: profiles.json
         if pathname == "/api/profiles":
-            self._send_file(BASE_DIR / "profiles.json")
+            payload = json.loads((BASE_DIR / "profiles.json").read_text(encoding="utf-8"))
+            self._send(200, "application/json; charset=utf-8", json.dumps(self._strip_emojis(payload), ensure_ascii=False))
             return
 
         # API: get email HTML content (rewrite image paths)
@@ -76,7 +87,7 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
                 'src="/home/xabier/Documentos/eurostars/images/',
                 'src="/images/eurostars/',
             )
-            self._send(200, "text/html; charset=utf-8", content)
+            self._send(200, "text/html; charset=utf-8", EMOJI_RE.sub("", content))
             return
 
         # Serve eurostars images
