@@ -196,8 +196,6 @@ def recommend_hotel(
     top_n: int = 1,
 ) -> list[tuple[str, float]]:
     """Return top-N hotels by cosine similarity, excluding already visited."""
-    from sklearn.metrics.pairwise import cosine_similarity
-
     user_emb = embeddings_data["user_embeddings"].get(str(user_id))
     if user_emb is None:
         return []
@@ -210,13 +208,20 @@ def recommend_hotel(
             break
 
     user_vec = np.array([user_emb[c] for c in FEATURE_COLS]).reshape(1, -1)
+    user_norm = np.linalg.norm(user_vec)
+    if user_norm == 0:
+        return []
 
     candidates = []
     for hid, hvec in embeddings_data["hotel_embeddings"].items():
         if hid in visited:
             continue
         h_vec = np.array([hvec[c] for c in FEATURE_COLS]).reshape(1, -1)
-        sim = cosine_similarity(user_vec, h_vec)[0][0]
+        hotel_norm = np.linalg.norm(h_vec)
+        if hotel_norm == 0:
+            sim = 0.0
+        else:
+            sim = float(np.dot(user_vec, h_vec.T)[0][0] / (user_norm * hotel_norm))
         candidates.append((hid, float(sim)))
 
     candidates.sort(key=lambda x: x[1], reverse=True)

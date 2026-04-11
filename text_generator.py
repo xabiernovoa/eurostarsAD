@@ -10,7 +10,11 @@ import json
 import logging
 import os
 
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    def load_dotenv():
+        return False
 
 load_dotenv()
 
@@ -24,7 +28,7 @@ logger = logging.getLogger("text_generator")
 
 TONE_INSTRUCTIONS = {
     "JOVEN": (
-        "Tono informal, aspiracional. Puedes usar emojis con moderación. "
+        "Tono informal, aspiracional. No uses emojis bajo ningún concepto. "
         "Frases cortas y directas. Evita formalidades. Transmite energía y ganas "
         "de vivir experiencias únicas. Tutea al usuario."
     ),
@@ -164,7 +168,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
 
         copies = {
             "JOVEN": {
-                "subject": f"🌟 {hotel['city']} te espera — tu próxima escapada",
+                "subject": f"{hotel['city']} te espera — tu próxima escapada",
                 "preheader": f"Hemos encontrado el hotel perfecto para ti en {hotel['city']}",
                 "headline": f"¿Preparado para descubrir {hotel['city']}?",
                 "subheadline": f"{hotel['name']} — tu base perfecta este {season}",
@@ -174,13 +178,13 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"especialmente para ti.",
                     f"Tu escapada perfecta suele durar {stay} noches — justo lo que "
                     f"necesitas para sumergirte en todo lo que {hotel['city']} tiene "
-                    f"para ofrecer este {season}. 🎒",
+                    f"para ofrecer este {season}.",
                     f"Desde patrimonio cultural hasta la mejor gastronomía local, "
                     f"{hotel['city']} lo tiene todo.",
                 ],
-                "cta_text": "Reservar ahora →",
+                "cta_text": "Reservar ahora",
                 "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign=joven_{season}_2025",
-                "ps_line": "PD: Las mejores habitaciones vuelan rápido. ¡No te quedes sin la tuya! ✈️",
+                "ps_line": "PD: Las mejores habitaciones vuelan rápido. ¡No te quedes sin la tuya!",
             },
             "ADULTO": {
                 "subject": f"{hotel['city']} — tu próximo destino ideal",
@@ -229,20 +233,20 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
 
         copies = {
             "JOVEN": {
-                "subject": f"¿Ya echas de menos {last['city']}? 😊",
+                "subject": f"¿Ya echas de menos {last['city']}?",
                 "preheader": f"Tu estancia en {last['hotel_name']} fue especial",
                 "headline": f"Gracias por elegir {last['hotel_name']}",
                 "subheadline": f"Tu próxima aventura podría ser {next_city}",
                 "body_paragraphs": [
                     f"Del {last['checkin']} al {last['checkout']} viviste algo "
                     f"especial en {last['city']}. Esperamos que cada momento haya "
-                    f"sido inolvidable. 💫",
+                    f"sido inolvidable.",
                     f"¿Y si tu próxima escapada es a {next_city}? "
                     f"{next_name} te espera con una oferta exclusiva solo para ti.",
                 ],
-                "cta_text": f"Descubrir {next_city} →",
+                "cta_text": f"Descubrir {next_city}",
                 "cta_url_suffix": "utm_source=email&utm_medium=post_stay&utm_campaign=joven_2025",
-                "ps_line": "PD: Reserva en las próximas 48h y consigue un 15% de descuento 🎉",
+                "ps_line": "PD: Reserva en las próximas 48h y consigue un 15% de descuento",
             },
             "ADULTO": {
                 "subject": f"Gracias por su estancia en {last['city']}",

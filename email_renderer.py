@@ -102,6 +102,10 @@ def render_email(
         }
 
     html = template.render(**context)
+    if not html.strip():
+        raise ValueError(
+            f"Rendered template {template_name} for guest {campaign_data.get('guest_id', '?')} is empty"
+        )
     logger.info("Rendered %s template for guest %s (%s)",
                 template_name, campaign_data.get("guest_id", "?"), moment)
     return html
