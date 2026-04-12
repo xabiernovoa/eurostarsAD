@@ -2,6 +2,33 @@
 
 Motor de personalización y plataforma de marketing inteligente para la cadena hotelera Eurostars. El sistema toma datos históricos de clientes y un catálogo de hoteles, construye perfiles, segmenta usuarios, genera campañas personalizadas para distintos momentos del viaje y proporciona un dashboard de marketing con asistente conversacional IA, un sistema autónomo multi-agente y demos interactivas.
 
+**No hemos construido una herramienta que genera campañas — hemos construido un ecosistema que piensa, decide y actúa como un equipo de marketing completo.**
+
+---
+
+## Qué hace
+
+### Hiperpersonalización 1-a-1
+Cada cliente recibe una comunicación única. El sistema analiza el historial de reservas, perfil de viaje, segmento de edad y valor del cliente para generar **emails con texto, tono e imágenes adaptados individualmente**. Un viajero cultural recibe un copy inspiracional con fotos de monumentos; un cliente de lujo recibe un tono premium con imágenes del spa. No es un template con campos dinámicos: es un mensaje pensado para una persona concreta.
+
+### Informes inteligentes para recepción
+Antes del check-in, recepción dispone de un **informe personalizado por huésped**: preferencias detectadas, oportunidades de upsell (upgrade de habitación, late checkout, experiencias gastronómicas), historial de estancias y recomendaciones de trato según perfil. El recepcionista no improvisa: llega preparado.
+
+### Adaptación de la experiencia a cada usuario
+El sistema no se limita al email. Adapta la experiencia completa del viaje en tres momentos clave:
+- **Pre-arrival**: campaña personalizada antes de la estancia, con hotel recomendado, imágenes seleccionadas por IA y eventos relevantes del destino.
+- **Check-in**: informe interno con contexto del huésped para que recepción personalice la bienvenida.
+- **Post-stay**: comunicación de seguimiento adaptada al perfil para fidelización y reactivación.
+
+### Sistema de sugerencias de acción
+Un motor de recomendaciones analiza los datos de campañas, segmentos, señales de recepción y contexto externo (eventos, tendencias, estacionalidad) para proponer **acciones concretas y ejecutables** en tres ejes: redes sociales, acciones dentro del hotel y publicidad externa. El equipo de marketing no parte de una hoja en blanco.
+
+### Sistema autónomo multi-agente
+Un motor independiente que opera de forma proactiva: un **Oráculo** recopila contexto externo (eventos culturales, ofertas estacionales, alertas de viaje), un **Scheduler** identifica qué usuarios contactar en este momento, y **múltiples agentes concurrentes** generan campañas personalizadas en paralelo usando Gemini. Todo se visualiza en streaming en tiempo real desde el dashboard.
+
+### Agente conversacional de marketing
+Un chat IA integrado en el dashboard que **conoce todos los datos operativos**: KPIs, segmentos, rendimiento por canal, campañas recientes. El responsable de marketing puede preguntar «¿qué segmento funciona peor?», «dame ideas para captar familias este fin de semana» o «analiza la situación actual», y recibe respuestas basadas en datos reales, no genéricos.
+
 ---
 
 ## Visión general
