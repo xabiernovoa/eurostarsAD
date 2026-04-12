@@ -2,7 +2,7 @@
 
 Motor de personalización y plataforma de marketing inteligente para la cadena hotelera Eurostars. El sistema toma datos históricos de clientes y un catálogo de hoteles, construye perfiles, segmenta usuarios, genera campañas personalizadas para distintos momentos del viaje y proporciona un dashboard de marketing con asistente conversacional IA, un sistema autónomo multi-agente y demos interactivas.
 
-**No hemos construido una herramienta que genera campañas — hemos construido un ecosistema que piensa, decide y actúa como un equipo de marketing completo.**
+**No es un generador de campañas: es un ecosistema vivo que transforma datos en decisiones y decisiones en experiencias.**
 
 ---
 
