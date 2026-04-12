@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import http.server
 import json
+import socketserver
 import sys
 import urllib.parse
 from pathlib import Path
@@ -13,8 +14,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+try:
+    from dotenv import load_dotenv  # type: ignore
+
+    load_dotenv(PROJECT_ROOT / ".env")
+except ModuleNotFoundError:
+    pass
+
 from pipeline.marketing.dashboard_engine import build_dashboard_data, load_context, save_context
 from pipeline.marketing.chat_engine import handle_chat_message, refresh_dashboard_cache, generate_campaign_proposals, handle_modify_messaging
+from autonomous.live import iter_tick
 
 PORT = 3003
 BASE_DIR = Path(__file__).parent.resolve()
@@ -33,8 +42,33 @@ MIME_TYPES = {
 
 
 class MarketingHandler(http.server.BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+
     def log_message(self, fmt, *args):
         print(f"  {args[0]}")
+
+    def _start_chunked_stream(self, content_type: str = "application/x-ndjson; charset=utf-8"):
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-cache, no-transform")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Transfer-Encoding", "chunked")
+        self.send_header("X-Accel-Buffering", "no")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
+    def _write_chunk(self, data: bytes) -> None:
+        size = f"{len(data):X}".encode("ascii")
+        self.wfile.write(size + b"\r\n" + data + b"\r\n")
+        self.wfile.flush()
+
+    def _end_chunked_stream(self) -> None:
+        self.wfile.write(b"0\r\n\r\n")
+        self.wfile.flush()
+
+    def _emit_ndjson(self, event: dict) -> None:
+        line = (json.dumps(event, ensure_ascii=False, default=str) + "\n").encode("utf-8")
+        self._write_chunk(line)
 
     def _send(self, code: int, content_type: str, body):
         if isinstance(body, str):
@@ -77,6 +111,10 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
         if pathname == "/api/campaigns":
             self._send(200, "application/json; charset=utf-8",
                        json.dumps(generate_campaign_proposals(), ensure_ascii=False))
+            return
+
+        if pathname == "/api/autonomous/stream":
+            self._handle_autonomous_stream(parsed.query)
             return
 
         if pathname == "/":
@@ -149,6 +187,52 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
 
         self._send(404, "application/json; charset=utf-8", json.dumps({"error": "Not found"}))
 
+    def _handle_autonomous_stream(self, query: str) -> None:
+        params = urllib.parse.parse_qs(query or "")
+
+        def _flag(name: str, default: bool = False) -> bool:
+            raw = params.get(name, [""])[0].lower()
+            if raw in {"1", "true", "yes", "y", "on"}:
+                return True
+            if raw in {"0", "false", "no", "n", "off"}:
+                return False
+            return default
+
+        def _int(name: str, default: int) -> int:
+            try:
+                return int(params.get(name, [default])[0])
+            except (TypeError, ValueError):
+                return default
+
+        force_mock = _flag("force_mock", False)
+        delay = _int("delay", 2 if force_mock else 5)
+        max_recs = max(1, min(50, _int("max", 20)))
+
+        self._start_chunked_stream()
+        try:
+            for event in iter_tick(
+                force_mock=force_mock,
+                reset_state=True,
+                delay_between_seconds=float(delay),
+                max_recommendations=max_recs,
+                pacing_seconds=0.15 if force_mock else 0.05,
+            ):
+                try:
+                    self._emit_ndjson(event)
+                except (BrokenPipeError, ConnectionResetError):
+                    # Cliente cerró la conexión — detenemos el tick.
+                    return
+        except Exception as exc:  # pragma: no cover — defensivo
+            try:
+                self._emit_ndjson({"type": "error", "stage": "server", "message": str(exc)})
+            except Exception:
+                pass
+        finally:
+            try:
+                self._end_chunked_stream()
+            except Exception:
+                pass
+
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -157,8 +241,13 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
 
+class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+
 def main():
-    server = http.server.HTTPServer(("", PORT), MarketingHandler)
+    server = ThreadedHTTPServer(("", PORT), MarketingHandler)
     print(f"\n  Eurostars Marketing Dashboard running at http://localhost:{PORT}\n")
     try:
         server.serve_forever()

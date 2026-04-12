@@ -707,6 +707,449 @@
         modifyApplyBtn.textContent = "Aplicar modificación";
     });
 
+    /* ── Autonomous Mode ─────────────────────────────────── */
+
+    var autoEls = {
+        toggleBtn: document.getElementById("autoToggleBtn"),
+        toggleLabel: document.getElementById("autoToggleLabel"),
+        forceMock: document.getElementById("autoForceMock"),
+        statusDot: document.getElementById("autoStatusDot"),
+        statusText: document.getElementById("autoStatusText"),
+        statusModel: document.getElementById("autoStatusModel"),
+        feedSub: document.getElementById("autoFeedSub"),
+        metricOracle: document.getElementById("autoMetricOracle"),
+        metricCandidates: document.getElementById("autoMetricCandidates"),
+        metricCampaigns: document.getElementById("autoMetricCampaigns"),
+        metricBlocked: document.getElementById("autoMetricBlocked"),
+        oracleList: document.getElementById("autoOracleList"),
+        campaignList: document.getElementById("autoCampaignList"),
+        log: document.getElementById("autoLog"),
+    };
+
+    var autoRunState = {
+        controller: null,
+        running: false,
+        counts: { oracle: 0, candidates: 0, campaigns: 0, blocked: 0 },
+        pauseTimer: null,
+    };
+
+    function autoSetToggle(running) {
+        if (!autoEls.toggleBtn) return;
+        autoEls.toggleBtn.dataset.state = running ? "running" : "idle";
+        autoEls.toggleLabel.textContent = running ? "Detener modo autónomo" : "Iniciar modo autónomo";
+    }
+
+    function autoSetStatus(state, text, model) {
+        autoEls.statusDot.className = "auto-status-dot " + (state || "idle");
+        autoEls.statusText.textContent = text || "";
+        if (model !== undefined) autoEls.statusModel.textContent = model || "";
+    }
+
+    function autoScrollFeedBottom() {
+        var list = autoEls.campaignList;
+        if (list) list.scrollTop = list.scrollHeight;
+    }
+
+    function autoClearPauseCountdown() {
+        if (autoRunState.pauseTimer) {
+            clearInterval(autoRunState.pauseTimer);
+            autoRunState.pauseTimer = null;
+        }
+        var node = document.getElementById("autoPauseCard");
+        if (node) node.remove();
+    }
+
+    function autoShowPauseCountdown(seconds) {
+        autoClearPauseCountdown();
+        if (!seconds || seconds <= 0) return;
+
+        var el = document.createElement("div");
+        el.id = "autoPauseCard";
+        el.className = "auto-pause-card";
+        el.innerHTML =
+            '<div class="auto-pause-icon"><span class="auto-dot"></span></div>' +
+            '<div class="auto-pause-text">Pausa antes de la siguiente recomendación · ' +
+            '<span id="autoPauseSeconds">' + seconds + '</span>s</div>';
+        if (autoEls.campaignList.querySelector("p.form-help")) {
+            autoEls.campaignList.innerHTML = "";
+        }
+        autoEls.campaignList.appendChild(el);
+        autoScrollFeedBottom();
+
+        var remaining = seconds;
+        autoRunState.pauseTimer = setInterval(function () {
+            remaining -= 1;
+            var span = document.getElementById("autoPauseSeconds");
+            if (span) span.textContent = Math.max(0, remaining);
+            if (remaining <= 0) autoClearPauseCountdown();
+        }, 1000);
+    }
+
+    function autoResetUI() {
+        autoRunState.counts = { oracle: 0, candidates: 0, campaigns: 0, blocked: 0 };
+        autoEls.metricOracle.textContent = "—";
+        autoEls.metricCandidates.textContent = "—";
+        autoEls.metricCampaigns.textContent = "—";
+        autoEls.metricBlocked.textContent = "—";
+        autoEls.oracleList.innerHTML = '<p class="form-help">Consultando al Oráculo…</p>';
+        autoEls.campaignList.innerHTML = '<p class="form-help">En espera de candidatos…</p>';
+        if (autoEls.feedSub) autoEls.feedSub.textContent = "en espera";
+        autoEls.log.textContent = "";
+        autoClearPauseCountdown();
+    }
+
+    function autoLog(event) {
+        try {
+            autoEls.log.textContent += JSON.stringify(event) + "\n";
+        } catch (_) { /* ignore */ }
+    }
+
+    var ORACLE_CATEGORY_LABELS = {
+        cultural_event: "Evento cultural",
+        extreme_weather: "Meteorología",
+        travel_alert: "Alerta de viaje",
+        seasonal_offer: "Oferta estacional",
+        tourism_trend: "Tendencia turística",
+    };
+
+    function renderOracleEntry(entry) {
+        var catLabel = ORACLE_CATEGORY_LABELS[entry.category] || entry.category || "";
+        var badge = entry.actionable === false ? "auto-badge warn" : "auto-badge";
+        var relBadge = '<span class="auto-rel">' + (entry.relevance || "—") + '/10</span>';
+        var el = document.createElement("div");
+        el.className = "auto-card auto-oracle-card fade-in";
+        el.dataset.city = (entry.city || "").toUpperCase();
+        el.dataset.category = entry.category || "";
+        el.innerHTML =
+            '<div class="auto-card-head">' +
+            '<span class="' + badge + '">' + esc(catLabel) + '</span>' +
+            '<span class="auto-city">' + esc(entry.city || "") + '</span>' +
+            relBadge +
+            '</div>' +
+            '<div class="auto-card-body">' + esc(entry.summary || "") + '</div>' +
+            '<div class="auto-card-foot">' + esc(entry.date || "") +
+            (entry.actionable === false ? ' · destino bloqueado' : '') + '</div>';
+        if (autoEls.oracleList.querySelector("p.form-help")) {
+            autoEls.oracleList.innerHTML = "";
+        }
+        autoEls.oracleList.appendChild(el);
+    }
+
+    function autoHighlightOracleCards(cityUp, categories) {
+        if (!cityUp) return;
+        var cards = autoEls.oracleList.querySelectorAll(".auto-oracle-card");
+        cards.forEach(function (c) { c.classList.remove("matched"); });
+        var categorySet = {};
+        (categories || []).forEach(function (c) { if (c) categorySet[c] = true; });
+        cards.forEach(function (c) {
+            if (c.dataset.city === cityUp && (!categories || !categories.length || categorySet[c.dataset.category])) {
+                c.classList.add("matched");
+            }
+        });
+    }
+
+    function renderMatchedEventsChips(events) {
+        if (!events || !events.length) return "";
+        return '<div class="auto-matched-events">' +
+            '<span class="auto-matched-label">Eventos del Oráculo usados:</span>' +
+            events.map(function (e) {
+                var catLabel = ORACLE_CATEGORY_LABELS[e.category] || e.category || "";
+                return '<span class="auto-event-chip" title="' + esc(e.summary || "") + '">' +
+                    '<span class="auto-chip-cat">' + esc(catLabel) + '</span>' +
+                    esc(e.summary || "").slice(0, 80) +
+                    (e.summary && e.summary.length > 80 ? "…" : "") +
+                    '</span>';
+            }).join("") +
+            '</div>';
+    }
+
+    function renderCampaignStart(ev) {
+        autoClearPauseCountdown();
+        var el = document.createElement("div");
+        el.className = "auto-card auto-campaign-card pending";
+        el.id = "auto-campaign-" + ev.guest_id;
+        el.innerHTML =
+            '<div class="auto-card-head">' +
+            '<span class="auto-badge pending">Generando</span>' +
+            '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
+            '</div>' +
+            '<div class="auto-card-skeleton">' +
+            '<span class="auto-spinner"></span>' +
+            '<div class="auto-skel-text">' +
+            '<div class="auto-skel-line lg"></div>' +
+            '<div class="auto-skel-line md"></div>' +
+            '<div class="auto-skel-line sm"></div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="auto-card-foot">Analizando perfil y eventos del Oráculo para este usuario…</div>';
+        if (autoEls.campaignList.querySelector("p.form-help")) {
+            autoEls.campaignList.innerHTML = "";
+        }
+        autoEls.campaignList.appendChild(el);
+        autoScrollFeedBottom();
+    }
+
+    function renderCampaignDone(ev) {
+        var existing = document.getElementById("auto-campaign-" + ev.guest_id);
+        var seg = ev.segment || {};
+        var hotel = ev.hotel || {};
+        var copy = ev.copy || {};
+        var matched = ev.matched_events || [];
+
+        var paragraphs = (copy.body_paragraphs || []).map(function (p) {
+            return '<p>' + esc(p) + '</p>';
+        }).join("");
+
+        var content =
+            '<div class="auto-card-head">' +
+            '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
+            '<span class="auto-tag">' + esc(seg.age_segment || "—") + '</span>' +
+            '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
+            '<span class="auto-tag">' + esc(seg.client_value || "—") + '</span>' +
+            '</div>' +
+            '<div class="auto-card-hotel">' + esc(hotel.name || "") +
+            ' · ' + esc(hotel.city || "") + ' (' + (hotel.stars || "—") + '★)</div>' +
+            '<div class="auto-card-subject">' + esc(copy.subject || "") + '</div>' +
+            '<div class="auto-card-preheader">' + esc(copy.preheader || "") + '</div>' +
+            '<div class="auto-card-headline">' + esc(copy.headline || "") + '</div>' +
+            (copy.subheadline ? '<div class="auto-card-subheadline">' + esc(copy.subheadline) + '</div>' : '') +
+            '<div class="auto-card-body">' + paragraphs + '</div>' +
+            '<div class="auto-card-cta"><span>CTA:</span> ' + esc(copy.cta_text || "") + '</div>' +
+            (copy.ps_line ? '<div class="auto-card-ps">' + esc(copy.ps_line) + '</div>' : '') +
+            renderMatchedEventsChips(matched);
+
+        if (existing) {
+            existing.classList.remove("pending");
+            existing.classList.add("fade-in");
+            existing.innerHTML = content;
+        } else {
+            var el = document.createElement("div");
+            el.className = "auto-card auto-campaign-card fade-in";
+            el.innerHTML = content;
+            autoEls.campaignList.appendChild(el);
+        }
+
+        // Resaltar en la columna del Oráculo los eventos efectivamente usados
+        autoHighlightOracleCards(
+            (hotel.city || "").toUpperCase(),
+            matched.map(function (e) { return e.category; })
+        );
+        autoScrollFeedBottom();
+    }
+
+    function renderCampaignSkipped(ev) {
+        var existing = document.getElementById("auto-campaign-" + ev.guest_id);
+        var html =
+            '<div class="auto-card-head">' +
+            '<span class="auto-badge warn">Omitido</span>' +
+            '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
+            '</div>' +
+            '<div class="auto-card-body">' + esc(ev.reason || "") + '</div>';
+        if (existing) {
+            existing.classList.remove("pending");
+            existing.innerHTML = html;
+        } else {
+            var el = document.createElement("div");
+            el.className = "auto-card auto-campaign-card";
+            el.innerHTML = html;
+            autoEls.campaignList.appendChild(el);
+        }
+        autoScrollFeedBottom();
+    }
+
+    function handleAutoEvent(ev) {
+        autoLog(ev);
+
+        switch (ev.type) {
+            case "start":
+                autoSetStatus("running", "Arrancando modo autónomo…",
+                    (ev.config && ev.config.gemini_available) ? ("Modelo: " + ev.config.model) : "Modo mock");
+                if (autoEls.feedSub && ev.config) {
+                    autoEls.feedSub.textContent =
+                        "cap " + (ev.config.max_recommendations || "?") +
+                        " · pausa " + (ev.config.delay_between_seconds || 0) + "s";
+                }
+                break;
+
+            case "oracle_start":
+                autoSetStatus("running", "Consultando al Oráculo…");
+                break;
+
+            case "oracle_entry":
+                autoRunState.counts.oracle++;
+                autoEls.metricOracle.textContent = autoRunState.counts.oracle;
+                renderOracleEntry(ev.entry || {});
+                break;
+
+            case "oracle_done":
+                autoRunState.counts.blocked = (ev.blocked || []).length;
+                autoEls.metricBlocked.textContent = autoRunState.counts.blocked;
+                autoSetStatus("running", "Oráculo listo: " + (ev.count || 0) + " señales · " +
+                    autoRunState.counts.blocked + " destinos bloqueados");
+                break;
+
+            case "candidates_start":
+                autoSetStatus("running", "Calculando candidatos…");
+                break;
+
+            case "candidate":
+                autoRunState.counts.candidates++;
+                autoEls.metricCandidates.textContent = autoRunState.counts.candidates;
+                break;
+
+            case "candidates_done":
+                autoSetStatus("running", (ev.count || 0) + " candidatos en cola");
+                if (ev.count === 0) {
+                    autoEls.campaignList.innerHTML =
+                        '<p class="form-help">No hay candidatos en esta ventana de envío.</p>';
+                }
+                break;
+
+            case "feed_start":
+                autoSetStatus("running", "Feed autónomo en marcha…");
+                if (autoEls.feedSub) {
+                    autoEls.feedSub.textContent =
+                        (ev.total_candidates || 0) + " candidatos · pausa " +
+                        (ev.delay_between_seconds || 0) + "s entre envíos";
+                }
+                break;
+
+            case "campaign_start":
+                renderCampaignStart(ev);
+                autoSetStatus("running",
+                    "Generando recomendación para guest " + ev.guest_id + "…");
+                break;
+
+            case "campaign_done":
+                autoRunState.counts.campaigns++;
+                autoEls.metricCampaigns.textContent = autoRunState.counts.campaigns;
+                renderCampaignDone(ev);
+                autoSetStatus("running", "Recomendación entregada · pausa antes de la siguiente…");
+                break;
+
+            case "campaign_skipped":
+                renderCampaignSkipped(ev);
+                break;
+
+            case "pause":
+                autoShowPauseCountdown(ev.delay_seconds || 0);
+                if (autoEls.feedSub) {
+                    autoEls.feedSub.textContent =
+                        "pausa " + (ev.delay_seconds || 0) + "s · " +
+                        (ev.remaining_candidates || 0) + " candidatos en cola";
+                }
+                break;
+
+            case "feed_done":
+                autoClearPauseCountdown();
+                if (autoEls.feedSub) {
+                    autoEls.feedSub.textContent =
+                        ev.total_recommendations + " recomendaciones emitidas · " +
+                        (ev.reason === "max_reached" ? "cap alcanzado" : "cola agotada");
+                }
+                break;
+
+            case "error":
+                autoSetStatus("error", "Error en " + (ev.stage || "?") + ": " + (ev.message || ""));
+                break;
+
+            case "tick_done":
+                var sum = ev.summary || {};
+                autoSetStatus("done", "Sesión cerrada en " + ev.duration_seconds + "s · " +
+                    (sum.recommendations_generated || 0) + " recomendaciones");
+                autoStopRun(false);
+                break;
+        }
+    }
+
+    async function autoStreamTick(opts) {
+        opts = opts || {};
+        var params = new URLSearchParams();
+        if (opts.forceMock) params.set("force_mock", "1");
+        if (opts.delay != null) params.set("delay", String(opts.delay));
+        if (opts.max != null) params.set("max", String(opts.max));
+
+        autoRunState.controller = new AbortController();
+        var response;
+        try {
+            response = await fetch("/api/autonomous/stream?" + params.toString(), {
+                signal: autoRunState.controller.signal,
+                headers: { "Accept": "application/x-ndjson" },
+            });
+        } catch (err) {
+            if (err && err.name === "AbortError") return;
+            autoSetStatus("error", "No se pudo iniciar el tick: " + err.message);
+            autoStopRun(false);
+            return;
+        }
+        if (!response.ok || !response.body) {
+            autoSetStatus("error", "Respuesta inválida del servidor (" + response.status + ")");
+            autoStopRun(false);
+            return;
+        }
+
+        var reader = response.body.getReader();
+        var decoder = new TextDecoder();
+        var buffer = "";
+        try {
+            while (true) {
+                var chunk = await reader.read();
+                if (chunk.done) break;
+                buffer += decoder.decode(chunk.value, { stream: true });
+                var lines = buffer.split("\n");
+                buffer = lines.pop();
+                for (var i = 0; i < lines.length; i++) {
+                    var line = lines[i].trim();
+                    if (!line) continue;
+                    try {
+                        handleAutoEvent(JSON.parse(line));
+                    } catch (e) { /* ignore malformed */ }
+                }
+            }
+            if (buffer.trim()) {
+                try { handleAutoEvent(JSON.parse(buffer.trim())); } catch (_) { }
+            }
+        } catch (err) {
+            if (err && err.name !== "AbortError") {
+                autoSetStatus("error", "Stream interrumpido: " + err.message);
+            }
+        } finally {
+            autoStopRun(false);
+        }
+    }
+
+    function autoStartRun() {
+        if (autoRunState.running) return;
+        autoRunState.running = true;
+        autoSetToggle(true);
+        autoResetUI();
+        autoSetStatus("running", "Arrancando modo autónomo…");
+        autoStreamTick({
+            forceMock: autoEls.forceMock ? autoEls.forceMock.checked : false,
+        });
+    }
+
+    function autoStopRun(abort) {
+        if (abort && autoRunState.controller) {
+            try { autoRunState.controller.abort(); } catch (_) { }
+        }
+        autoRunState.running = false;
+        autoRunState.controller = null;
+        autoClearPauseCountdown();
+        autoSetToggle(false);
+    }
+
+    if (autoEls.toggleBtn) {
+        autoEls.toggleBtn.addEventListener("click", function () {
+            if (autoRunState.running) {
+                autoSetStatus("idle", "Modo autónomo detenido.");
+                autoStopRun(true);
+            } else {
+                autoStartRun();
+            }
+        });
+    }
+
     /* ── Init ────────────────────────────────────────────── */
 
     refreshDashboard();

@@ -102,6 +102,14 @@
                     </svg>
                     Generador
                 </button>
+                <button class="nav-item" data-section="autonomous" id="navAutonomous">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <path d="M12 7v5l3 2"></path>
+                    </svg>
+                    Modo autónomo
+                </button>
                 <button class="nav-item" data-section="config" id="navConfig">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -255,6 +263,86 @@
                         partir de los datos de audiencia, rendimiento y señales activas. Puedes modificar el mensaje de
                         cada campaña con instrucciones personalizadas.</p>
                     <div id="proposalGrid"></div>
+                </div>
+            </div>
+
+            <!-- ── AUTONOMOUS ────────────────────── -->
+            <div class="section-view" id="viewAutonomous">
+                <div class="section-header">
+                    <h1 class="section-title">Modo autónomo</h1>
+                    <div class="section-actions">
+                        <label class="auto-toggle" title="Usar datos mock sin llamar al modelo">
+                            <input type="checkbox" id="autoForceMock"> Forzar mock
+                        </label>
+                        <button class="btn btn-primary auto-toggle-btn" id="autoToggleBtn" data-state="idle">
+                            <span class="auto-toggle-icon" aria-hidden="true">
+                                <svg class="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="6 4 20 12 6 20 6 4"></polygon>
+                                </svg>
+                                <svg class="icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                    <rect x="6" y="6" width="12" height="12" rx="1"></rect>
+                                </svg>
+                            </span>
+                            <span class="auto-toggle-label" id="autoToggleLabel">Iniciar modo autónomo</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <p class="form-help" style="margin-bottom:16px">
+                        El sistema consulta al Oráculo (noticias y tendencias), decide a qué usuarios contactar
+                        en función de su patrón histórico y lead time, y genera campañas personalizadas con Gemini.
+                        Las recomendaciones aparecen aquí en vivo a medida que se generan.
+                    </p>
+
+                    <div class="auto-status" id="autoStatus">
+                        <div class="auto-status-dot" id="autoStatusDot"></div>
+                        <div class="auto-status-text" id="autoStatusText">En espera. Pulsa «Iniciar modo autónomo»
+                            para comenzar.</div>
+                        <div class="auto-status-model" id="autoStatusModel"></div>
+                    </div>
+
+                    <div class="auto-metrics" id="autoMetrics">
+                        <div class="auto-metric">
+                            <div class="auto-metric-label">Oráculo</div>
+                            <div class="auto-metric-value" id="autoMetricOracle">—</div>
+                        </div>
+                        <div class="auto-metric">
+                            <div class="auto-metric-label">Candidatos</div>
+                            <div class="auto-metric-value" id="autoMetricCandidates">—</div>
+                        </div>
+                        <div class="auto-metric">
+                            <div class="auto-metric-label">Recomendaciones</div>
+                            <div class="auto-metric-value" id="autoMetricCampaigns">—</div>
+                        </div>
+                        <div class="auto-metric">
+                            <div class="auto-metric-label">Bloqueadas</div>
+                            <div class="auto-metric-value" id="autoMetricBlocked">—</div>
+                        </div>
+                    </div>
+
+                    <div class="auto-columns">
+                        <aside class="auto-col auto-col-oracle">
+                            <h2 class="auto-col-title">Oráculo · contexto externo</h2>
+                            <div class="auto-list" id="autoOracleList">
+                                <p class="form-help">Las señales externas aparecerán aquí…</p>
+                            </div>
+                        </aside>
+                        <section class="auto-col auto-col-feed">
+                            <div class="auto-feed-header">
+                                <h2 class="auto-col-title">Recomendaciones en vivo</h2>
+                                <span class="auto-feed-sub" id="autoFeedSub">en espera</span>
+                            </div>
+                            <div class="auto-list auto-feed" id="autoCampaignList">
+                                <p class="form-help">El sistema generará recomendaciones dirigidas a usuarios concretos
+                                    de forma continua, incorporando el contexto del Oráculo.</p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <details class="auto-log" id="autoLogDetails">
+                        <summary>Log detallado del tick</summary>
+                        <pre id="autoLog"></pre>
+                    </details>
                 </div>
             </div>
 
