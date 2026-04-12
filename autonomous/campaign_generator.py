@@ -335,7 +335,7 @@ def generate_campaign(
     # la decisión del selector del pipeline para auditoría.
     channel_decision = channel_selector.select_channel(
         campaign_data["segment"],
-        {"avg_booking_leadtime": campaign_data.get("avg_length_stay", 15)},
+        {"avg_booking_leadtime": campaign_data.get("avg_booking_leadtime", 15)},
     )
 
     # Eventos del oráculo ordenados por afinidad con el perfil del usuario

@@ -945,12 +945,60 @@
         autoScrollFeedBottom();
     }
 
+    var CHANNEL_META = {
+        email: { icon: "✉️", label: "email" },
+        sms: { icon: "💬", label: "sms" },
+        push: { icon: "🔔", label: "push" },
+    };
+
+    function renderChannelBadge(channel) {
+        if (!channel) return "";
+        var primary = (channel.primary_channel || "email").toLowerCase();
+        var meta = CHANNEL_META[primary] || CHANNEL_META.email;
+        var reason = channel.reason || "";
+        var secondary = channel.secondary_channel
+            ? " · fallback " + channel.secondary_channel
+            : "";
+        var badge =
+            '<span class="auto-channel-badge auto-channel-' + esc(primary) + '"' +
+            (reason ? ' title="' + esc(reason + secondary) + '"' : '') + '>' +
+            '<span class="auto-channel-icon" aria-hidden="true">' + meta.icon + '</span>' +
+            '<span class="auto-channel-label">' + esc(meta.label) + '</span>' +
+            '</span>';
+        var rationale = reason
+            ? '<div class="auto-channel-reason">' + esc(reason) + secondary + '</div>'
+            : "";
+        return { badge: badge, rationale: rationale, primary: primary };
+    }
+
+    function renderSmsPreview(copy) {
+        var subject = (copy && copy.subject) || "";
+        var firstPara = copy && copy.body_paragraphs && copy.body_paragraphs[0]
+            ? copy.body_paragraphs[0]
+            : "";
+        var text = (subject + " — " + firstPara).slice(0, 160);
+        return (
+            '<div class="auto-sms-preview" title="Vista previa SMS (160 caracteres)">' +
+            '<div class="auto-sms-bubble">' +
+            '<span class="auto-sms-icon" aria-hidden="true">💬</span>' +
+            '<span class="auto-sms-text">' + esc(text) + '</span>' +
+            '</div>' +
+            '<div class="auto-sms-foot">' + text.length + '/160 caracteres</div>' +
+            '</div>'
+        );
+    }
+
     function renderCampaignDone(ev) {
         var existing = document.getElementById("auto-campaign-" + ev.guest_id);
         var seg = ev.segment || {};
         var hotel = ev.hotel || {};
         var copy = ev.copy || {};
         var matched = ev.matched_events || [];
+        var channel = ev.channel || {};
+        var channelRendered = renderChannelBadge(channel);
+        var channelBadge = channelRendered ? channelRendered.badge : "";
+        var channelReason = channelRendered ? channelRendered.rationale : "";
+        var channelPrimary = channelRendered ? channelRendered.primary : "email";
 
         var paragraphs = (copy.body_paragraphs || []).map(function (p) {
             return '<p>' + esc(p) + '</p>';
@@ -966,7 +1014,9 @@
             '<span class="auto-tag">' + esc(seg.age_segment || "—") + '</span>' +
             '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
             '<span class="auto-tag">' + esc(seg.client_value || "—") + '</span>' +
+            channelBadge +
             '</div>' +
+            channelReason +
             '<div class="auto-card-hotel">' + esc(hotel.name || "") +
             ' · ' + esc(hotel.city || "") + ' (' + (hotel.stars || "—") + '★)</div>' +
             '<div class="auto-card-subject">' + esc(copy.subject || "") + '</div>' +
@@ -975,6 +1025,7 @@
             (copy.subheadline ? '<div class="auto-card-subheadline">' + esc(copy.subheadline) + '</div>' : '') +
             '<div class="auto-card-body">' + paragraphs + '</div>' +
             '<div class="auto-card-cta"><span>CTA:</span> ' + esc(copy.cta_text || "") + '</div>' +
+            (channelPrimary === "sms" ? renderSmsPreview(copy) : '') +
             (copy.ps_line ? '<div class="auto-card-ps">' + esc(copy.ps_line) + '</div>' : '') +
             renderMatchedEventsChips(matched) +
             '<button type="button" class="auto-card-preview-btn" data-guest="' + esc(ev.guest_id) +

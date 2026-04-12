@@ -1,95 +1,111 @@
 {
-  "last_oracle_refresh": "2026-04-12T05:24:51",
+  "last_oracle_refresh": "2026-04-12T05:59:08",
   "last_generic_campaign": null,
   "user_last_contacted": {
-    "1007094314": "2026-04-12T05:25:08",
-    "1013530969": "2026-04-12T05:25:11",
-    "1003752586": "2026-04-12T05:25:11",
-    "1013545260": "2026-04-12T05:25:20"
+    "1013530969": "2026-04-12T05:59:26",
+    "1003752586": "2026-04-12T05:59:28",
+    "1007094314": "2026-04-12T05:59:37",
+    "1016518794": "2026-04-12T05:59:45",
+    "1013545260": "2026-04-12T05:59:45",
+    "1019630853": "2026-04-12T05:59:56",
+    "1019682167": "2026-04-12T05:59:59",
+    "1019671446": "2026-04-12T06:00:02",
+    "1016530069": "2026-04-12T06:00:21",
+    "1016721941": "2026-04-12T06:00:22",
+    "1016530109": "2026-04-12T06:00:23",
+    "1013400808": "2026-04-12T06:00:37",
+    "1016721082": "2026-04-12T06:00:42",
+    "1017009766": "2026-04-12T06:00:43",
+    "1019677924": "2026-04-12T06:00:52",
+    "1017308262": "2026-04-12T06:00:55",
+    "1008922782": "2026-04-12T06:00:56",
+    "1014279270": "2026-04-12T06:00:57",
+    "1013700087": "2026-04-12T06:01:13",
+    "1013616405": "2026-04-12T06:01:14"
   },
   "oracle_context": [
     {
       "city": "SEVILLA",
       "category": "cultural_event",
-      "summary": "La Feria de Abril (27/04-03/05) provocará alta ocupación. Foco en gestión de precios y disponibilidad para maximizar ingresos.",
+      "summary": "Feria de Abril 2026 del 26 de abril al 3 de mayo. Gran afluencia esperada y alta demanda de alojamiento. Oportunidad de paquetes premium.",
       "relevance": 10,
-      "date": "2026-04-12",
+      "date": "2026-04-20",
       "actionable": true
     },
     {
       "city": "GRANADA",
       "category": "tourism_trend",
-      "summary": "Crecimiento del segmento de 'nómadas digitales'. Oportunidad para paquetes de estancias medias con servicios adaptados (wifi de alta velocidad, coworking).",
+      "summary": "Aumento del turismo de naturaleza y senderismo en Sierra Nevada en primavera. Potencial para nuevas ofertas combinadas con estancias en la ciudad.",
       "relevance": 7,
       "date": "2026-04-15",
       "actionable": true
     },
     {
       "city": "LISBOA",
-      "category": "cultural_event",
-      "summary": "Confirmación de las Festas de Lisboa para junio. Se espera gran afluencia. Iniciar promoción anticipada de reservas y eventos clave.",
-      "relevance": 9,
-      "date": "2026-05-01",
-      "actionable": true
-    },
-    {
-      "city": "OPORTO",
       "category": "seasonal_offer",
-      "summary": "Lanzamiento de campaña 'Descubre Oporto en Primavera': 20% dto. para estancias de 3+ noches en abril y mayo. Foco en escapadas urbanas.",
+      "summary": "Lanzamiento de promoción 'Descubre Lisboa en Primavera' para estancias en mayo y junio. Descuentos en noches y experiencias gastronómicas.",
       "relevance": 8,
       "date": "2026-04-10",
       "actionable": true
     },
     {
-      "city": "ROMA",
+      "city": "OPORTO",
       "category": "tourism_trend",
-      "summary": "Aumento de la demanda de turismo sostenible y experiencias locales auténticas. Desarrollar ofertas culturales y gastronómicas no masivas.",
-      "relevance": 6,
-      "date": "2026-04-20",
+      "summary": "Creciente interés en rutas del vino por el Douro y enoturismo experiencial. Atrae a un público de mayor poder adquisitivo y estancias más largas.",
+      "relevance": 9,
+      "date": "2026-04-12",
+      "actionable": true
+    },
+    {
+      "city": "ROMA",
+      "category": "cultural_event",
+      "summary": "Inauguración de la exposición 'Tesoros del Renacimiento Romano' en las Scuderie del Quirinale (mayo-septiembre). Esperada afluencia internacional.",
+      "relevance": 8,
+      "date": "2026-05-01",
       "actionable": true
     },
     {
       "city": "MADRID",
-      "category": "cultural_event",
-      "summary": "Fiestas de San Isidro (10-15 mayo) generarán alta afluencia. Adaptar la oferta y promocionar eventos cercanos al hotel.",
-      "relevance": 9,
-      "date": "2026-05-05",
+      "category": "extreme_weather",
+      "summary": "Previsión de una ola de calor temprana para finales de mayo. Preparar servicios de piscina y aire acondicionado, promover actividades nocturnas.",
+      "relevance": 6,
+      "date": "2026-05-25",
       "actionable": true
     },
     {
       "city": "EL GROVE",
       "category": "travel_alert",
-      "summary": "AVISO METEO: Previsión de temporal marítimo (viento/oleaje) del 18 al 20 de abril. Impacto en actividades náuticas. Avisar a clientes.",
+      "summary": "Obras de mejora en el acceso al puerto y ciertas zonas costeras de O Grove hasta principios de junio. Posibles desvíos y ruido diurno moderado.",
       "relevance": 7,
-      "date": "2026-04-18",
+      "date": "2026-04-12",
       "actionable": true
     },
     {
       "city": "SEVILLA",
       "category": "tourism_trend",
-      "summary": "Popularidad creciente de las rutas gastronómicas y el tapeo. Crear experiencias culinarias exclusivas o alianzas con restaurantes locales.",
+      "summary": "Incremento de la demanda de turismo sostenible y experiencias auténticas en el centro histórico, evitando aglomeraciones.",
       "relevance": 7,
-      "date": "2026-04-22",
-      "actionable": true
-    },
-    {
-      "city": "ROMA",
-      "category": "travel_alert",
-      "summary": "Huelga de transporte público parcial anunciada para el 28 de abril. Informar a los huéspedes y ofrecer alternativas de movilidad y rutas a pie.",
-      "relevance": 8,
-      "date": "2026-04-25",
+      "date": "2026-04-09",
       "actionable": true
     },
     {
       "city": "MADRID",
+      "category": "cultural_event",
+      "summary": "Festival de Música 'Noches del Botánico' anuncia cartel completo para el verano. Fuerte demanda prevista para alojamientos cercanos al venue.",
+      "relevance": 9,
+      "date": "2026-04-18",
+      "actionable": true
+    },
+    {
+      "city": "GRANADA",
       "category": "seasonal_offer",
-      "summary": "Lanzamiento de 'Madrid en Flor', paquete de primavera con visitas a jardines y museos. Especial foco en escapadas de fin de semana.",
-      "relevance": 8,
-      "date": "2026-04-08",
+      "summary": "Campaña 'Verano con vistas a la Alhambra' con descuentos para estancias de julio y agosto. Incluye paquetes de visitas guiadas nocturnas.",
+      "relevance": 9,
+      "date": "2026-04-15",
       "actionable": true
     }
   ],
-  "campaigns_sent": 4,
+  "campaigns_sent": 20,
   "generic_campaigns_sent": 0,
   "ticks_executed": 1,
   "blocked_destinations": []

@@ -240,6 +240,7 @@ def generate_pre_arrival(guest_id: str, embeddings: dict, segments: dict,
         "events": events,
         "preferences": preferences,
         "avg_length_stay": float(user_rows["AVG_LENGTH_STAY"].iloc[0]),
+        "avg_booking_leadtime": float(user_rows["AVG_BOOKING_LEADTIME"].iloc[0]),
     }
 
 
