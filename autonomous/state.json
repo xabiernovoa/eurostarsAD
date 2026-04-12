@@ -1,106 +1,106 @@
 {
-  "last_oracle_refresh": "2026-04-12T05:59:08",
+  "last_oracle_refresh": "2026-04-12T08:58:18",
   "last_generic_campaign": null,
   "user_last_contacted": {
-    "1013530969": "2026-04-12T05:59:26",
-    "1003752586": "2026-04-12T05:59:28",
-    "1007094314": "2026-04-12T05:59:37",
-    "1016518794": "2026-04-12T05:59:45",
-    "1013545260": "2026-04-12T05:59:45",
-    "1019630853": "2026-04-12T05:59:56",
-    "1019682167": "2026-04-12T05:59:59",
-    "1019671446": "2026-04-12T06:00:02",
-    "1016530069": "2026-04-12T06:00:21",
-    "1016721941": "2026-04-12T06:00:22",
-    "1016530109": "2026-04-12T06:00:23",
-    "1013400808": "2026-04-12T06:00:37",
-    "1016721082": "2026-04-12T06:00:42",
-    "1017009766": "2026-04-12T06:00:43",
-    "1019677924": "2026-04-12T06:00:52",
-    "1017308262": "2026-04-12T06:00:55",
-    "1008922782": "2026-04-12T06:00:56",
-    "1014279270": "2026-04-12T06:00:57",
-    "1013700087": "2026-04-12T06:01:13",
-    "1013616405": "2026-04-12T06:01:14"
+    "1003752586": "2026-04-12T08:58:20",
+    "1007094314": "2026-04-12T08:58:20",
+    "1013530969": "2026-04-12T08:58:21",
+    "1013545260": "2026-04-12T08:58:23",
+    "1016518794": "2026-04-12T08:58:24",
+    "1019630853": "2026-04-12T08:58:24",
+    "1019671446": "2026-04-12T08:58:27",
+    "1019682167": "2026-04-12T08:58:27",
+    "1016721941": "2026-04-12T08:58:27",
+    "1016530069": "2026-04-12T08:58:30",
+    "1016530109": "2026-04-12T08:58:30",
+    "1013400808": "2026-04-12T08:58:31",
+    "1016721082": "2026-04-12T08:58:33",
+    "1017009766": "2026-04-12T08:58:34",
+    "1019677924": "2026-04-12T08:58:34",
+    "1017308262": "2026-04-12T08:58:37",
+    "1014279270": "2026-04-12T08:58:37",
+    "1008922782": "2026-04-12T08:58:38",
+    "1013616405": "2026-04-12T08:58:40",
+    "1013700087": "2026-04-12T08:58:41"
   },
   "oracle_context": [
     {
-      "city": "SEVILLA",
+      "city": "GRANADA",
       "category": "cultural_event",
-      "summary": "Feria de Abril 2026 del 26 de abril al 3 de mayo. Gran afluencia esperada y alta demanda de alojamiento. Oportunidad de paquetes premium.",
-      "relevance": 10,
-      "date": "2026-04-20",
+      "summary": "Conciertos al atardecer en la Alhambra durante el festival de primavera.",
+      "relevance": 8,
+      "date": "2026-04-12",
       "actionable": true
     },
     {
-      "city": "GRANADA",
-      "category": "tourism_trend",
-      "summary": "Aumento del turismo de naturaleza y senderismo en Sierra Nevada en primavera. Potencial para nuevas ofertas combinadas con estancias en la ciudad.",
+      "city": "EL GROVE",
+      "category": "seasonal_offer",
+      "summary": "Menús de marisco con descuentos entre semana en la ría de Arousa.",
       "relevance": 7,
-      "date": "2026-04-15",
+      "date": "2026-04-29",
+      "actionable": true
+    },
+    {
+      "city": "MADRID",
+      "category": "cultural_event",
+      "summary": "Arco cierra con récord de asistencia y exposiciones paralelas.",
+      "relevance": 8,
+      "date": "2026-05-03",
+      "actionable": true
+    },
+    {
+      "city": "OPORTO",
+      "category": "cultural_event",
+      "summary": "Festival de jazz en la Ribeira durante el fin de semana largo.",
+      "relevance": 7,
+      "date": "2026-04-16",
       "actionable": true
     },
     {
       "city": "LISBOA",
-      "category": "seasonal_offer",
-      "summary": "Lanzamiento de promoción 'Descubre Lisboa en Primavera' para estancias en mayo y junio. Descuentos en noches y experiencias gastronómicas.",
+      "category": "cultural_event",
+      "summary": "Las Fiestas de Lisboa empiezan a calentar motores con eventos en Alfama.",
       "relevance": 8,
-      "date": "2026-04-10",
+      "date": "2026-04-20",
       "actionable": true
     },
     {
       "city": "OPORTO",
       "category": "tourism_trend",
-      "summary": "Creciente interés en rutas del vino por el Douro y enoturismo experiencial. Atrae a un público de mayor poder adquisitivo y estancias más largas.",
-      "relevance": 9,
-      "date": "2026-04-12",
+      "summary": "Las bodegas de Vila Nova de Gaia baten récord de reservas para primavera.",
+      "relevance": 8,
+      "date": "2026-04-19",
       "actionable": true
+    },
+    {
+      "city": "LISBOA",
+      "category": "seasonal_offer",
+      "summary": "Compañías aéreas lanzan tarifas reducidas desde el sur de Europa.",
+      "relevance": 7,
+      "date": "2026-04-19",
+      "actionable": true
+    },
+    {
+      "city": "MADRID",
+      "category": "seasonal_offer",
+      "summary": "Promociones gastronómicas en torno a la Semana del Cocido.",
+      "relevance": 6,
+      "date": "2026-05-05",
+      "actionable": true
+    },
+    {
+      "city": "OPORTO",
+      "category": "travel_alert",
+      "summary": "Huelga puntual en transporte público de Oporto durante 48 horas.",
+      "relevance": 8,
+      "date": "2026-04-13",
+      "actionable": false
     },
     {
       "city": "ROMA",
-      "category": "cultural_event",
-      "summary": "Inauguración de la exposición 'Tesoros del Renacimiento Romano' en las Scuderie del Quirinale (mayo-septiembre). Esperada afluencia internacional.",
-      "relevance": 8,
-      "date": "2026-05-01",
-      "actionable": true
-    },
-    {
-      "city": "MADRID",
-      "category": "extreme_weather",
-      "summary": "Previsión de una ola de calor temprana para finales de mayo. Preparar servicios de piscina y aire acondicionado, promover actividades nocturnas.",
-      "relevance": 6,
-      "date": "2026-05-25",
-      "actionable": true
-    },
-    {
-      "city": "EL GROVE",
-      "category": "travel_alert",
-      "summary": "Obras de mejora en el acceso al puerto y ciertas zonas costeras de O Grove hasta principios de junio. Posibles desvíos y ruido diurno moderado.",
-      "relevance": 7,
-      "date": "2026-04-12",
-      "actionable": true
-    },
-    {
-      "city": "SEVILLA",
       "category": "tourism_trend",
-      "summary": "Incremento de la demanda de turismo sostenible y experiencias auténticas en el centro histórico, evitando aglomeraciones.",
-      "relevance": 7,
-      "date": "2026-04-09",
-      "actionable": true
-    },
-    {
-      "city": "MADRID",
-      "category": "cultural_event",
-      "summary": "Festival de Música 'Noches del Botánico' anuncia cartel completo para el verano. Fuerte demanda prevista para alojamientos cercanos al venue.",
-      "relevance": 9,
-      "date": "2026-04-18",
-      "actionable": true
-    },
-    {
-      "city": "GRANADA",
-      "category": "seasonal_offer",
-      "summary": "Campaña 'Verano con vistas a la Alhambra' con descuentos para estancias de julio y agosto. Incluye paquetes de visitas guiadas nocturnas.",
-      "relevance": 9,
+      "summary": "El Jubileo atrae más visitantes de lo previsto a la Ciudad Eterna.",
+      "relevance": 8,
       "date": "2026-04-15",
       "actionable": true
     }
@@ -108,5 +108,7 @@
   "campaigns_sent": 20,
   "generic_campaigns_sent": 0,
   "ticks_executed": 1,
-  "blocked_destinations": []
+  "blocked_destinations": [
+    "OPORTO"
+  ]
 }
