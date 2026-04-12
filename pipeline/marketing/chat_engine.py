@@ -693,6 +693,86 @@ def _generate_ai_proposals(dashboard: dict) -> list[dict] | None:
     return result
 
 
+def generate_single_campaign_proposal(
+    index: int,
+    previous_names: list[str],
+    *,
+    force_mock: bool = False,
+) -> dict | None:
+    """Genera UNA sola propuesta de campaña estilo Generador.
+
+    Devuelve un dict con los campos que espera la tarjeta del dashboard
+    (name, objective, segment, channel, timing, subject_line, preview_text,
+    body_summary, priority, rationale, category, category_label). Si Gemini
+    no está disponible o ``force_mock`` es True, cae a una variante del
+    banco heurístico, añadiendo sufijo «(variante)» si el nombre colisiona.
+    """
+    dashboard = _get_dashboard()
+    previous_names = previous_names or []
+
+    def _from_heuristics() -> dict | None:
+        proposals = _generate_heuristic_proposals(dashboard)
+        if not proposals:
+            return None
+        base = dict(proposals[index % len(proposals)])
+        base["id"] = f"live-{index + 1:03d}"
+        if base.get("name") in previous_names:
+            base["name"] = f"{base['name']} (variante)"
+        return base
+
+    if force_mock:
+        return _from_heuristics()
+
+    try:
+        from autonomous.gemini_client import call_gemini, is_available
+    except ModuleNotFoundError:
+        return _from_heuristics()
+
+    if not is_available():
+        return _from_heuristics()
+
+    system_prompt = _build_system_prompt(dashboard)
+    previous_fmt = (
+        ", ".join(f'"{n}"' for n in previous_names[-10:])
+        if previous_names
+        else "ninguno todavía"
+    )
+    prompt = (
+        f"{system_prompt}\n\n"
+        "Genera UNA SOLA propuesta de campaña de marketing (no una lista) "
+        "para Eurostars Hotel Company, pensada para el equipo de marketing. "
+        f"Esta es la propuesta número {index + 1} en la sesión.\n"
+        f"Evita repetir cualquiera de estos nombres ya usados: {previous_fmt}.\n\n"
+        "Devuelve únicamente un objeto JSON con estos campos (en español):\n"
+        "  id (string corto tipo 'live-001'),\n"
+        "  name (título breve de la campaña),\n"
+        "  category (uno de: rrss, hotel, local, branding, geolocalizacion, "
+        "evento, decoracion),\n"
+        "  category_label (etiqueta legible en español de la categoría),\n"
+        "  objective (1 frase),\n"
+        "  segment (etiqueta del segmento objetivo),\n"
+        "  channel (canal o combinación),\n"
+        "  timing (string temporal: '4 semanas', 'jueves a domingo', etc.),\n"
+        "  subject_line (asunto breve si aplica),\n"
+        "  preview_text (texto corto tipo preview email),\n"
+        "  body_summary (descripción detallada en 3-6 frases, visible en la "
+        "tarjeta del dashboard; no cortes ideas),\n"
+        "  priority ('alta', 'media' o 'baja'),\n"
+        "  rationale (1-3 frases explicando por qué esta propuesta encaja "
+        "con los datos actuales del dashboard).\n\n"
+        "No incluyas markdown ni explicaciones fuera del JSON."
+    )
+
+    result = call_gemini(prompt, json_output=True)
+    if isinstance(result, dict) and result.get("name"):
+        result.setdefault("id", f"live-{index + 1:03d}")
+        if result["name"] in previous_names:
+            result["name"] = f"{result['name']} (variante)"
+        return result
+
+    return _from_heuristics()
+
+
 def _modify_messaging_heuristic(campaign: dict, instructions: str) -> dict:
     """Apply heuristic modifications to campaign messaging."""
     msg = instructions.lower()

@@ -271,16 +271,22 @@
                 <div class="section-header">
                     <h1 class="section-title">Modo autónomo</h1>
                     <div class="section-actions">
-                        <label class="auto-toggle" title="Segundos entre recomendaciones individuales">
+                        <label class="auto-toggle" title="Throttle total entre recomendaciones (se reparte entre los agentes concurrentes)">
                             Pausa
                             <input type="number" id="autoDelayInput" min="0" max="60" step="1" value="10"
                                 style="width:52px;margin-left:6px">s
                         </label>
                         <label class="auto-toggle"
-                            title="Cada cuántas recomendaciones individuales se intercala una genérica">
-                            Genérica cada
-                            <input type="number" id="autoGenericInput" min="0" max="50" step="1" value="5"
-                                style="width:52px;margin-left:6px">
+                            title="Agentes concurrentes generando recomendaciones en paralelo">
+                            Agentes
+                            <input type="number" id="autoWorkersInput" min="1" max="6" step="1" value="3"
+                                style="width:46px;margin-left:6px">
+                        </label>
+                        <label class="auto-toggle"
+                            title="Propuestas de campaña estilo Generador a emitir en esta sesión">
+                            Campañas
+                            <input type="number" id="autoCampaignsInput" min="0" max="10" step="1" value="5"
+                                style="width:46px;margin-left:6px">
                         </label>
                         <label class="auto-toggle" title="Usar datos mock sin llamar al modelo">
                             <input type="checkbox" id="autoForceMock"> Forzar mock
@@ -327,11 +333,11 @@
                                 <div class="agent-state" id="agentRecommenderState">en espera</div>
                             </div>
                         </div>
-                        <div class="agent-chip" data-agent="generic">
+                        <div class="agent-chip" data-agent="campaigns">
                             <span class="agent-dot"></span>
                             <div class="agent-body">
-                                <div class="agent-name">Campañas genéricas</div>
-                                <div class="agent-state" id="agentGenericState">en espera</div>
+                                <div class="agent-name">Campañas</div>
+                                <div class="agent-state" id="agentCampaignsState">en espera</div>
                             </div>
                         </div>
                         <div class="agent-chip" data-agent="embeddings">
@@ -361,8 +367,8 @@
                             <div class="auto-metric-value" id="autoMetricBlocked">—</div>
                         </div>
                         <div class="auto-metric">
-                            <div class="auto-metric-label">Genéricas</div>
-                            <div class="auto-metric-value" id="autoMetricGeneric">—</div>
+                            <div class="auto-metric-label">Campañas</div>
+                            <div class="auto-metric-value" id="autoMetricProposals">—</div>
                         </div>
                     </div>
 
@@ -383,14 +389,14 @@
                                     de forma continua, incorporando el contexto del Oráculo.</p>
                             </div>
                         </section>
-                        <aside class="auto-col auto-col-generic">
+                        <aside class="auto-col auto-col-campaigns">
                             <div class="auto-feed-header">
-                                <h2 class="auto-col-title">Campañas genéricas</h2>
-                                <span class="auto-feed-sub" id="autoGenericSub">en espera</span>
+                                <h2 class="auto-col-title">Campañas</h2>
+                                <span class="auto-feed-sub" id="autoCampaignsSub">en espera</span>
                             </div>
-                            <div class="auto-list" id="autoGenericList">
-                                <p class="form-help">Cada cierto número de recomendaciones individuales el sistema
-                                    intercala una campaña para un segmento amplio.</p>
+                            <div class="auto-list" id="autoCampaignsList">
+                                <p class="form-help">Un agente independiente genera propuestas de campaña
+                                    en paralelo con las recomendaciones individuales.</p>
                             </div>
                         </aside>
                     </div>

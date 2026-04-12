@@ -234,9 +234,12 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 return default
 
         force_mock = _flag("force_mock", False)
-        delay = _int("delay", 2 if force_mock else 5)
+        delay = _int("delay", 2 if force_mock else 10)
         max_recs = max(1, min(50, _int("max", 20)))
-        generic_every_n = max(0, min(50, _int("generic_every_n", 5)))
+        workers = max(1, min(6, _int("workers", 3)))
+        campaigns = max(0, min(10, _int("campaigns", 5)))
+        # Compatibilidad: clientes antiguos que pasen ``generic_every_n``
+        # reciben silencio (el parámetro ya no existe).
 
         self._start_chunked_stream()
         try:
@@ -246,7 +249,8 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 delay_between_seconds=float(delay),
                 max_recommendations=max_recs,
                 pacing_seconds=0.15 if force_mock else 0.05,
-                generic_every_n=generic_every_n,
+                recommender_workers=workers,
+                campaigns_per_tick=campaigns,
             ):
                 try:
                     self._emit_ndjson(event)

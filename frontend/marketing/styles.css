@@ -799,18 +799,18 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     margin-bottom: 24px;
 }
 .auto-columns-3 {
-    grid-template-columns: minmax(240px, 0.85fr) minmax(0, 2.2fr) minmax(260px, 1.05fr);
+    grid-template-columns: minmax(240px, 0.8fr) minmax(0, 2.0fr) minmax(300px, 1.2fr);
 }
 @media (max-width: 1400px) {
     .auto-columns-3 { grid-template-columns: minmax(240px, 0.9fr) minmax(0, 2fr); }
-    .auto-columns-3 .auto-col-generic { grid-column: 1 / -1; }
+    .auto-columns-3 .auto-col-campaigns { grid-column: 1 / -1; }
 }
 @media (max-width: 1100px) {
     .auto-columns { grid-template-columns: 1fr; }
     .auto-columns-3 { grid-template-columns: 1fr; }
-    .auto-columns-3 .auto-col-generic { grid-column: auto; }
+    .auto-columns-3 .auto-col-campaigns { grid-column: auto; }
 }
-.auto-col-generic .auto-list { max-height: 720px; }
+.auto-col-campaigns .auto-list { max-height: 720px; }
 
 .auto-col-oracle .auto-list { max-height: 720px; }
 .auto-col-feed { min-width: 0; }
@@ -1260,14 +1260,120 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
     50% { opacity: 0.55; }
 }
 
-/* ── Generic campaign card ──────────────────────────────── */
-.auto-generic-card {
+/* ── Proposal card (Campañas column — Generador-style) ─── */
+.auto-proposal-card {
+    padding: 16px 16px 14px;
     border-left: 3px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
-.auto-generic-card .auto-badge {
-    background: var(--gold-bg-strong);
+.auto-proposal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.auto-proposal-category {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--gold-light);
-    border: 1px solid rgba(201, 162, 68, 0.35);
+}
+.auto-proposal-priority {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.auto-proposal-priority.alta { color: #f87171; border-color: rgba(248, 113, 113, 0.35); }
+.auto-proposal-priority.media { color: #fbbf24; border-color: rgba(251, 191, 36, 0.35); }
+.auto-proposal-priority.baja { color: #9ca3af; }
+.auto-proposal-name {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--text-primary);
+}
+.auto-proposal-objective {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+.auto-proposal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.auto-proposal-tags .auto-tag {
+    font-size: 10px;
+}
+.auto-proposal-subject {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    line-height: 1.4;
+}
+.auto-proposal-preview {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+.auto-proposal-body {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.55;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.auto-proposal-rationale {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.5;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.auto-proposal-rationale.expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+}
+.auto-proposal-rationale-toggle {
+    align-self: flex-start;
+    background: transparent;
+    border: 0;
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 2px 0;
+    margin-top: -4px;
+}
+.auto-proposal-rationale-toggle:hover { color: var(--gold); }
+
+/* ── Worker attribution tag on recommendation cards ────── */
+.auto-worker-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    border-radius: 4px;
+    color: #4ade80;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: rgba(74, 222, 128, 0.08);
 }
 
 /* ── "Ver email HTML" button ────────────────────────────── */

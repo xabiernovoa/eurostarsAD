@@ -714,32 +714,43 @@
         toggleLabel: document.getElementById("autoToggleLabel"),
         forceMock: document.getElementById("autoForceMock"),
         delayInput: document.getElementById("autoDelayInput"),
-        genericInput: document.getElementById("autoGenericInput"),
+        workersInput: document.getElementById("autoWorkersInput"),
+        campaignsInput: document.getElementById("autoCampaignsInput"),
         statusDot: document.getElementById("autoStatusDot"),
         statusText: document.getElementById("autoStatusText"),
         statusModel: document.getElementById("autoStatusModel"),
         feedSub: document.getElementById("autoFeedSub"),
-        genericSub: document.getElementById("autoGenericSub"),
+        campaignsSub: document.getElementById("autoCampaignsSub"),
         metricOracle: document.getElementById("autoMetricOracle"),
         metricCandidates: document.getElementById("autoMetricCandidates"),
         metricCampaigns: document.getElementById("autoMetricCampaigns"),
         metricBlocked: document.getElementById("autoMetricBlocked"),
-        metricGeneric: document.getElementById("autoMetricGeneric"),
+        metricProposals: document.getElementById("autoMetricProposals"),
         oracleList: document.getElementById("autoOracleList"),
         campaignList: document.getElementById("autoCampaignList"),
-        genericList: document.getElementById("autoGenericList"),
+        campaignsList: document.getElementById("autoCampaignsList"),
         log: document.getElementById("autoLog"),
         agentOracle: document.getElementById("agentOracleState"),
         agentRecommender: document.getElementById("agentRecommenderState"),
-        agentGeneric: document.getElementById("agentGenericState"),
+        agentCampaigns: document.getElementById("agentCampaignsState"),
         agentEmbeddings: document.getElementById("agentEmbeddingsState"),
     };
 
     var autoRunState = {
         controller: null,
         running: false,
-        counts: { oracle: 0, candidates: 0, campaigns: 0, blocked: 0, generic: 0 },
-        pauseTimer: null,
+        counts: {
+            oracle: 0,
+            candidates: 0,
+            recs_done: 0,
+            recs_skipped: 0,
+            proposals_done: 0,
+            blocked: 0,
+        },
+        totalWorkers: 0,
+        totalCampaigns: 0,
+        // worker_state map: key = "recommender-1"/"proposals-0", value = "idle"|"busy"|"done"
+        workerStates: {},
     };
 
     function setAgentState(which, state, text) {
@@ -770,62 +781,74 @@
         if (list) list.scrollTop = list.scrollHeight;
     }
 
-    function autoClearPauseCountdown() {
-        if (autoRunState.pauseTimer) {
-            clearInterval(autoRunState.pauseTimer);
-            autoRunState.pauseTimer = null;
-        }
-        var node = document.getElementById("autoPauseCard");
-        if (node) node.remove();
-    }
-
-    function autoShowPauseCountdown(seconds) {
-        autoClearPauseCountdown();
-        if (!seconds || seconds <= 0) return;
-
-        var el = document.createElement("div");
-        el.id = "autoPauseCard";
-        el.className = "auto-pause-card";
-        el.innerHTML =
-            '<div class="auto-pause-icon"><span class="auto-dot"></span></div>' +
-            '<div class="auto-pause-text">Pausa antes de la siguiente recomendación · ' +
-            '<span id="autoPauseSeconds">' + seconds + '</span>s</div>';
-        if (autoEls.campaignList.querySelector("p.form-help")) {
-            autoEls.campaignList.innerHTML = "";
-        }
-        autoEls.campaignList.appendChild(el);
-        autoScrollFeedBottom();
-
-        var remaining = seconds;
-        autoRunState.pauseTimer = setInterval(function () {
-            remaining -= 1;
-            var span = document.getElementById("autoPauseSeconds");
-            if (span) span.textContent = Math.max(0, remaining);
-            if (remaining <= 0) autoClearPauseCountdown();
-        }, 1000);
+    function autoScrollCampaignsBottom() {
+        var list = autoEls.campaignsList;
+        if (list) list.scrollTop = list.scrollHeight;
     }
 
     function autoResetUI() {
-        autoRunState.counts = { oracle: 0, candidates: 0, campaigns: 0, blocked: 0, generic: 0 };
+        autoRunState.counts = {
+            oracle: 0,
+            candidates: 0,
+            recs_done: 0,
+            recs_skipped: 0,
+            proposals_done: 0,
+            blocked: 0,
+        };
+        autoRunState.workerStates = {};
+        autoRunState.totalWorkers = 0;
+        autoRunState.totalCampaigns = 0;
         autoEls.metricOracle.textContent = "—";
         autoEls.metricCandidates.textContent = "—";
         autoEls.metricCampaigns.textContent = "—";
         autoEls.metricBlocked.textContent = "—";
-        if (autoEls.metricGeneric) autoEls.metricGeneric.textContent = "—";
+        if (autoEls.metricProposals) autoEls.metricProposals.textContent = "—";
         autoEls.oracleList.innerHTML = '<p class="form-help">Consultando al Oráculo…</p>';
         autoEls.campaignList.innerHTML = '<p class="form-help">En espera de candidatos…</p>';
-        if (autoEls.genericList) {
-            autoEls.genericList.innerHTML =
-                '<p class="form-help">Se intercalarán al cabo de varias recomendaciones individuales…</p>';
+        if (autoEls.campaignsList) {
+            autoEls.campaignsList.innerHTML =
+                '<p class="form-help">Un agente independiente generará propuestas de campaña aquí…</p>';
         }
         if (autoEls.feedSub) autoEls.feedSub.textContent = "en espera";
-        if (autoEls.genericSub) autoEls.genericSub.textContent = "en espera";
+        if (autoEls.campaignsSub) autoEls.campaignsSub.textContent = "en espera";
         autoEls.log.textContent = "";
-        autoClearPauseCountdown();
         setAgentState("Oracle", "idle", "en espera");
         setAgentState("Recommender", "idle", "en espera");
-        setAgentState("Generic", "idle", "en espera");
+        setAgentState("Campaigns", "idle", "en espera");
         setAgentState("Embeddings", "running", "200 perfiles activos");
+    }
+
+    function autoRecomputeRecommenderAgent() {
+        var busy = 0;
+        var done = 0;
+        var total = autoRunState.totalWorkers || 0;
+        Object.keys(autoRunState.workerStates).forEach(function (k) {
+            if (k.indexOf("recommender-") !== 0) return;
+            var s = autoRunState.workerStates[k];
+            if (s === "busy") busy++;
+            else if (s === "done") done++;
+        });
+        var state = busy > 0 ? "running" : (done === total && total > 0 ? "done" : "waiting");
+        var label;
+        if (done === total && total > 0) {
+            label = total + " agentes · sesión completa";
+        } else {
+            label = busy + "/" + total + " activos · " + autoRunState.counts.recs_done + " emitidas";
+        }
+        setAgentState("Recommender", state, label);
+    }
+
+    function autoRecomputeCampaignsAgent() {
+        var s = autoRunState.workerStates["proposals-0"];
+        var total = autoRunState.totalCampaigns || 0;
+        var done = autoRunState.counts.proposals_done;
+        if (!s || s === "idle") {
+            setAgentState("Campaigns", "waiting", "en espera");
+        } else if (s === "busy") {
+            setAgentState("Campaigns", "running", "generando · " + done + "/" + total);
+        } else {
+            setAgentState("Campaigns", "done", done + "/" + total + " emitidas");
+        }
     }
 
     function autoLog(event) {
@@ -894,13 +917,16 @@
     }
 
     function renderCampaignStart(ev) {
-        autoClearPauseCountdown();
+        var workerTag = ev.worker_id
+            ? '<span class="auto-worker-tag">agente ' + esc(ev.worker_id) + '</span>'
+            : '';
         var el = document.createElement("div");
         el.className = "auto-card auto-campaign-card pending";
         el.id = "auto-campaign-" + ev.guest_id;
         el.innerHTML =
             '<div class="auto-card-head">' +
             '<span class="auto-badge pending">Generando</span>' +
+            workerTag +
             '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
             '</div>' +
             '<div class="auto-card-skeleton">' +
@@ -930,8 +956,12 @@
             return '<p>' + esc(p) + '</p>';
         }).join("");
 
+        var workerTag = ev.worker_id
+            ? '<span class="auto-worker-tag">agente ' + esc(ev.worker_id) + '</span>'
+            : '';
         var content =
             '<div class="auto-card-head">' +
+            workerTag +
             '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
             '<span class="auto-tag">' + esc(seg.age_segment || "—") + '</span>' +
             '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
@@ -990,17 +1020,16 @@
         };
     }
 
-    function renderGenericCampaignStart() {
-        if (!autoEls.genericList) return;
-        var existing = document.getElementById("auto-generic-pending");
-        if (existing) return;
-        var el = document.createElement("div");
-        el.id = "auto-generic-pending";
-        el.className = "auto-card auto-generic-card pending";
+    function renderProposalStart(ev) {
+        if (!autoEls.campaignsList) return;
+        var idx = ev.index || 0;
+        var total = ev.total || "?";
+        var el = document.createElement("article");
+        el.id = "auto-proposal-" + idx;
+        el.className = "auto-card auto-proposal-card pending";
         el.innerHTML =
-            '<div class="auto-card-head">' +
-            '<span class="auto-badge pending">Generando</span>' +
-            '<span class="auto-tag">segmento amplio</span>' +
+            '<div class="auto-proposal-head">' +
+            '<span class="auto-proposal-category">Generando · ' + esc(idx) + '/' + esc(total) + '</span>' +
             '</div>' +
             '<div class="auto-card-skeleton">' +
             '<span class="auto-spinner"></span>' +
@@ -1008,61 +1037,81 @@
             '<div class="auto-skel-line lg"></div>' +
             '<div class="auto-skel-line md"></div>' +
             '<div class="auto-skel-line sm"></div>' +
+            '<div class="auto-skel-line lg"></div>' +
             '</div>' +
             '</div>';
-        if (autoEls.genericList.querySelector("p.form-help")) {
-            autoEls.genericList.innerHTML = "";
+        if (autoEls.campaignsList.querySelector("p.form-help")) {
+            autoEls.campaignsList.innerHTML = "";
         }
-        autoEls.genericList.appendChild(el);
-        autoEls.genericList.scrollTop = autoEls.genericList.scrollHeight;
+        autoEls.campaignsList.appendChild(el);
+        autoScrollCampaignsBottom();
     }
 
-    function renderGenericCampaignDone(ev) {
-        if (!autoEls.genericList) return;
-        var camp = ev.campaign || {};
-        var seg = camp.segment || {};
-        var hotel = camp.hotel || {};
-        var copy = camp.copy || {};
-        var paragraphs = (copy.body_paragraphs || []).map(function (p) {
-            return '<p>' + esc(p) + '</p>';
-        }).join("");
+    function renderProposalDone(ev) {
+        if (!autoEls.campaignsList) return;
+        var idx = ev.index || 0;
+        var total = ev.total || "?";
+        var p = ev.proposal || {};
+
+        var priorityClass = (p.priority || "media").toLowerCase();
+        var categoryLabel = p.category_label || p.category || "Campaña";
+
+        var tags = [];
+        if (p.channel) tags.push('<span class="auto-tag">' + esc(p.channel) + '</span>');
+        if (p.segment) tags.push('<span class="auto-tag">' + esc(p.segment) + '</span>');
+        if (p.timing) tags.push('<span class="auto-tag">' + esc(p.timing) + '</span>');
+
+        var rationaleHtml = "";
+        if (p.rationale) {
+            var long = p.rationale.length > 200;
+            rationaleHtml =
+                '<div class="auto-proposal-rationale' + (long ? '' : ' expanded') + '">' +
+                esc(p.rationale) +
+                '</div>' +
+                (long
+                    ? '<button type="button" class="auto-proposal-rationale-toggle">ver más</button>'
+                    : '');
+        }
 
         var html =
-            '<div class="auto-card-head">' +
-            '<span class="auto-badge">Genérica</span>' +
-            '<span class="auto-tag">' + esc(seg.age_segment || camp.segment_label || "—") + '</span>' +
-            '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
+            '<div class="auto-proposal-head">' +
+            '<span class="auto-proposal-category">' + esc(categoryLabel) +
+            ' · ' + esc(idx) + '/' + esc(total) + '</span>' +
+            (p.priority
+                ? '<span class="auto-proposal-priority ' + esc(priorityClass) + '">' +
+                esc(p.priority) + '</span>'
+                : '') +
             '</div>' +
-            (camp.name ? '<div class="auto-card-headline">' + esc(camp.name) + '</div>' : '') +
-            (hotel.name
-                ? '<div class="auto-card-hotel">' + esc(hotel.name || "") +
-                ' · ' + esc(hotel.city || camp.destination || "") + '</div>'
-                : (camp.destination ? '<div class="auto-card-hotel">' + esc(camp.destination) + '</div>' : '')) +
-            (copy.subject ? '<div class="auto-card-subject">' + esc(copy.subject) + '</div>' : '') +
-            (copy.preheader ? '<div class="auto-card-preheader">' + esc(copy.preheader) + '</div>' : '') +
-            (copy.headline ? '<div class="auto-card-headline">' + esc(copy.headline) + '</div>' : '') +
-            (paragraphs ? '<div class="auto-card-body">' + paragraphs + '</div>' : '') +
-            (copy.cta_text ? '<div class="auto-card-cta"><span>CTA:</span> ' + esc(copy.cta_text) + '</div>' : '') +
-            (camp.rationale
-                ? '<div class="auto-card-ps">' + esc(camp.rationale) + '</div>'
-                : '');
+            (p.name ? '<div class="auto-proposal-name">' + esc(p.name) + '</div>' : '') +
+            (p.objective ? '<div class="auto-proposal-objective">' + esc(p.objective) + '</div>' : '') +
+            (tags.length ? '<div class="auto-proposal-tags">' + tags.join("") + '</div>' : '') +
+            (p.subject_line
+                ? '<div class="auto-proposal-subject">' + esc(p.subject_line) + '</div>'
+                : '') +
+            (p.preview_text
+                ? '<div class="auto-proposal-preview">' + esc(p.preview_text) + '</div>'
+                : '') +
+            (p.body_summary
+                ? '<div class="auto-proposal-body">' + esc(p.body_summary) + '</div>'
+                : '') +
+            rationaleHtml;
 
-        var existing = document.getElementById("auto-generic-pending");
+        var existing = document.getElementById("auto-proposal-" + idx);
         if (existing) {
             existing.classList.remove("pending");
             existing.classList.add("fade-in");
-            existing.removeAttribute("id");
             existing.innerHTML = html;
         } else {
-            var el = document.createElement("div");
-            el.className = "auto-card auto-generic-card fade-in";
+            var el = document.createElement("article");
+            el.id = "auto-proposal-" + idx;
+            el.className = "auto-card auto-proposal-card fade-in";
             el.innerHTML = html;
-            if (autoEls.genericList.querySelector("p.form-help")) {
-                autoEls.genericList.innerHTML = "";
+            if (autoEls.campaignsList.querySelector("p.form-help")) {
+                autoEls.campaignsList.innerHTML = "";
             }
-            autoEls.genericList.appendChild(el);
+            autoEls.campaignsList.appendChild(el);
         }
-        autoEls.genericList.scrollTop = autoEls.genericList.scrollHeight;
+        autoScrollCampaignsBottom();
     }
 
     function renderCampaignSkipped(ev) {
@@ -1092,10 +1141,18 @@
             case "start":
                 autoSetStatus("running", "Arrancando modo autónomo…",
                     (ev.config && ev.config.gemini_available) ? ("Modelo: " + ev.config.model) : "Modo mock");
+                if (ev.config) {
+                    autoRunState.totalWorkers = ev.config.recommender_workers || 0;
+                    autoRunState.totalCampaigns = ev.config.campaigns_per_tick || 0;
+                }
                 if (autoEls.feedSub && ev.config) {
                     autoEls.feedSub.textContent =
-                        "cap " + (ev.config.max_recommendations || "?") +
-                        " · pausa " + (ev.config.delay_between_seconds || 0) + "s";
+                        (ev.config.recommender_workers || 1) + " agentes · cap " +
+                        (ev.config.max_recommendations || "?");
+                }
+                if (autoEls.campaignsSub && ev.config) {
+                    autoEls.campaignsSub.textContent =
+                        (ev.config.campaigns_per_tick || 0) + " campañas programadas";
                 }
                 break;
 
@@ -1141,82 +1198,96 @@
                 break;
 
             case "feed_start":
-                autoSetStatus("running", "Feed autónomo en marcha…");
-                setAgentState("Generic", "waiting",
-                    "cada " + (ev.generic_every_n || 5) + " individuales");
+                autoRunState.totalWorkers = ev.recommender_workers || autoRunState.totalWorkers;
+                autoRunState.totalCampaigns = ev.campaigns_per_tick != null ? ev.campaigns_per_tick : autoRunState.totalCampaigns;
+                autoSetStatus("running",
+                    autoRunState.totalWorkers + " agentes generando en paralelo…");
                 if (autoEls.feedSub) {
                     autoEls.feedSub.textContent =
-                        (ev.total_candidates || 0) + " candidatos · pausa " +
-                        (ev.delay_between_seconds || 0) + "s entre envíos";
+                        (ev.total_candidates || 0) + " candidatos · " +
+                        autoRunState.totalWorkers + " agentes concurrentes";
+                }
+                if (autoRunState.totalCampaigns > 0) {
+                    setAgentState("Campaigns", "waiting",
+                        "0/" + autoRunState.totalCampaigns + " emitidas");
+                } else {
+                    setAgentState("Campaigns", "idle", "desactivadas");
+                }
+                autoRecomputeRecommenderAgent();
+                break;
+
+            case "worker_state":
+                var key = (ev.kind || "recommender") + "-" + (ev.worker_id || 0);
+                autoRunState.workerStates[key] = ev.state;
+                if (ev.kind === "proposals") {
+                    autoRecomputeCampaignsAgent();
+                } else {
+                    autoRecomputeRecommenderAgent();
                 }
                 break;
 
             case "campaign_start":
                 renderCampaignStart(ev);
                 autoSetStatus("running",
-                    "Generando recomendación para guest " + ev.guest_id + "…");
-                setAgentState("Recommender", "running", "guest " + ev.guest_id);
+                    "Agente " + (ev.worker_id || "?") + " → guest " + ev.guest_id + "…");
                 break;
 
             case "campaign_done":
-                autoRunState.counts.campaigns++;
-                autoEls.metricCampaigns.textContent = autoRunState.counts.campaigns;
+                autoRunState.counts.recs_done++;
+                autoEls.metricCampaigns.textContent = autoRunState.counts.recs_done;
                 renderCampaignDone(ev);
-                autoSetStatus("running", "Recomendación entregada · pausa antes de la siguiente…");
-                setAgentState("Recommender", "done",
-                    autoRunState.counts.campaigns + " recomendaciones entregadas");
+                autoRecomputeRecommenderAgent();
                 break;
 
             case "campaign_skipped":
+                autoRunState.counts.recs_skipped++;
                 renderCampaignSkipped(ev);
+                autoRecomputeRecommenderAgent();
                 break;
 
-            case "generic_campaign_start":
-                renderGenericCampaignStart();
-                setAgentState("Generic", "running", "generando campaña genérica…");
-                if (autoEls.genericSub) autoEls.genericSub.textContent = "generando…";
-                break;
-
-            case "generic_campaign_done":
-                autoRunState.counts.generic++;
-                if (autoEls.metricGeneric) {
-                    autoEls.metricGeneric.textContent = autoRunState.counts.generic;
-                }
-                renderGenericCampaignDone(ev);
-                setAgentState("Generic", "done",
-                    autoRunState.counts.generic + " campañas emitidas");
-                if (autoEls.genericSub) {
-                    autoEls.genericSub.textContent =
-                        autoRunState.counts.generic + " emitidas";
+            case "proposal_start":
+                renderProposalStart(ev);
+                if (autoEls.campaignsSub) {
+                    autoEls.campaignsSub.textContent =
+                        "generando " + (ev.index || "?") + "/" + (ev.total || "?");
                 }
                 break;
 
-            case "pause":
-                autoShowPauseCountdown(ev.delay_seconds || 0);
-                if (autoEls.feedSub) {
-                    autoEls.feedSub.textContent =
-                        "pausa " + (ev.delay_seconds || 0) + "s · " +
-                        (ev.remaining_candidates || 0) + " candidatos en cola";
+            case "proposal_done":
+                autoRunState.counts.proposals_done++;
+                if (autoEls.metricProposals) {
+                    autoEls.metricProposals.textContent = autoRunState.counts.proposals_done;
+                }
+                renderProposalDone(ev);
+                autoRecomputeCampaignsAgent();
+                if (autoEls.campaignsSub) {
+                    autoEls.campaignsSub.textContent =
+                        autoRunState.counts.proposals_done + "/" +
+                        (ev.total || autoRunState.totalCampaigns) + " emitidas";
                 }
                 break;
 
             case "feed_done":
-                autoClearPauseCountdown();
                 if (autoEls.feedSub) {
                     autoEls.feedSub.textContent =
-                        ev.total_recommendations + " recomendaciones emitidas · " +
-                        (ev.reason === "max_reached" ? "cap alcanzado" : "cola agotada");
+                        (ev.recommendations_generated || 0) + " recomendaciones · " +
+                        (ev.proposals_generated || 0) + " campañas · " +
+                        (ev.reason === "cap_reached" ? "cap alcanzado" : "cola agotada");
                 }
                 break;
 
             case "error":
-                autoSetStatus("error", "Error en " + (ev.stage || "?") + ": " + (ev.message || ""));
+                autoSetStatus("error",
+                    "Error en " + (ev.stage || "?") +
+                    (ev.worker_id ? " (agente " + ev.worker_id + ")" : "") +
+                    ": " + (ev.message || ""));
                 break;
 
             case "tick_done":
                 var sum = ev.summary || {};
                 autoSetStatus("done", "Sesión cerrada en " + ev.duration_seconds + "s · " +
-                    (sum.recommendations_generated || 0) + " recomendaciones");
+                    (sum.recommendations_generated || 0) + " recomendaciones · " +
+                    (sum.campaigns_generated || 0) + " campañas");
                 autoStopRun(false);
                 break;
         }
@@ -1228,7 +1299,8 @@
         if (opts.forceMock) params.set("force_mock", "1");
         if (opts.delay != null) params.set("delay", String(opts.delay));
         if (opts.max != null) params.set("max", String(opts.max));
-        if (opts.genericEveryN != null) params.set("generic_every_n", String(opts.genericEveryN));
+        if (opts.workers != null) params.set("workers", String(opts.workers));
+        if (opts.campaigns != null) params.set("campaigns", String(opts.campaigns));
 
         autoRunState.controller = new AbortController();
         var response;
@@ -1286,11 +1358,13 @@
         autoResetUI();
         autoSetStatus("running", "Arrancando modo autónomo…");
         var delay = autoEls.delayInput ? parseInt(autoEls.delayInput.value, 10) : NaN;
-        var genericEveryN = autoEls.genericInput ? parseInt(autoEls.genericInput.value, 10) : NaN;
+        var workers = autoEls.workersInput ? parseInt(autoEls.workersInput.value, 10) : NaN;
+        var campaigns = autoEls.campaignsInput ? parseInt(autoEls.campaignsInput.value, 10) : NaN;
         autoStreamTick({
             forceMock: autoEls.forceMock ? autoEls.forceMock.checked : false,
             delay: isNaN(delay) ? null : Math.max(0, Math.min(60, delay)),
-            genericEveryN: isNaN(genericEveryN) ? null : Math.max(0, Math.min(50, genericEveryN)),
+            workers: isNaN(workers) ? null : Math.max(1, Math.min(6, workers)),
+            campaigns: isNaN(campaigns) ? null : Math.max(0, Math.min(10, campaigns)),
         });
     }
 
@@ -1300,7 +1374,6 @@
         }
         autoRunState.running = false;
         autoRunState.controller = null;
-        autoClearPauseCountdown();
         autoSetToggle(false);
     }
 
@@ -1321,6 +1394,18 @@
             if (!btn) return;
             var guest = btn.getAttribute("data-guest");
             if (guest) openEmailPreview(guest);
+        });
+    }
+
+    if (autoEls.campaignsList) {
+        autoEls.campaignsList.addEventListener("click", function (e) {
+            var btn = e.target.closest && e.target.closest(".auto-proposal-rationale-toggle");
+            if (!btn) return;
+            var rationale = btn.previousElementSibling;
+            if (rationale && rationale.classList.contains("auto-proposal-rationale")) {
+                var expanded = rationale.classList.toggle("expanded");
+                btn.textContent = expanded ? "ver menos" : "ver más";
+            }
         });
     }
 
