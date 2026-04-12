@@ -713,25 +713,45 @@
         toggleBtn: document.getElementById("autoToggleBtn"),
         toggleLabel: document.getElementById("autoToggleLabel"),
         forceMock: document.getElementById("autoForceMock"),
+        delayInput: document.getElementById("autoDelayInput"),
+        genericInput: document.getElementById("autoGenericInput"),
         statusDot: document.getElementById("autoStatusDot"),
         statusText: document.getElementById("autoStatusText"),
         statusModel: document.getElementById("autoStatusModel"),
         feedSub: document.getElementById("autoFeedSub"),
+        genericSub: document.getElementById("autoGenericSub"),
         metricOracle: document.getElementById("autoMetricOracle"),
         metricCandidates: document.getElementById("autoMetricCandidates"),
         metricCampaigns: document.getElementById("autoMetricCampaigns"),
         metricBlocked: document.getElementById("autoMetricBlocked"),
+        metricGeneric: document.getElementById("autoMetricGeneric"),
         oracleList: document.getElementById("autoOracleList"),
         campaignList: document.getElementById("autoCampaignList"),
+        genericList: document.getElementById("autoGenericList"),
         log: document.getElementById("autoLog"),
+        agentOracle: document.getElementById("agentOracleState"),
+        agentRecommender: document.getElementById("agentRecommenderState"),
+        agentGeneric: document.getElementById("agentGenericState"),
+        agentEmbeddings: document.getElementById("agentEmbeddingsState"),
     };
 
     var autoRunState = {
         controller: null,
         running: false,
-        counts: { oracle: 0, candidates: 0, campaigns: 0, blocked: 0 },
+        counts: { oracle: 0, candidates: 0, campaigns: 0, blocked: 0, generic: 0 },
         pauseTimer: null,
     };
+
+    function setAgentState(which, state, text) {
+        var labelEl = autoEls["agent" + which];
+        if (!labelEl) return;
+        labelEl.textContent = text || "";
+        var chip = labelEl.closest(".agent-chip");
+        if (chip) {
+            chip.classList.remove("idle", "running", "waiting", "done", "error");
+            chip.classList.add(state || "idle");
+        }
+    }
 
     function autoSetToggle(running) {
         if (!autoEls.toggleBtn) return;
@@ -786,16 +806,26 @@
     }
 
     function autoResetUI() {
-        autoRunState.counts = { oracle: 0, candidates: 0, campaigns: 0, blocked: 0 };
+        autoRunState.counts = { oracle: 0, candidates: 0, campaigns: 0, blocked: 0, generic: 0 };
         autoEls.metricOracle.textContent = "—";
         autoEls.metricCandidates.textContent = "—";
         autoEls.metricCampaigns.textContent = "—";
         autoEls.metricBlocked.textContent = "—";
+        if (autoEls.metricGeneric) autoEls.metricGeneric.textContent = "—";
         autoEls.oracleList.innerHTML = '<p class="form-help">Consultando al Oráculo…</p>';
         autoEls.campaignList.innerHTML = '<p class="form-help">En espera de candidatos…</p>';
+        if (autoEls.genericList) {
+            autoEls.genericList.innerHTML =
+                '<p class="form-help">Se intercalarán al cabo de varias recomendaciones individuales…</p>';
+        }
         if (autoEls.feedSub) autoEls.feedSub.textContent = "en espera";
+        if (autoEls.genericSub) autoEls.genericSub.textContent = "en espera";
         autoEls.log.textContent = "";
         autoClearPauseCountdown();
+        setAgentState("Oracle", "idle", "en espera");
+        setAgentState("Recommender", "idle", "en espera");
+        setAgentState("Generic", "idle", "en espera");
+        setAgentState("Embeddings", "running", "200 perfiles activos");
     }
 
     function autoLog(event) {
@@ -916,7 +946,9 @@
             '<div class="auto-card-body">' + paragraphs + '</div>' +
             '<div class="auto-card-cta"><span>CTA:</span> ' + esc(copy.cta_text || "") + '</div>' +
             (copy.ps_line ? '<div class="auto-card-ps">' + esc(copy.ps_line) + '</div>' : '') +
-            renderMatchedEventsChips(matched);
+            renderMatchedEventsChips(matched) +
+            '<button type="button" class="auto-card-preview-btn" data-guest="' + esc(ev.guest_id) +
+            '" title="Ver email HTML renderizado">Ver email HTML</button>';
 
         if (existing) {
             existing.classList.remove("pending");
@@ -935,6 +967,102 @@
             matched.map(function (e) { return e.category; })
         );
         autoScrollFeedBottom();
+    }
+
+    function openEmailPreview(guestId) {
+        var overlay = document.getElementById("emailPreviewOverlay");
+        if (!overlay) return;
+        overlay.style.display = "flex";
+        overlay.innerHTML =
+            '<div class="email-preview-modal">' +
+            '<div class="email-preview-header">' +
+            '<span>Email renderizado · guest ' + esc(guestId) + '</span>' +
+            '<button type="button" class="email-preview-close" aria-label="Cerrar">✕</button>' +
+            '</div>' +
+            '<iframe src="/api/autonomous/email/' + encodeURIComponent(guestId) +
+            '" class="email-preview-iframe" title="Email ' + esc(guestId) + '"></iframe>' +
+            '</div>';
+        overlay.onclick = function (e) {
+            if (e.target === overlay || e.target.classList.contains("email-preview-close")) {
+                overlay.style.display = "none";
+                overlay.innerHTML = "";
+            }
+        };
+    }
+
+    function renderGenericCampaignStart() {
+        if (!autoEls.genericList) return;
+        var existing = document.getElementById("auto-generic-pending");
+        if (existing) return;
+        var el = document.createElement("div");
+        el.id = "auto-generic-pending";
+        el.className = "auto-card auto-generic-card pending";
+        el.innerHTML =
+            '<div class="auto-card-head">' +
+            '<span class="auto-badge pending">Generando</span>' +
+            '<span class="auto-tag">segmento amplio</span>' +
+            '</div>' +
+            '<div class="auto-card-skeleton">' +
+            '<span class="auto-spinner"></span>' +
+            '<div class="auto-skel-text">' +
+            '<div class="auto-skel-line lg"></div>' +
+            '<div class="auto-skel-line md"></div>' +
+            '<div class="auto-skel-line sm"></div>' +
+            '</div>' +
+            '</div>';
+        if (autoEls.genericList.querySelector("p.form-help")) {
+            autoEls.genericList.innerHTML = "";
+        }
+        autoEls.genericList.appendChild(el);
+        autoEls.genericList.scrollTop = autoEls.genericList.scrollHeight;
+    }
+
+    function renderGenericCampaignDone(ev) {
+        if (!autoEls.genericList) return;
+        var camp = ev.campaign || {};
+        var seg = camp.segment || {};
+        var hotel = camp.hotel || {};
+        var copy = camp.copy || {};
+        var paragraphs = (copy.body_paragraphs || []).map(function (p) {
+            return '<p>' + esc(p) + '</p>';
+        }).join("");
+
+        var html =
+            '<div class="auto-card-head">' +
+            '<span class="auto-badge">Genérica</span>' +
+            '<span class="auto-tag">' + esc(seg.age_segment || camp.segment_label || "—") + '</span>' +
+            '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
+            '</div>' +
+            (camp.name ? '<div class="auto-card-headline">' + esc(camp.name) + '</div>' : '') +
+            (hotel.name
+                ? '<div class="auto-card-hotel">' + esc(hotel.name || "") +
+                ' · ' + esc(hotel.city || camp.destination || "") + '</div>'
+                : (camp.destination ? '<div class="auto-card-hotel">' + esc(camp.destination) + '</div>' : '')) +
+            (copy.subject ? '<div class="auto-card-subject">' + esc(copy.subject) + '</div>' : '') +
+            (copy.preheader ? '<div class="auto-card-preheader">' + esc(copy.preheader) + '</div>' : '') +
+            (copy.headline ? '<div class="auto-card-headline">' + esc(copy.headline) + '</div>' : '') +
+            (paragraphs ? '<div class="auto-card-body">' + paragraphs + '</div>' : '') +
+            (copy.cta_text ? '<div class="auto-card-cta"><span>CTA:</span> ' + esc(copy.cta_text) + '</div>' : '') +
+            (camp.rationale
+                ? '<div class="auto-card-ps">' + esc(camp.rationale) + '</div>'
+                : '');
+
+        var existing = document.getElementById("auto-generic-pending");
+        if (existing) {
+            existing.classList.remove("pending");
+            existing.classList.add("fade-in");
+            existing.removeAttribute("id");
+            existing.innerHTML = html;
+        } else {
+            var el = document.createElement("div");
+            el.className = "auto-card auto-generic-card fade-in";
+            el.innerHTML = html;
+            if (autoEls.genericList.querySelector("p.form-help")) {
+                autoEls.genericList.innerHTML = "";
+            }
+            autoEls.genericList.appendChild(el);
+        }
+        autoEls.genericList.scrollTop = autoEls.genericList.scrollHeight;
     }
 
     function renderCampaignSkipped(ev) {
@@ -973,12 +1101,15 @@
 
             case "oracle_start":
                 autoSetStatus("running", "Consultando al Oráculo…");
+                setAgentState("Oracle", "running", "refrescando señales…");
                 break;
 
             case "oracle_entry":
                 autoRunState.counts.oracle++;
                 autoEls.metricOracle.textContent = autoRunState.counts.oracle;
                 renderOracleEntry(ev.entry || {});
+                setAgentState("Oracle", "running",
+                    autoRunState.counts.oracle + " señales detectadas");
                 break;
 
             case "oracle_done":
@@ -986,10 +1117,13 @@
                 autoEls.metricBlocked.textContent = autoRunState.counts.blocked;
                 autoSetStatus("running", "Oráculo listo: " + (ev.count || 0) + " señales · " +
                     autoRunState.counts.blocked + " destinos bloqueados");
+                setAgentState("Oracle", "done",
+                    (ev.count || 0) + " señales · " + autoRunState.counts.blocked + " bloqueados");
                 break;
 
             case "candidates_start":
                 autoSetStatus("running", "Calculando candidatos…");
+                setAgentState("Recommender", "running", "seleccionando candidatos…");
                 break;
 
             case "candidate":
@@ -999,6 +1133,7 @@
 
             case "candidates_done":
                 autoSetStatus("running", (ev.count || 0) + " candidatos en cola");
+                setAgentState("Recommender", "running", (ev.count || 0) + " candidatos en cola");
                 if (ev.count === 0) {
                     autoEls.campaignList.innerHTML =
                         '<p class="form-help">No hay candidatos en esta ventana de envío.</p>';
@@ -1007,6 +1142,8 @@
 
             case "feed_start":
                 autoSetStatus("running", "Feed autónomo en marcha…");
+                setAgentState("Generic", "waiting",
+                    "cada " + (ev.generic_every_n || 5) + " individuales");
                 if (autoEls.feedSub) {
                     autoEls.feedSub.textContent =
                         (ev.total_candidates || 0) + " candidatos · pausa " +
@@ -1018,6 +1155,7 @@
                 renderCampaignStart(ev);
                 autoSetStatus("running",
                     "Generando recomendación para guest " + ev.guest_id + "…");
+                setAgentState("Recommender", "running", "guest " + ev.guest_id);
                 break;
 
             case "campaign_done":
@@ -1025,10 +1163,32 @@
                 autoEls.metricCampaigns.textContent = autoRunState.counts.campaigns;
                 renderCampaignDone(ev);
                 autoSetStatus("running", "Recomendación entregada · pausa antes de la siguiente…");
+                setAgentState("Recommender", "done",
+                    autoRunState.counts.campaigns + " recomendaciones entregadas");
                 break;
 
             case "campaign_skipped":
                 renderCampaignSkipped(ev);
+                break;
+
+            case "generic_campaign_start":
+                renderGenericCampaignStart();
+                setAgentState("Generic", "running", "generando campaña genérica…");
+                if (autoEls.genericSub) autoEls.genericSub.textContent = "generando…";
+                break;
+
+            case "generic_campaign_done":
+                autoRunState.counts.generic++;
+                if (autoEls.metricGeneric) {
+                    autoEls.metricGeneric.textContent = autoRunState.counts.generic;
+                }
+                renderGenericCampaignDone(ev);
+                setAgentState("Generic", "done",
+                    autoRunState.counts.generic + " campañas emitidas");
+                if (autoEls.genericSub) {
+                    autoEls.genericSub.textContent =
+                        autoRunState.counts.generic + " emitidas";
+                }
                 break;
 
             case "pause":
@@ -1068,6 +1228,7 @@
         if (opts.forceMock) params.set("force_mock", "1");
         if (opts.delay != null) params.set("delay", String(opts.delay));
         if (opts.max != null) params.set("max", String(opts.max));
+        if (opts.genericEveryN != null) params.set("generic_every_n", String(opts.genericEveryN));
 
         autoRunState.controller = new AbortController();
         var response;
@@ -1124,8 +1285,12 @@
         autoSetToggle(true);
         autoResetUI();
         autoSetStatus("running", "Arrancando modo autónomo…");
+        var delay = autoEls.delayInput ? parseInt(autoEls.delayInput.value, 10) : NaN;
+        var genericEveryN = autoEls.genericInput ? parseInt(autoEls.genericInput.value, 10) : NaN;
         autoStreamTick({
             forceMock: autoEls.forceMock ? autoEls.forceMock.checked : false,
+            delay: isNaN(delay) ? null : Math.max(0, Math.min(60, delay)),
+            genericEveryN: isNaN(genericEveryN) ? null : Math.max(0, Math.min(50, genericEveryN)),
         });
     }
 
@@ -1147,6 +1312,15 @@
             } else {
                 autoStartRun();
             }
+        });
+    }
+
+    if (autoEls.campaignList) {
+        autoEls.campaignList.addEventListener("click", function (e) {
+            var btn = e.target.closest && e.target.closest(".auto-card-preview-btn");
+            if (!btn) return;
+            var guest = btn.getAttribute("data-guest");
+            if (guest) openEmailPreview(guest);
         });
     }
 

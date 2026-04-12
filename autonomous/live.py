@@ -17,20 +17,22 @@ El cliente (frontend) detiene la generación cerrando la conexión HTTP;
 el servidor captura el ``BrokenPipeError`` y aborta el generador.
 
 Eventos emitidos (``type``):
-    start               — metadatos iniciales y configuración
-    oracle_start        — comienza el refresco del Oráculo
-    oracle_entry        — cada entrada del Oráculo
-    oracle_done         — resumen del Oráculo (count, blocked, trending)
-    candidates_start    — se abre la búsqueda de candidatos
-    candidate           — un candidato válido detectado
-    candidates_done     — fin de la fase de selección
-    feed_start          — arranca el feed continuo
-    campaign_start      — comienza la generación para un guest
-    campaign_done       — recomendación completa (incluye matched_events)
-    campaign_skipped    — usuario omitido (destino bloqueado o sin datos)
-    pause               — espera artificial entre recomendaciones
-    feed_done           — ya no hay más candidatos (cap o cola agotada)
-    tick_done           — resumen final
+    start                   — metadatos iniciales y configuración
+    oracle_start            — comienza el refresco del Oráculo
+    oracle_entry            — cada entrada del Oráculo
+    oracle_done             — resumen del Oráculo (count, blocked, trending)
+    candidates_start        — se abre la búsqueda de candidatos
+    candidate               — un candidato válido detectado
+    candidates_done         — fin de la fase de selección
+    feed_start              — arranca el feed continuo
+    campaign_start          — comienza la generación para un guest
+    campaign_done           — recomendación completa (incluye matched_events)
+    campaign_skipped        — usuario omitido (destino bloqueado o sin datos)
+    pause                   — espera artificial entre recomendaciones
+    generic_campaign_start  — comienza una campaña genérica intercalada
+    generic_campaign_done   — campaña genérica completada
+    feed_done               — ya no hay más candidatos (cap o cola agotada)
+    tick_done               — resumen final
 """
 
 from __future__ import annotations
@@ -66,6 +68,7 @@ def iter_tick(
     window_days: int = 400,
     cooldown_days: int = 0,
     pacing_seconds: float = 0.05,
+    generic_every_n: int = 5,
 ) -> Iterator[dict[str, Any]]:
     """
     Ejecuta un feed autónomo continuo y emite eventos NDJSON.
@@ -74,6 +77,8 @@ def iter_tick(
       (visible en el frontend como cuenta atrás).
     * ``max_recommendations``: cap de seguridad para evitar drenar la
       cuota del modelo en demos largas.
+    * ``generic_every_n``: cada N recomendaciones individuales generadas,
+      intercala una campaña genérica. Pon ``0`` para desactivar.
     """
     config.ensure_output_dirs()
 
@@ -89,6 +94,7 @@ def iter_tick(
             "max_recommendations": max_recommendations,
             "window_days": window_days,
             "cooldown_days": cooldown_days,
+            "generic_every_n": generic_every_n,
             "gemini_available": gemini_client.is_available() and not force_mock,
             "model": (
                 config.GEMINI_MODEL
@@ -194,6 +200,7 @@ def iter_tick(
     _sleep(pacing_seconds)
 
     generated: list[dict[str, Any]] = []
+    generic_generated: list[dict[str, Any]] = []
     skipped = 0
 
     for idx, cand in enumerate(candidates):
@@ -252,6 +259,46 @@ def iter_tick(
         generated.append(payload)
         yield payload
 
+        # Intercalado: cada N recomendaciones, generar una genérica.
+        if (
+            generic_every_n
+            and generic_every_n > 0
+            and len(generated) % generic_every_n == 0
+        ):
+            yield {
+                "type": "generic_campaign_start",
+                "message": "Generando campaña genérica para un segmento amplio…",
+                "after_individual": len(generated),
+            }
+            _sleep(pacing_seconds)
+            try:
+                from autonomous import generic_campaigns
+
+                proposals = generic_campaigns.generate_generic_campaigns(
+                    oracle_context=ctx,
+                    force_mock=force_mock,
+                    max_campaigns=1,
+                    save_report=False,
+                )
+            except Exception as exc:  # pragma: no cover — defensivo
+                logger.exception("Error generando campaña genérica")
+                yield {
+                    "type": "error",
+                    "stage": "generic",
+                    "message": str(exc),
+                }
+                proposals = []
+
+            for prop in proposals or []:
+                generic_generated.append(prop)
+                state_module.record_generic_campaign(st, now=datetime.now())
+                yield {
+                    "type": "generic_campaign_done",
+                    "index": len(generic_generated),
+                    "campaign": prop,
+                }
+                _sleep(pacing_seconds)
+
         # Pausa artificial antes de la siguiente recomendación.
         remaining = min(len(candidates) - idx - 1, max_recommendations - len(generated))
         if remaining > 0 and delay_between_seconds > 0:
@@ -284,6 +331,7 @@ def iter_tick(
             "candidates_found": len(candidates),
             "recommendations_generated": len(generated),
             "recommendations_skipped": skipped,
+            "generic_campaigns_generated": len(generic_generated),
             "blocked_destinations": sorted(blocked),
         },
     }

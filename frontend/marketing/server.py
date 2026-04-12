@@ -117,11 +117,40 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
             self._handle_autonomous_stream(parsed.query)
             return
 
+        if pathname.startswith("/api/autonomous/email/"):
+            self._handle_email_preview(pathname)
+            return
+
         if pathname == "/":
             self._send_file(BASE_DIR / "index.html")
             return
 
         self._send_file(BASE_DIR / pathname.lstrip("/"))
+
+    def _handle_email_preview(self, pathname: str) -> None:
+        # /api/autonomous/email/{guest_id}
+        raw_id = pathname.rsplit("/", 1)[-1]
+        # Sanitización estricta: solo alfanuméricos, guiones y guion bajo.
+        guest_id = "".join(ch for ch in raw_id if ch.isalnum() or ch in ("-", "_"))
+        if not guest_id:
+            self._send(400, "application/json; charset=utf-8",
+                       json.dumps({"error": "guest_id inválido"}, ensure_ascii=False))
+            return
+        email_path = PROJECT_ROOT / "autonomous" / "output" / "emails" / f"pre_arrival_{guest_id}.html"
+        try:
+            email_path = email_path.resolve()
+            emails_root = (PROJECT_ROOT / "autonomous" / "output" / "emails").resolve()
+            if emails_root not in email_path.parents:
+                raise ValueError("path escape")
+        except Exception:
+            self._send(400, "application/json; charset=utf-8",
+                       json.dumps({"error": "ruta inválida"}, ensure_ascii=False))
+            return
+        if email_path.is_file():
+            self._send_file(email_path)
+        else:
+            self._send(404, "application/json; charset=utf-8",
+                       json.dumps({"error": "Email no encontrado"}, ensure_ascii=False))
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -207,6 +236,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
         force_mock = _flag("force_mock", False)
         delay = _int("delay", 2 if force_mock else 5)
         max_recs = max(1, min(50, _int("max", 20)))
+        generic_every_n = max(0, min(50, _int("generic_every_n", 5)))
 
         self._start_chunked_stream()
         try:
@@ -216,6 +246,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 delay_between_seconds=float(delay),
                 max_recommendations=max_recs,
                 pacing_seconds=0.15 if force_mock else 0.05,
+                generic_every_n=generic_every_n,
             ):
                 try:
                     self._emit_ndjson(event)

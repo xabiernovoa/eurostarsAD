@@ -3,15 +3,14 @@
 chat_engine.py — Marketing AI Assistant.
 
 Conversational agent with full access to dashboard data.
-Uses Anthropic if available, falls back to a contextual heuristic engine.
+Uses Gemini via Vertex AI (autonomous.gemini_client) when available,
+falls back to a contextual heuristic engine otherwise.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
-import re
 import sys
 from pathlib import Path
 
@@ -60,6 +59,53 @@ def _build_system_prompt(dashboard: dict) -> str:
     focus_cities = dashboard.get("focus_cities", [])
     recent_campaigns = dashboard.get("recent_campaigns", [])
 
+    perf_age_json = json.dumps(
+        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_age],
+        ensure_ascii=False,
+    )
+    perf_profile_json = json.dumps(
+        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_profile],
+        ensure_ascii=False,
+    )
+    perf_value_json = json.dumps(
+        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_value],
+        ensure_ascii=False,
+    )
+    perf_moment_json = json.dumps(
+        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_moment],
+        ensure_ascii=False,
+    )
+    top_segments_json = json.dumps(
+        [
+            {
+                "segment": s["segment_label"],
+                "users": s["users"],
+                "campaigns": s["campaigns"],
+                "engagement": s["avg_engagement_index"],
+                "adr": s["avg_adr"],
+                "channel": s["dominant_channel"],
+            }
+            for s in segment_cards[:6]
+        ],
+        ensure_ascii=False,
+    )
+    recent_json = json.dumps(
+        [
+            {
+                "type": c["campaign_type"],
+                "segment": c["age_segment"] + " / " + c["travel_profile"],
+                "channel": c["channel"],
+                "hotel": c["hotel"],
+                "engagement": c["engagement_index"],
+            }
+            for c in recent_campaigns[:6]
+        ],
+        ensure_ascii=False,
+    )
+    rrss_summary = (recommendations.get("rrss") or {}).get("summary", "N/A")
+    hotel_summary = (recommendations.get("hotel") or {}).get("summary", "N/A")
+    ads_summary = (recommendations.get("ads") or {}).get("summary", "N/A")
+
     return f"""Eres el director de estrategia de marketing de Eurostars Hotel Company.
 Tienes acceso completo a los datos operativos de campañas, segmentación de clientes y señales del mercado.
 Responde siempre en español. Sé directo, concreto y profesional. No uses emojis.
@@ -82,27 +128,27 @@ KPIs ACTUALES:
 CIUDADES EN FOCO: {', '.join(focus_cities)}
 
 RENDIMIENTO POR EDAD:
-{json.dumps([{{'label': s['label'], 'index': s['avg_engagement_index'], 'count': s['count']}} for s in perf_age], ensure_ascii=False)}
+{perf_age_json}
 
 RENDIMIENTO POR PERFIL DE VIAJE:
-{json.dumps([{{'label': s['label'], 'index': s['avg_engagement_index'], 'count': s['count']}} for s in perf_profile], ensure_ascii=False)}
+{perf_profile_json}
 
 RENDIMIENTO POR VALOR DE CLIENTE:
-{json.dumps([{{'label': s['label'], 'index': s['avg_engagement_index'], 'count': s['count']}} for s in perf_value], ensure_ascii=False)}
+{perf_value_json}
 
 RENDIMIENTO POR MOMENTO:
-{json.dumps([{{'label': s['label'], 'index': s['avg_engagement_index'], 'count': s['count']}} for s in perf_moment], ensure_ascii=False)}
+{perf_moment_json}
 
 TOP SEGMENTOS:
-{json.dumps([{{'segment': s['segment_label'], 'users': s['users'], 'campaigns': s['campaigns'], 'engagement': s['avg_engagement_index'], 'adr': s['avg_adr'], 'channel': s['dominant_channel']}} for s in segment_cards[:6]], ensure_ascii=False)}
+{top_segments_json}
 
 RECOMENDACIONES ACTIVAS:
-- RRSS: {recommendations.get('rrss', {{}}).get('summary', 'N/A')}
-- Hotel: {recommendations.get('hotel', {{}}).get('summary', 'N/A')}
-- Ads: {recommendations.get('ads', {{}}).get('summary', 'N/A')}
+- RRSS: {rrss_summary}
+- Hotel: {hotel_summary}
+- Ads: {ads_summary}
 
 CAMPAÑAS RECIENTES (últimas 6):
-{json.dumps([{{'type': c['campaign_type'], 'segment': c['age_segment'] + ' / ' + c['travel_profile'], 'channel': c['channel'], 'hotel': c['hotel'], 'engagement': c['engagement_index']}} for c in recent_campaigns[:6]], ensure_ascii=False)}
+{recent_json}
 """
 
 
@@ -333,36 +379,32 @@ def _heuristic_reply(message: str, dashboard: dict) -> str:
     )
 
 
-# ── Anthropic engine ─────────────────────────────────────────
+# ── Gemini engine (vía autonomous.gemini_client) ─────────────
 
-def _anthropic_reply(message: str, history: list[dict], dashboard: dict) -> str | None:
-    """Try to get a reply from Anthropic. Returns None if unavailable."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key or api_key.startswith("sk-ant-xxxxx"):
-        return None
-
+def _gemini_reply(message: str, history: list[dict], dashboard: dict) -> str | None:
+    """Responde al chat de marketing usando Gemini vía Vertex AI."""
     try:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=api_key)
-        system_prompt = _build_system_prompt(dashboard)
-
-        messages = []
-        for entry in history[-10:]:
-            role = "user" if entry.get("role") == "user" else "assistant"
-            messages.append({"role": role, "content": entry.get("content", "")})
-        messages.append({"role": "user", "content": message})
-
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=800,
-            system=system_prompt,
-            messages=messages,
-        )
-        return response.content[0].text.strip()
-    except Exception as exc:
-        logger.warning("Anthropic chat failed: %s", exc)
+        from autonomous.gemini_client import call_gemini, is_available
+    except ModuleNotFoundError:
         return None
+
+    if not is_available():
+        return None
+
+    system_prompt = _build_system_prompt(dashboard)
+
+    # Gemini no tiene rol "system" separado → lo inyectamos en el prompt.
+    conversation = f"INSTRUCCIONES DEL SISTEMA:\n{system_prompt}\n\n"
+    conversation += "HISTORIAL DE CONVERSACIÓN:\n"
+    for entry in history[-10:]:
+        role = "USUARIO" if entry.get("role") == "user" else "ASISTENTE"
+        conversation += f"{role}: {entry.get('content', '')}\n"
+    conversation += f"\nUSUARIO: {message}\nASISTENTE:"
+
+    reply = call_gemini(conversation, json_output=False)
+    if not reply:
+        return None
+    return str(reply).strip() or None
 
 
 # ── Campaign Proposal Generator ──────────────────────────────
@@ -623,35 +665,32 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
 
 
 def _generate_ai_proposals(dashboard: dict) -> list[dict] | None:
-    """Try to generate proposals with Anthropic."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key or api_key.startswith("sk-ant-xxxxx"):
-        return None
-
+    """Genera propuestas de campaña con Gemini vía Vertex AI."""
     try:
-        import anthropic
-        client = anthropic.Anthropic(api_key=api_key)
-        system_prompt = _build_system_prompt(dashboard)
-        prompt = """Genera exactamente 5 propuestas de campaña de marketing. Para cada una devuelve JSON con estos campos:
-id, name, objective, segment, segment_users (int), segment_engagement (float 0-1), channel, campaign_type (pre_arrival/post_stay/checkin_report), timing, estimated_engagement (float 0-1), subject_line, preview_text, body_summary, priority (alta/media/baja), rationale.
-
-Devuelve solo un JSON array. Sin markdown, sin explicación."""
-
-        response = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            system=system_prompt,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        return json.loads(text)
-    except Exception as exc:
-        logger.warning("Anthropic proposals failed: %s", exc)
+        from autonomous.gemini_client import call_gemini, is_available
+    except ModuleNotFoundError:
         return None
+
+    if not is_available():
+        return None
+
+    system_prompt = _build_system_prompt(dashboard)
+    prompt = (
+        f"{system_prompt}\n\n"
+        "Genera exactamente 5 propuestas de campaña de marketing. "
+        "Para cada una devuelve un objeto JSON con estos campos: "
+        "id, name, objective, segment, segment_users (int), "
+        "segment_engagement (float 0-1), channel, campaign_type "
+        "(pre_arrival/post_stay/checkin_report), timing, "
+        "estimated_engagement (float 0-1), subject_line, preview_text, "
+        "body_summary, priority (alta/media/baja), rationale.\n\n"
+        "Devuelve únicamente un array JSON, sin markdown ni explicación."
+    )
+
+    result = call_gemini(prompt, json_output=True)
+    if not isinstance(result, list) or not result:
+        return None
+    return result
 
 
 def _modify_messaging_heuristic(campaign: dict, instructions: str) -> dict:
@@ -690,19 +729,45 @@ def _modify_messaging_heuristic(campaign: dict, instructions: str) -> dict:
     return modified
 
 
+def _modify_messaging_ai(campaign: dict, instructions: str) -> dict | None:
+    """Reescribe el copy de una campaña con Gemini siguiendo las instrucciones."""
+    try:
+        from autonomous.gemini_client import call_gemini, is_available
+    except ModuleNotFoundError:
+        return None
+
+    if not is_available():
+        return None
+
+    prompt = (
+        "Eres copywriter de Eurostars Hotel Company. "
+        "Modifica esta campaña de email siguiendo las instrucciones.\n\n"
+        f"CAMPAÑA ACTUAL:\n{json.dumps(campaign, ensure_ascii=False, indent=2)}\n\n"
+        f"INSTRUCCIONES: {instructions}\n\n"
+        "Devuelve únicamente el JSON de la campaña modificada con los mismos "
+        "campos. Ajusta especialmente subject_line, preview_text y body_summary."
+    )
+
+    result = call_gemini(prompt, json_output=True)
+    if not isinstance(result, dict):
+        return None
+    result["_modification_applied"] = instructions
+    return result
+
+
 # ── Public API ────────────────────────────────────────────────
 
 def generate_campaign_proposals() -> dict:
     """
     Generate structured campaign proposals from dashboard data.
 
-    Returns: {"proposals": [...], "source": "anthropic"|"heuristic"}
+    Returns: {"proposals": [...], "source": "gemini"|"heuristic"}
     """
     dashboard = _get_dashboard()
 
     ai_proposals = _generate_ai_proposals(dashboard)
     if ai_proposals:
-        return {"proposals": ai_proposals, "source": "anthropic"}
+        return {"proposals": ai_proposals, "source": "gemini"}
 
     proposals = _generate_heuristic_proposals(dashboard)
     return {"proposals": proposals, "source": "heuristic"}
@@ -712,43 +777,18 @@ def handle_modify_messaging(campaign_id: str, instructions: str) -> dict:
     """
     Modify the messaging of a generated campaign based on instructions.
 
-    Returns: {"campaign": {...}, "source": "anthropic"|"heuristic"}
+    Returns: {"campaign": {...}, "source": "gemini"|"heuristic"}
     """
     dashboard = _get_dashboard()
     proposals = _generate_heuristic_proposals(dashboard)
-    
+
     campaign = next((p for p in proposals if p["id"] == campaign_id), None)
     if not campaign:
         return {"error": f"Campaña {campaign_id} no encontrada", "campaign": None, "source": "heuristic"}
 
-    # Try Anthropic for better messaging
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if api_key and not api_key.startswith("sk-ant-xxxxx"):
-        try:
-            import anthropic
-            client = anthropic.Anthropic(api_key=api_key)
-            prompt = f"""Modifica esta campaña de marketing siguiendo estas instrucciones: "{instructions}"
-
-Campaña actual:
-{json.dumps(campaign, ensure_ascii=False, indent=2)}
-
-Devuelve SOLO el JSON de la campaña modificada, con los mismos campos. Ajusta subject_line, preview_text y body_summary según las instrucciones."""
-
-            response = client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=800,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            text = response.content[0].text.strip()
-            if text.startswith("```"):
-                text = text.split("```")[1]
-                if text.startswith("json"):
-                    text = text[4:]
-            modified = json.loads(text)
-            modified["_modification_applied"] = instructions
-            return {"campaign": modified, "source": "anthropic"}
-        except Exception as exc:
-            logger.warning("Anthropic modify failed: %s", exc)
+    ai = _modify_messaging_ai(campaign, instructions)
+    if ai:
+        return {"campaign": ai, "source": "gemini"}
 
     modified = _modify_messaging_heuristic(campaign, instructions)
     return {"campaign": modified, "source": "heuristic"}
@@ -758,29 +798,16 @@ def handle_chat_message(message: str, history: list[dict] | None = None) -> dict
     """
     Handle a chat message from the marketing director.
 
-    Returns: {"reply": "...", "source": "anthropic"|"heuristic"}
+    Returns: {"reply": "...", "source": "gemini"|"heuristic"}
     """
     if history is None:
         history = []
 
-    # Demo interception for causal reasoning (Radar de Fricción)
-    if "granada" in message.lower():
-        reply = (
-            "⚠️ **Alerta de Radar de Fricción: Granada**\n\n"
-            "He cruzado nuestros datos de reservas con el análisis de sentimiento de redes sociales y notas de recepción y **desaconsejo lanzar una campaña en este destino ahora mismo**.\n\n"
-            "La demanda hacia Granada ha caído un 14% esta semana, pero el motivo **es ajeno al marketing**. Hemos detectado fuertes protestas locales cerca de la calle del hotel principal, lo que ha generado quejas por ruido en las redes (sentimiento de los últimos 3 días: -65%).\n\n"
-            "Lanzar una campaña de captación ahora mismo tendría un ROI bajo y riesgo de dañar la reputación del hotel. Sugiero pausar Ads allí y derivar el presupuesto a **Sevilla** o **Córdoba**, que mantienen tendencias positivas. \n\n"
-            "¿Quieres que genere una nueva campaña propuesta para Sevilla adaptada a tu segmento principal?"
-        )
-        return {"reply": reply, "source": "heuristic"}
-
     dashboard = _get_dashboard()
 
-    # Try Anthropic first
-    anthropic_reply = _anthropic_reply(message, history, dashboard)
-    if anthropic_reply:
-        return {"reply": anthropic_reply, "source": "anthropic"}
+    gemini = _gemini_reply(message, history, dashboard)
+    if gemini:
+        return {"reply": gemini, "source": "gemini"}
 
-    # Fallback to heuristic
     reply = _heuristic_reply(message, dashboard)
     return {"reply": reply, "source": "heuristic"}

@@ -33,47 +33,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger("text_generator")
 
-# ── Model config ─────────────────────────────────────────────────────────────
-OPENAI_EMAIL_MODEL = os.environ.get("OPENAI_EMAIL_MODEL", "gpt-5.4-nano")
-OPENAI_EMAIL_MAX_OUTPUT_TOKENS = int(
-    os.environ.get("OPENAI_EMAIL_MAX_OUTPUT_TOKENS", "320")
-)
-
-EMAIL_COPY_SCHEMA = {
-    "type": "json_schema",
-    "json_schema": {
-        "name": "email_copy",
-        "strict": True,
-        "schema": {
-            "type": "object",
-            "properties": {
-                "subject": {"type": "string"},
-                "preheader": {"type": "string"},
-                "headline": {"type": "string"},
-                "subheadline": {"type": "string"},
-                "body_paragraphs": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                },
-                "cta_text": {"type": "string"},
-                "cta_url_suffix": {"type": "string"},
-                "ps_line": {"type": "string"},
-            },
-            "required": [
-                "subject",
-                "preheader",
-                "headline",
-                "subheadline",
-                "body_paragraphs",
-                "cta_text",
-                "cta_url_suffix",
-                "ps_line",
-            ],
-            "additionalProperties": False,
-        },
-    },
-}
-
 # ── Tone instructions by age segment ─────────────────────────────────────
 
 TONE_INSTRUCTIONS = {
@@ -362,41 +321,20 @@ def _log_generation_source(source: str, guest_id: str, moment: str) -> None:
     )
 
 
-def _call_openai(prompt: str) -> dict:
-    """Call the OpenAI API and return parsed JSON copy."""
-    from openai import OpenAI
+def _call_gemini(prompt: str) -> dict:
+    """Llama a Gemini vía Vertex AI y devuelve el copy parseado."""
+    from autonomous.gemini_client import call_gemini
 
-    api_key = os.environ.get("OPENAI_API_KEY", "")
-    client = OpenAI(api_key=api_key)
-    request = {
-        "model": OPENAI_EMAIL_MODEL,
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    "Eres un copywriter de alto rendimiento para emails de Eurostars. "
-                    "Responde solo con JSON válido y conciso."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-        "response_format": EMAIL_COPY_SCHEMA,
-        "max_completion_tokens": OPENAI_EMAIL_MAX_OUTPUT_TOKENS,
-    }
-
-    try:
-        response = client.chat.completions.create(**request)
-    except TypeError:
-        request.pop("max_completion_tokens", None)
-        response = client.chat.completions.create(**request)
-
-    message = response.choices[0].message
-    refusal = getattr(message, "refusal", None)
-    if refusal:
-        raise ValueError(f"OpenAI refusal: {refusal}")
-
-    raw = message.content or "{}"
-    return json.loads(raw)
+    full_prompt = (
+        "Eres un copywriter de alto rendimiento para emails de Eurostars. "
+        "Responde únicamente con JSON válido y conciso ajustado al esquema "
+        "indicado en las instrucciones.\n\n"
+        f"{prompt}"
+    )
+    result = call_gemini(full_prompt, json_output=True)
+    if not isinstance(result, dict):
+        raise ValueError("Gemini no disponible o respuesta vacía/invalida")
+    return result
 
 
 def generate_copy(
@@ -432,27 +370,16 @@ def generate_copy(
             _log_generation_source("mock", guest_id, moment)
         return copy
 
-    # ── Validate API key ──────────────────────────────────────────────────
-    api_key = os.environ.get("OPENAI_API_KEY", "")
-    if not api_key or api_key.startswith("sk-xxxxx"):
-        logger.warning(
-            "OPENAI_API_KEY no configurada o es un placeholder; usando mock copy."
-        )
-        copy = _mock_copy(campaign_data, moment)
-        if verbose:
-            _log_generation_source("mock", guest_id, moment)
-        return copy
-
     prompt = _build_prompt(campaign_data, moment)
 
     try:
-        copy = _call_openai(prompt)
+        copy = _call_gemini(prompt)
         if verbose:
-            _log_generation_source(f"openai:{OPENAI_EMAIL_MODEL}", guest_id, moment)
+            _log_generation_source("gemini", guest_id, moment)
         return copy
 
     except Exception as exc:
-        logger.warning("OpenAI email generation failed: %s. Using mock copy.", exc)
+        logger.warning("Gemini email generation failed: %s. Using mock copy.", exc)
         copy = _mock_copy(campaign_data, moment)
         if verbose:
             _log_generation_source("mock", guest_id, moment)
@@ -497,7 +424,7 @@ def main():
     logger.info(
         "Generated sample assets for guest %s using model %s",
         results[0].get("guest_id", "?"),
-        OPENAI_EMAIL_MODEL if not dry_run else "mock",
+        "mock" if dry_run else "gemini",
     )
     logger.debug("Sample copy: %s", json.dumps(copy, ensure_ascii=False))
     logger.debug("Sample sms: %s", sms)

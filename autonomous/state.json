@@ -1,9 +1,11 @@
 {
-  "last_oracle_refresh": "2026-04-12T01:28:25",
-  "last_generic_campaign": null,
+  "last_oracle_refresh": "2026-04-12T04:12:34",
+  "last_generic_campaign": "2026-04-12T04:12:36",
   "user_last_contacted": {
-    "1003752586": "2026-04-12T01:28:26",
-    "1007094314": "2026-04-12T01:28:29"
+    "1003752586": "2026-04-12T04:12:35",
+    "1007094314": "2026-04-12T04:12:35",
+    "1013530969": "2026-04-12T04:12:36",
+    "1013545260": "2026-04-12T04:12:36"
   },
   "oracle_context": [
     {
@@ -87,8 +89,8 @@
       "actionable": true
     }
   ],
-  "campaigns_sent": 2,
-  "generic_campaigns_sent": 0,
+  "campaigns_sent": 4,
+  "generic_campaigns_sent": 2,
   "ticks_executed": 1,
   "blocked_destinations": [
     "OPORTO"
