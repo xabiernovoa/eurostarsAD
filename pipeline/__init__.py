@@ -1,1 +1,0 @@
-"""Eurostars pipeline package."""

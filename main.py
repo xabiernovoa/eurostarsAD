@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from pipeline.orchestration.main import main
+from backend.batch import main
 
 
 if __name__ == "__main__":

@@ -1,0 +1,82 @@
+[
+  {
+    "city": "GRANADA",
+    "category": "cultural_event",
+    "summary": "Conciertos al atardecer en la Alhambra durante el festival de primavera.",
+    "relevance": 8,
+    "date": "2026-04-14",
+    "actionable": true
+  },
+  {
+    "city": "EL GROVE",
+    "category": "seasonal_offer",
+    "summary": "Menús de marisco con descuentos entre semana en la ría de Arousa.",
+    "relevance": 7,
+    "date": "2026-05-01",
+    "actionable": true
+  },
+  {
+    "city": "MADRID",
+    "category": "cultural_event",
+    "summary": "Arco cierra con récord de asistencia y exposiciones paralelas.",
+    "relevance": 8,
+    "date": "2026-05-05",
+    "actionable": true
+  },
+  {
+    "city": "OPORTO",
+    "category": "cultural_event",
+    "summary": "Festival de jazz en la Ribeira durante el fin de semana largo.",
+    "relevance": 7,
+    "date": "2026-04-18",
+    "actionable": true
+  },
+  {
+    "city": "LISBOA",
+    "category": "cultural_event",
+    "summary": "Las Fiestas de Lisboa empiezan a calentar motores con eventos en Alfama.",
+    "relevance": 8,
+    "date": "2026-04-22",
+    "actionable": true
+  },
+  {
+    "city": "OPORTO",
+    "category": "tourism_trend",
+    "summary": "Las bodegas de Vila Nova de Gaia baten récord de reservas para primavera.",
+    "relevance": 8,
+    "date": "2026-04-21",
+    "actionable": true
+  },
+  {
+    "city": "LISBOA",
+    "category": "seasonal_offer",
+    "summary": "Compañías aéreas lanzan tarifas reducidas desde el sur de Europa.",
+    "relevance": 7,
+    "date": "2026-04-21",
+    "actionable": true
+  },
+  {
+    "city": "MADRID",
+    "category": "seasonal_offer",
+    "summary": "Promociones gastronómicas en torno a la Semana del Cocido.",
+    "relevance": 6,
+    "date": "2026-05-07",
+    "actionable": true
+  },
+  {
+    "city": "OPORTO",
+    "category": "travel_alert",
+    "summary": "Huelga puntual en transporte público de Oporto durante 48 horas.",
+    "relevance": 8,
+    "date": "2026-04-15",
+    "actionable": false
+  },
+  {
+    "city": "ROMA",
+    "category": "tourism_trend",
+    "summary": "El Jubileo atrae más visitantes de lo previsto a la Ciudad Eterna.",
+    "relevance": 8,
+    "date": "2026-04-17",
+    "actionable": true
+  }
+]

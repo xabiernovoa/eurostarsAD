@@ -37,7 +37,7 @@ start_service() {
 
   (
     cd "${ROOT_DIR}"
-    exec "${PYTHON_BIN}" "${script_path}"
+    exec "${PYTHON_BIN}" -B "${script_path}"
   ) &
 
   local pid=$!
@@ -45,9 +45,9 @@ start_service() {
   echo "Started ${name} (pid ${pid})"
 }
 
-start_service "Gmail demo" "frontend/mail/server.py"
-start_service "Reception demo" "frontend/receptionist/server.py"
-start_service "Marketing dashboard" "frontend/marketing/server.py"
+start_service "Gmail demo" "demos/mail/server.py"
+start_service "Reception demo" "demos/receptionist/server.py"
+start_service "Marketing dashboard" "demos/marketing/server.py"
 
 echo
 echo "Services running:"
@@ -57,4 +57,10 @@ echo "  Marketing:    http://localhost:3003"
 echo
 echo "Press Ctrl+C to stop all services."
 
-wait
+while ((${#PIDS[@]} > 0)); do
+  if ! wait -n "${PIDS[@]}"; then
+    echo
+    echo "A service exited unexpectedly." >&2
+    exit 1
+  fi
+done

@@ -37,9 +37,9 @@ El proyecto se compone de tres capas principales:
 
 | Capa | Descripción | Entrada |
 |------|-------------|---------|
-| **Pipeline** | Procesamiento batch de datos → embeddings → segmentación → campañas → render → entrega | `main.py --phase all` |
-| **Sistema Autónomo** | Motor multi-agente que consulta un Oráculo de contexto externo, selecciona usuarios candidatos y genera campañas personalizadas en tiempo real con IA (Gemini vía Vertex AI) | `autonomous/run.py --mode demo` |
-| **Frontends** | Tres aplicaciones web de demostración (Marketing Dashboard, Gmail demo, Recepción) | `start_services.sh` |
+| **Backend batch** | Procesamiento batch de datos → embeddings → segmentación → campañas → render → entrega | `python3 main.py --phase all` |
+| **Sistema Autónomo** | Motor multi-agente que consulta un Oráculo de contexto externo, selecciona usuarios candidatos y genera campañas personalizadas en tiempo real con IA (Gemini vía Vertex AI) | `python3 -m backend.autonomous.cli --mode demo` |
+| **Demos** | Tres aplicaciones web de demostración (Marketing Dashboard, Gmail demo, Recepción) | `./start_services.sh` |
 
 ---
 
@@ -49,7 +49,7 @@ El proyecto se compone de tres capas principales:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        EUROSTARS AI ENGINE                         │
 ├──────────────┬──────────────────────┬───────────────────────────────┤
-│  Pipeline    │  Sistema Autónomo    │  Frontends                    │
+│  Backend     │  Sistema Autónomo    │  Demos                        │
 │ (batch)      │  (multi-agente)      │  (demos interactivas)         │
 │              │                      │                               │
 │ embeddings   │ oracle.py            │ Marketing Dashboard (:3003)   │
@@ -73,8 +73,8 @@ El proyecto se compone de tres capas principales:
 
 | Archivo | Descripción |
 |---------|-------------|
-| `data/customer_data_200.csv` | Historial de reservas de 200 clientes. Campos: `GUEST_ID`, `HOTEL_ID`, `CHECKIN_DATE`, `CHECKOUT_DATE`, `AVG_BOOKING_LEADTIME`, `AVG_LENGTH_STAY`, `AVG_SCORE`, `CONFIRMED_RESERVATIONS_ADR`, entre otros. Separador: `;` |
-| `data/hotel_data.csv` | Catálogo de hoteles con nombre, ciudad, país, estrellas, marca y atributos del destino |
+| `data/raw/customer_data.csv` | Historial de reservas de 200 clientes. Campos: `GUEST_ID`, `HOTEL_ID`, `CHECKIN_DATE`, `CHECKOUT_DATE`, `AVG_BOOKING_LEADTIME`, `AVG_LENGTH_STAY`, `AVG_SCORE`, `CONFIRMED_RESERVATIONS_ADR`, entre otros. Separador: `;` |
+| `data/raw/hotel_data.csv` | Catálogo de hoteles con nombre, ciudad, país, estrellas, marca y atributos del destino |
 | `images/<hotel_id>/` | Imágenes reales de cada hotel. El pipeline genera automáticamente `metadata.json` con tags |
 
 ---
@@ -111,8 +111,7 @@ cp .env.example .env
 |---------|-----|
 | `pandas`, `numpy`, `scikit-learn` | Procesamiento de datos y embeddings |
 | `jinja2`, `premailer` | Renderizado de plantillas HTML de email |
-| `openai` | Generación de copy de email (pipeline batch) |
-| `google-genai` | IA generativa con Gemini vía Vertex AI (sistema autónomo) |
+| `google-genai` | Generación de copy y contexto con Gemini vía Vertex AI |
 | `anthropic` | Recomendaciones del dashboard (opcional) |
 | `Pillow` | Procesamiento de imágenes |
 | `sendgrid` | Envío real de emails (opcional) |
@@ -200,19 +199,19 @@ El sistema autónomo es un motor independiente que reutiliza los módulos del pi
 
 ```bash
 # Demo end-to-end (5 campañas personalizadas + 1 genérica)
-python3 autonomous/run.py --mode demo
+python3 -m backend.autonomous.cli --mode demo
 
 # Un único tick del heartbeat
-python3 autonomous/run.py --mode tick
+python3 -m backend.autonomous.cli --mode tick
 
 # Bucle continuo (cada 30 min por defecto)
-python3 autonomous/run.py --mode loop
+python3 -m backend.autonomous.cli --mode loop
 
 # Forzar contenido mock (sin llamar a Gemini)
-python3 autonomous/run.py --mode demo --force-mock
+python3 -m backend.autonomous.cli --mode demo --force-mock
 
 # Logs detallados
-python3 autonomous/run.py --mode demo -v
+python3 -m backend.autonomous.cli --mode demo -v
 ```
 
 ### 3. Frontends de demostración
@@ -229,38 +228,34 @@ Esto arranca los 3 servicios en paralelo. `Ctrl+C` los detiene todos.
 
 ```bash
 # Marketing Dashboard → http://localhost:3003
-python3 frontend/marketing/server.py
+python3 demos/marketing/server.py
 
 # Gmail demo → http://localhost:3001
-python3 frontend/mail/server.py
+python3 demos/mail/server.py
 
 # Recepción demo → http://localhost:3002
-python3 frontend/receptionist/server.py
+python3 demos/receptionist/server.py
 ```
 
-#### Regenerar perfiles de la demo de Gmail
-
-Si ejecutas el pipeline de nuevo y quieres actualizar la demo:
-
-```bash
-python3 frontend/mail/build_profiles.py
-```
+La demo de Gmail lee los perfiles desde `data/raw/customer_data.csv` y los
+correos directamente desde `output/`, así que no necesita un paso extra de
+regeneración.
 
 ---
 
 ## Cómo funciona cada componente
 
-### Pipeline batch
+### Backend batch
 
 #### Fase 1 — Embeddings
 
-`pipeline/embeddings/build_embeddings.py`
+`backend/personalization/embeddings.py`
 
-Transforma atributos de hotel (ciudad, estrellas, marca, país) en vectores de 11 dimensiones. El embedding de cada usuario se calcula como media ponderada de los hoteles que ha visitado. Se guarda en `data/embeddings.json`.
+Transforma atributos de hotel (ciudad, estrellas, marca, país) en vectores de 11 dimensiones. El embedding de cada usuario se calcula como media ponderada de los hoteles que ha visitado. Se guarda en `data/generated/embeddings.json`.
 
 #### Fase 2 — Segmentación
 
-`pipeline/segmentation/segment_users.py`
+`backend/personalization/segmentation.py`
 
 Clasifica a cada usuario en 4 ejes:
 
@@ -271,11 +266,11 @@ Clasifica a cada usuario en 4 ejes:
 | `client_value` | `STANDARD`, `MID_VALUE`, `HIGH_VALUE` |
 | `travel_pattern` | `RECURRENTE_DESTINO`, `EXPLORADOR`, `FIEL_CADENA` |
 
-Se guarda en `data/segments.json`.
+Se guarda en `data/generated/segments.json`.
 
 #### Fase 3 — Campañas
 
-`pipeline/campaigns/campaign_engine.py`
+`backend/campaigns/planner.py`
 
 Genera la estructura de datos de cada campaña:
 
@@ -295,25 +290,25 @@ Tres momentos del ciclo de vida:
 
 #### Fase 4 — Imágenes
 
-- `pipeline/assets/auto_tag_images.py`: Genera `metadata.json` por hotel analizando nombres de archivo e infiriendo tags (spa, gastronomía, habitación, etc.)
-- `pipeline/assets/image_selector.py`: Puntúa imágenes por afinidad con el embedding y segmento del usuario. Devuelve 3-5 imágenes por campaña.
+- `backend/assets/image_metadata.py`: Genera `metadata.json` por hotel analizando nombres de archivo e infiriendo tags (spa, gastronomía, habitación, etc.)
+- `backend/assets/image_selector.py`: Puntúa imágenes por afinidad con el embedding y segmento del usuario. Devuelve 3-5 imágenes por campaña.
 
 #### Fase 5 — Texto
 
-`pipeline/content/text_generator.py`
+`backend/campaigns/copy.py`
 
 Dos modos de generación:
 
 | Modo | Condición | Fuente |
 |------|-----------|--------|
-| Mock | `dry_run=True` o sin `OPENAI_API_KEY` | Copy determinista basado en segmento |
-| Real | `dry_run=False` + `OPENAI_API_KEY` disponible | OpenAI |
+| Mock | `dry_run=True` o sin credenciales | Copy determinista basado en segmento |
+| Real | `dry_run=False` + credenciales Vertex disponibles | Gemini |
 
 También genera SMS cortos (≤160 caracteres) cuando el canal principal es `sms`.
 
 #### Fase 6 — Render HTML
 
-`pipeline/rendering/email_renderer.py`
+`backend/campaigns/renderer.py`
 
 Renderiza HTML responsive con Jinja2 usando plantillas diferenciadas por segmento:
 
@@ -326,7 +321,7 @@ Renderiza HTML responsive con Jinja2 usando plantillas diferenciadas por segment
 
 #### Fase 7 — Canal
 
-`pipeline/channels/channel_selector.py`
+`backend/campaigns/channels.py`
 
 Decide entre `email`, `sms` o `push` con reglas basadas en:
 
@@ -335,15 +330,15 @@ Decide entre `email`, `sms` o `push` con reglas basadas en:
 
 #### Fase 8 — Entrega
 
-`pipeline/delivery/send_campaign.py`
+`backend/campaigns/delivery.py`
 
 - `dry_run=True` (default): guarda HTML en `output/`
 - `dry_run=False` + `--send`: envía vía SendGrid
-- Registra cada acción en `data/campaign_log.json`
+- Registra cada acción en `data/generated/campaign_log.json`
 
 #### Fase 9 — Dashboard marketing
 
-`pipeline/marketing/dashboard_engine.py`
+`backend/marketing/dashboard.py`
 
 Construye un payload JSON completo para el dashboard:
 
@@ -353,7 +348,7 @@ Construye un payload JSON completo para el dashboard:
 - Recomendaciones de RRSS, hotel y publicidad (heurísticas o vía Anthropic)
 - Campañas recientes y ciudades en foco
 
-`pipeline/marketing/chat_engine.py`
+`backend/marketing/chat.py`
 
 Asistente conversacional de marketing con:
 
@@ -366,7 +361,7 @@ Asistente conversacional de marketing con:
 
 ### Sistema autónomo
 
-El sistema autónomo es una capa independiente que opera sobre el pipeline existente para generar campañas de forma proactiva. Su arquitectura se basa en un **heartbeat** periódico.
+El sistema autónomo es una capa independiente que opera sobre el backend existente para generar campañas de forma proactiva. Su arquitectura se basa en un **heartbeat** periódico.
 
 #### Flujo de un tick
 
@@ -375,7 +370,7 @@ El sistema autónomo es una capa independiente que opera sobre el pipeline exist
 2. Scheduler → selecciona usuarios cuya ventana de contacto es ahora
 3. Campañas → genera email personalizado por usuario (Gemini o mock)
 4. Genéricas → propone campañas por segmento si toca
-5. Estado → persiste en autonomous/state.json
+5. Estado → persiste en `data/runtime/autonomous_state.json`
 ```
 
 #### Componentes
@@ -388,11 +383,11 @@ El sistema autónomo es una capa independiente que opera sobre el pipeline exist
 | `heartbeat.py` | Bucle principal que coordina las 4 fases. Modo `tick` (una vez), `loop` (periódico) o `demo` (5 campañas + 1 genérica) |
 | `live.py` | Orquestador **multi-agente concurrente** para el dashboard: N workers de recomendación + 1 worker de propuestas operando sobre una cola compartida. Emite eventos NDJSON en streaming para visualización en tiempo real |
 | `gemini_client.py` | Wrapper sobre Gemini vía Vertex AI con `google-genai` SDK. Autenticación por cuenta de servicio. Si no hay credenciales, devuelve `None` y todos los módulos caen a mocks |
-| `state.py` | Persistencia en `autonomous/state.json`: último refresco del Oráculo, historial de contactos, contadores de ticks y campañas |
+| `backend/storage/autonomous_state.py` | Persistencia en `data/runtime/autonomous_state.json`: último refresco del Oráculo, historial de contactos, contadores de ticks y campañas |
 
 ---
 
-### Frontends
+### Demos
 
 #### Marketing Dashboard (`localhost:3003`)
 
@@ -423,7 +418,8 @@ Dashboard analítico completo tipo SPA con soporte dark/light mode. Incluye:
 
 Interfaz estilo Gmail con 200 perfiles de clientes. Cada perfil tiene una bandeja con emails personalizados (pre-arrival, check-in, post-stay) generados por el pipeline. Permite navegar entre perfiles para ver cómo la personalización varía según segmento, hotel y contexto.
 
-Los perfiles se pre-generan con `frontend/mail/build_profiles.py` y se guardan en `profiles.json`.
+Los perfiles se leen directamente de `data/raw/customer_data.csv` y el inbox se
+construye desde los HTML generados en `output/`.
 
 #### Recepción Demo (`localhost:3002`)
 
@@ -434,29 +430,29 @@ Interfaz para consultar los informes de check-in generados por el pipeline (`out
 ## Flujo de datos
 
 ```
-customer_data_200.csv ──┐
-                        ├── embeddings ──► embeddings.json
-hotel_data.csv ─────────┘
+data/raw/customer_data.csv ──┐
+                             ├── embeddings ──► data/generated/embeddings.json
+data/raw/hotel_data.csv ─────┘
                                 │
-customer_data_200.csv ──────────├── segmentation ──► segments.json
+data/raw/customer_data.csv ────├── segmentation ──► data/generated/segments.json
                                 │
 images/<hotel_id>/*.jpg ────────├── auto_tag ──► metadata.json
                                 │
-embeddings.json + segments.json ├── campaigns ──► campaign data
+data/generated/embeddings.json + data/generated/segments.json ├── campaigns ──► campaign data
                                 │
 metadata.json + embeddings ─────├── image_selector ──► selected images
                                 │
-campaign data ──────────────────├── text_generator ──► copy (OpenAI/mock)
+campaign data ──────────────────├── copy ──► copy (Gemini/mock)
                                 │
-copy + images + template ───────├── email_renderer ──► HTML
+copy + images + template ───────├── renderer ──► HTML
                                 │
-segment + leadtime ─────────────├── channel_selector ──► email/sms/push
+segment + leadtime ─────────────├── channels ──► email/sms/push
                                 │
-HTML + copy + channel ──────────├── send_campaign ──► output/*.html / SendGrid
+HTML + copy + channel ──────────├── delivery ──► output/*.html / SendGrid
                                 │
-campaign_log.json + segments ───├── dashboard_engine ──► dashboard payload
+data/generated/campaign_log.json + data/generated/segments.json ───├── dashboard ──► dashboard payload
                                 │
-oracle context + candidates ────└── autonomous/live ──► NDJSON stream
+oracle context + candidates ────└── backend/autonomous/live.py ──► NDJSON stream
 ```
 
 ---
@@ -483,7 +479,7 @@ python3 main.py --phase all
 #    - http://localhost:3002  → Demo de recepción
 ```
 
-> **Nota**: No se necesita ninguna API key para la demo básica. Todo funciona con datos y texto mock. Para IA real, configura `GOOGLE_APPLICATION_CREDENTIALS` y `VERTEX_PROJECT_ID` en `.env`.
+> **Nota**: No se necesita ninguna API key para la demo básica. Todo funciona con datos y texto mock. Para IA real, configura `GOOGLE_APPLICATION_CREDENTIALS` y `VERTEX_PROJECT_ID` en `.env`; si guardas una cuenta de servicio local, usa una ruta privada como `.secrets/vertex-service-account.json`.
 
 ---
 
@@ -491,7 +487,7 @@ python3 main.py --phase all
 
 - `output/` está en `.gitignore` — contiene artefactos generados por el pipeline.
 - `.env` también está en `.gitignore` — nunca debe subirse al repositorio.
-- `autonomous/output/` contiene las salidas del sistema autónomo (emails HTML y campañas genéricas).
+- `output/autonomous/` contiene las salidas del sistema autónomo (emails HTML y campañas genéricas).
 - El proyecto está diseñado para funcionar completamente en local sin APIs externas.
 - El procesamiento de campañas es paralelo (configurable con `CAMPAIGN_MAX_WORKERS`).
 - El modo autónomo live usa múltiples hilos para demostrar concurrencia real entre agentes.

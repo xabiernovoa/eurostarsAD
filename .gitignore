@@ -1,7 +1,14 @@
 .env
 .env.*
 !.env.example
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 output/
-__pycache__/
+**/__pycache__/
 *.py[cod]
-other-files
+.secrets/
+other-files/
+*.pem
+*.key
