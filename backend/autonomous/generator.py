@@ -1,5 +1,5 @@
 """
-campaign_generator.py — Generación de campañas personalizadas.
+generator.py — Generación de campañas personalizadas.
 
 Reutiliza módulos del pipeline existente para:
   * Segmentar al usuario y obtener su embedding.
@@ -298,6 +298,8 @@ def generate_campaign(
     output_dir: Path | None = None,
     save_html: bool = True,
     force_mock: bool = False,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> dict[str, Any] | None:
     """
     Genera una campaña pre-arrival personalizada para un usuario.
@@ -310,7 +312,12 @@ def generate_campaign(
     output_dir = Path(output_dir or config.EMAILS_DIR)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    results = campaign_engine.generate_all("pre_arrival", guest_id=str(guest_id))
+    results = campaign_engine.generate_all(
+        "pre_arrival",
+        guest_id=str(guest_id),
+        timing_mode=timing_mode,
+        send_offset_days=send_offset_days,
+    )
     if not results:
         logger.warning("Sin datos de campaña para el usuario %s", guest_id)
         return None
@@ -369,6 +376,7 @@ def generate_campaign(
         "copy": copy,
         "copy_source": copy_source,
         "matched_events": matched_events,
+        "travel_prediction": campaign_data.get("travel_prediction", {}),
         "html_path": str(html_path) if html_path else None,
         "generated_at": datetime.now().isoformat(timespec="seconds"),
     }

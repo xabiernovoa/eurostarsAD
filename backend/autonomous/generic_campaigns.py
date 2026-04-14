@@ -1,7 +1,7 @@
 """
 generic_campaigns.py — Campañas genéricas por segmento y tendencia.
 
-A diferencia de ``campaign_generator.py`` (que apunta a un usuario concreto),
+A diferencia de ``generator.py`` (que apunta a un usuario concreto),
 este módulo produce propuestas de campaña para segmentos amplios. Se activa
 periódicamente y usa el Oráculo para elegir destinos con tendencias positivas.
 """

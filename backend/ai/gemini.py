@@ -1,5 +1,5 @@
 """
-gemini_client.py — Wrapper minimalista sobre Gemini vía Vertex AI.
+gemini.py — Wrapper minimalista sobre Gemini vía Vertex AI.
 
 Usa la SDK unificada ``google-genai`` en modo Vertex, autenticada con la cuenta
 de servicio apuntada por ``GOOGLE_APPLICATION_CREDENTIALS``. Si no hay
@@ -92,9 +92,11 @@ def call_gemini(prompt: str, json_output: bool = True) -> Any:
         )
 
     try:
+        generate_config = {"temperature": config.GEMINI_TEMPERATURE}
         response = client.models.generate_content(
             model=config.GEMINI_MODEL,
             contents=full_prompt,
+            config=generate_config,
         )
     except Exception as exc:  # pragma: no cover — red/API
         logger.warning("Llamada a Vertex falló: %s", exc)

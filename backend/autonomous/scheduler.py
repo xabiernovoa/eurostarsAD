@@ -1,10 +1,11 @@
 """
-user_scheduler.py — Cálculo del momento óptimo para contactar a cada usuario.
+scheduler.py — Cálculo del momento óptimo para contactar a cada usuario.
 
-La lógica es puramente temporal:
+La lógica es temporal y admite dos estrategias:
 
-1. Se determina el mes/estación de viaje habitual del usuario.
-2. Se resta su ``AVG_BOOKING_LEADTIME`` para obtener la ventana ideal de envío.
+1. ``heuristic``: mes habitual + ``AVG_BOOKING_LEADTIME``.
+2. ``regression``: predicción de próximo check-in con regresión lineal sobre el
+   histórico de viajes del usuario.
 3. Si la fecha actual cae dentro de esa ventana (±SEND_WINDOW_DAYS), el usuario
    pasa a ser candidato.
 4. Se filtran los usuarios contactados recientemente (cooldown).
@@ -13,14 +14,14 @@ La lógica es puramente temporal:
 from __future__ import annotations
 
 import logging
-from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 from backend import config
+from backend.personalization.travel_prediction import predict_next_trip
 from backend.storage import autonomous_state as state_module
 from backend.storage.customers import load_customers_df
 
@@ -31,20 +32,11 @@ def _load_customers(path: Path | None = None) -> pd.DataFrame:
     return load_customers_df(path)
 
 
-def _next_occurrence(month: int, today: date) -> date:
-    """Próxima fecha (día 15) del mes indicado, a partir de hoy."""
-    year = today.year if month > today.month or (month == today.month and today.day <= 15) else today.year + 1
-    return date(year, month, 15)
-
-
-def _ideal_send_date(preferred_month: int, avg_leadtime_days: float, today: date) -> date:
-    target_checkin = _next_occurrence(preferred_month, today)
-    return target_checkin - timedelta(days=max(7, int(round(avg_leadtime_days))))
-
-
 def compute_user_plans(
     customers: pd.DataFrame | None = None,
     now: datetime | None = None,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> list[dict[str, Any]]:
     """
     Calcula, para cada usuario, su próxima ventana de contacto.
@@ -59,21 +51,31 @@ def compute_user_plans(
 
     plans: list[dict[str, Any]] = []
     for guest_id, rows in df.groupby("GUEST_ID"):
-        months = rows["CHECKIN_DATE"].dt.month.tolist()
-        if not months:
+        if rows.empty:
             continue
-        preferred_month = Counter(months).most_common(1)[0][0]
-        avg_leadtime = float(rows["AVG_BOOKING_LEADTIME"].iloc[0] or 14)
-        target_checkin = _next_occurrence(preferred_month, today)
-        send_date = _ideal_send_date(preferred_month, avg_leadtime, today)
+        timing = predict_next_trip(
+            rows,
+            mode=timing_mode,
+            send_offset_days=send_offset_days,
+            today=today,
+        )
+        predicted_checkin = date.fromisoformat(timing["predicted_checkin_date"])
+        send_date = date.fromisoformat(timing["send_date"])
+        avg_leadtime = float(rows["AVG_BOOKING_LEADTIME"].mean() or 14)
 
         plans.append(
             {
                 "guest_id": str(guest_id),
-                "preferred_month": int(preferred_month),
+                "preferred_month": int(predicted_checkin.month),
                 "avg_leadtime_days": avg_leadtime,
                 "ideal_send_date": send_date.isoformat(),
-                "target_checkin": target_checkin.isoformat(),
+                "target_checkin": predicted_checkin.isoformat(),
+                "prediction_mode_requested": timing["requested_mode"],
+                "prediction_mode_used": timing["mode_used"],
+                "prediction_source": timing["prediction_source"],
+                "history_points_used": timing["history_points_used"],
+                "fallback_reason": timing.get("fallback_reason"),
+                "regression_r2": timing.get("regression_r2"),
             }
         )
 
@@ -89,6 +91,8 @@ def find_candidates(
     cooldown_days: int | None = None,
     max_candidates: int | None = None,
     blocked_destinations: set[str] | None = None,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> list[dict[str, Any]]:
     """
     Devuelve la lista de usuarios candidatos a recibir una campaña en este tick.
@@ -96,7 +100,8 @@ def find_candidates(
     Un usuario es candidato si:
       * hoy cae dentro de (ideal_send_date ± window_days),
       * no ha sido contactado en los últimos ``cooldown_days``,
-      * su destino objetivo no está bloqueado por el Oráculo (si se indica).
+      * y posteriormente puede ser descartado por el generador si el Oráculo
+        bloquea el destino recomendado.
     """
     window_days = window_days if window_days is not None else config.SEND_WINDOW_DAYS
     cooldown_days = cooldown_days if cooldown_days is not None else config.USER_COOLDOWN_DAYS
@@ -104,7 +109,12 @@ def find_candidates(
     now = now or datetime.now()
     today = now.date()
 
-    plans = compute_user_plans(customers=customers, now=now)
+    plans = compute_user_plans(
+        customers=customers,
+        now=now,
+        timing_mode=timing_mode,
+        send_offset_days=send_offset_days,
+    )
     candidates: list[dict[str, Any]] = []
     for plan in plans:
         send_date = date.fromisoformat(plan["ideal_send_date"])

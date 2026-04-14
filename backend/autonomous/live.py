@@ -117,6 +117,8 @@ def _recommender_worker(
     worker_lock: threading.Lock,
     stop_event: threading.Event,
     force_mock: bool,
+    timing_mode: str | None,
+    send_offset_days: int | None,
     per_worker_delay: float,
     initial_stagger: float,
     mock_work_seconds: float,
@@ -177,6 +179,8 @@ def _recommender_worker(
                     guest_id,
                     oracle_context=oracle_ctx,
                     force_mock=force_mock,
+                    timing_mode=timing_mode,
+                    send_offset_days=send_offset_days,
                 )
             except Exception as exc:  # pragma: no cover — defensivo
                 logger.exception("Worker %d falló en campaña %s", worker_id, guest_id)
@@ -213,6 +217,7 @@ def _recommender_worker(
                 "copy": result["copy"],
                 "copy_source": result["copy_source"],
                 "matched_events": result.get("matched_events", []),
+                "travel_prediction": result.get("travel_prediction", {}),
                 "html_path": result.get("html_path"),
             })
             candidate_q.task_done()
@@ -359,6 +364,8 @@ def iter_tick(
     pacing_seconds: float = 0.05,
     recommender_workers: int = 3,
     campaigns_per_tick: int = 5,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> Iterator[dict[str, Any]]:
     """
     Ejecuta un feed autónomo concurrente y emite eventos NDJSON.
@@ -394,6 +401,8 @@ def iter_tick(
             "cooldown_days": cooldown_days,
             "recommender_workers": recommender_workers,
             "campaigns_per_tick": campaigns_per_tick,
+            "travel_prediction_mode": timing_mode or "heuristic/env",
+            "regression_send_offset_days": send_offset_days,
             "gemini_available": gemini_client.is_available() and not force_mock,
             "model": (
                 config.GEMINI_MODEL
@@ -461,6 +470,8 @@ def iter_tick(
             cooldown_days=cooldown_days,
             max_candidates=max_recommendations,
             blocked_destinations=blocked,
+            timing_mode=timing_mode,
+            send_offset_days=send_offset_days,
         )
     except Exception as exc:  # pragma: no cover — defensivo
         logger.exception("Fallo en scheduler")
@@ -543,6 +554,8 @@ def iter_tick(
                 worker_lock=worker_lock,
                 stop_event=stop_event,
                 force_mock=force_mock,
+                timing_mode=timing_mode,
+                send_offset_days=send_offset_days,
                 per_worker_delay=per_worker_delay,
                 initial_stagger=i * 0.4,
                 mock_work_seconds=mock_work_seconds,

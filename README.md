@@ -53,13 +53,13 @@ El proyecto se compone de tres capas principales:
 │ (batch)      │  (multi-agente)      │  (demos interactivas)         │
 │              │                      │                               │
 │ embeddings   │ oracle.py            │ Marketing Dashboard (:3003)   │
-│ segmentation │ user_scheduler.py    │   ├── Dashboard analítico     │
-│ campaigns    │ campaign_generator   │   ├── Generador de campañas   │
+│ segmentation │ scheduler.py         │   ├── Dashboard analítico     │
+│ campaigns    │ generator.py         │   ├── Generador de campañas   │
 │ assets       │ heartbeat.py         │   ├── Chat IA con Gemini      │
 │ content      │ live.py (streaming)  │   └── Modo autónomo live      │
-│ rendering    │ gemini_client.py     │                               │
-│ channels     │ generic_campaigns    │ Gmail demo (:3001)            │
-│ delivery     │ state.py             │   └── Bandeja personalizada   │
+│ rendering    │ ai/gemini.py         │                               │
+│ channels     │ generic_campaigns.py │ Gmail demo (:3001)            │
+│ delivery     │ autonomous_state.py  │   └── Bandeja personalizada   │
 │ marketing    │ config.py            │                               │
 │              │                      │ Recepción demo (:3002)        │
 │              │                      │   └── Informes check-in       │
@@ -109,7 +109,7 @@ cp .env.example .env
 
 | Paquete | Uso |
 |---------|-----|
-| `pandas`, `numpy`, `scikit-learn` | Procesamiento de datos y embeddings |
+| `pandas`, `numpy` | Procesamiento de datos, embeddings y regresión temporal |
 | `jinja2`, `premailer` | Renderizado de plantillas HTML de email |
 | `google-genai` | Generación de copy y contexto con Gemini vía Vertex AI |
 | `anthropic` | Recomendaciones del dashboard (opcional) |
@@ -127,28 +127,33 @@ El proyecto carga variables desde un archivo `.env` en la raíz. Copia `.env.exa
 
 | Variable | Obligatoria | Descripción |
 |----------|:-----------:|-------------|
-| `OPENAI_API_KEY` | No | Genera copy real con OpenAI. Sin ella, usa texto mock |
-| `OPENAI_EMAIL_MODEL` | No | Modelo a usar (default: `gpt-5.4-nano`) |
-| `OPENAI_EMAIL_MAX_OUTPUT_TOKENS` | No | Límite de tokens para el copy |
+| `GOOGLE_APPLICATION_CREDENTIALS` | No | Ruta al JSON de cuenta de servicio de Vertex AI. Puede ser relativa al proyecto |
+| `VERTEX_PROJECT_ID` | No | ID del proyecto de Google Cloud |
+| `VERTEX_LOCATION` | No | Región de Vertex (default: `us-central1`) |
+| `GEMINI_MODEL` | No | Modelo compartido para batch, chat y sistema autónomo |
+| `GEMINI_TEMPERATURE` | No | Temperatura de Gemini |
 | `SENDGRID_API_KEY` | No | Solo necesaria si ejecutas con `--send` |
 | `SENDER_EMAIL` | No | Remitente para SendGrid |
 | `CAMPAIGN_MAX_WORKERS` | No | Hilos para procesamiento paralelo de campañas |
+| `TRAVEL_PREDICTION_MODE` | No | `heuristic` o `regression` para campañas `pre_arrival` |
+| `TRAVEL_REGRESSION_SEND_OFFSET_DAYS` | No | Antelación simulada en días cuando se usa regresión (default: `21`) |
+| `TRAVEL_REGRESSION_MIN_HISTORY` | No | Historial mínimo para intentar regresión antes de caer al heurístico |
 
 ### Sistema autónomo
 
 | Variable | Obligatoria | Descripción |
 |----------|:-----------:|-------------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | No | Ruta al JSON de cuenta de servicio de Vertex AI. Puede ser relativa al proyecto |
-| `VERTEX_PROJECT_ID` | No | ID del proyecto de Google Cloud |
-| `VERTEX_LOCATION` | No | Región de Vertex (default: `us-central1`) |
-| `AUTONOMOUS_GEMINI_MODEL` | No | Modelo Gemini (default: `gemini-2.5-flash`) |
-| `AUTONOMOUS_GEMINI_TEMPERATURE` | No | Temperatura del modelo (default: `0.7`) |
+| `ANTHROPIC_API_KEY` | No | Habilita recomendaciones narrativas en el dashboard |
 | `AUTONOMOUS_DRY_RUN` | No | Default: `True` |
+| `AUTONOMOUS_ORACLE_INTERVAL_HOURS` | No | Frecuencia de refresco del Oráculo |
+| `AUTONOMOUS_HEARTBEAT_INTERVAL_MINUTES` | No | Intervalo del loop autónomo |
+| `AUTONOMOUS_USER_COOLDOWN_DAYS` | No | Cooldown entre contactos al mismo usuario |
+| `AUTONOMOUS_SEND_WINDOW_DAYS` | No | Ventana de activación alrededor de la fecha ideal de envío |
 
 ### Comportamiento sin API keys
 
-- **Sin `OPENAI_API_KEY`**: el pipeline genera texto mock realista, sin llamar a ningún API.
-- **Sin `GOOGLE_APPLICATION_CREDENTIALS`**: el sistema autónomo genera copy mock y el Oráculo usa datos mock de eventos plausibles.
+- **Sin credenciales de Vertex AI**: el pipeline batch, el chat y el sistema autónomo generan copy mock y el Oráculo usa datos plausibles mock.
+- **Sin `ANTHROPIC_API_KEY`**: el dashboard usa recomendaciones heurísticas.
 - **Sin `SENDGRID_API_KEY`**: los emails se guardan en disco (`output/`) en vez de enviarse.
 - **El proyecto funciona completamente en local sin ninguna API key.** Todas las funcionalidades tienen fallback determinista.
 
@@ -186,6 +191,12 @@ python3 main.py --phase campaign --moment post_stay
 # Campaña para un usuario concreto
 python3 main.py --phase campaign --moment pre_arrival --guest_id 1014907189
 
+# Activar predicción temporal por regresión para pre-arrival
+python3 main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression
+
+# Simular envío 21 días antes de la fecha predicha por regresión
+python3 main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression --regression-send-offset-days 21
+
 # Fase 9: Snapshot del dashboard de marketing
 python3 main.py --phase marketing
 
@@ -209,6 +220,9 @@ python3 -m backend.autonomous.cli --mode loop
 
 # Forzar contenido mock (sin llamar a Gemini)
 python3 -m backend.autonomous.cli --mode demo --force-mock
+
+# Activar scheduling por regresión en el sistema autónomo
+python3 -m backend.autonomous.cli --mode tick --travel-prediction-mode regression --regression-send-offset-days 21
 
 # Logs detallados
 python3 -m backend.autonomous.cli --mode demo -v
@@ -274,7 +288,8 @@ Se guarda en `data/generated/segments.json`.
 
 Genera la estructura de datos de cada campaña:
 
-- Predice la ventana probable de viaje del usuario
+- Predice la próxima ventana de viaje del usuario
+- Puede usar un modo heurístico o un modo de regresión lineal sobre fechas históricas de check-in
 - Recomienda un hotel basado en embeddings
 - Recupera eventos del destino (mock)
 - Resume preferencias del usuario
@@ -334,6 +349,8 @@ Decide entre `email`, `sms` o `push` con reglas basadas en:
 
 - `dry_run=True` (default): guarda HTML en `output/`
 - `dry_run=False` + `--send`: envía vía SendGrid
+- El envío real del batch usa destinatarios placeholder `guest_<id>@example.com`; es un flujo de demo, no una integración productiva con los emails del CSV
+- Si se activa `--travel-prediction-mode regression`, el backend fuerza simulación y no envía emails reales
 - Registra cada acción en `data/generated/campaign_log.json`
 
 #### Fase 9 — Dashboard marketing
@@ -378,11 +395,11 @@ El sistema autónomo es una capa independiente que opera sobre el backend existe
 | Módulo | Función |
 |--------|---------|
 | `oracle.py` | Consulta y clasifica eventos/noticias por ciudad. Con Gemini genera inteligencia turística real; sin él, usa una base de datos mock de eventos plausibles por ciudad (Feria de Abril, Alhambra, Fiestas de Lisboa, etc.). Clasificación: `cultural_event`, `seasonal_offer`, `tourism_trend`, `travel_alert`, `extreme_weather` |
-| `user_scheduler.py` | Calcula el mes de viaje habitual de cada usuario, resta su lead time medio, y determina si hoy cae dentro de la ventana de contacto (±7 días por defecto). Aplica cooldown para evitar contacto repetitivo |
-| `campaign_generator.py` | Reutiliza `campaign_engine`, `channel_selector` y `email_renderer` del pipeline. Genera el copy con Gemini cuando está disponible, incluyendo eventos del Oráculo como gancho. Con afinidad perfil-evento (explorador cultural → eventos culturales, aventurero → tendencias turísticas, lujo → ofertas estacionales) |
+| `scheduler.py` | Calcula la próxima fecha objetivo de contacto por usuario. En modo `heuristic` usa mes habitual + lead time; en modo `regression` ajusta una regresión lineal sobre fechas de check-in históricas y simula el envío antes de la fecha prevista. Aplica cooldown para evitar contacto repetitivo |
+| `generator.py` | Reutiliza `campaign_engine`, `channel_selector` y `email_renderer` del pipeline. Genera el copy con Gemini cuando está disponible, incluyendo eventos del Oráculo como gancho. Con afinidad perfil-evento (explorador cultural → eventos culturales, aventurero → tendencias turísticas, lujo → ofertas estacionales) |
 | `heartbeat.py` | Bucle principal que coordina las 4 fases. Modo `tick` (una vez), `loop` (periódico) o `demo` (5 campañas + 1 genérica) |
 | `live.py` | Orquestador **multi-agente concurrente** para el dashboard: N workers de recomendación + 1 worker de propuestas operando sobre una cola compartida. Emite eventos NDJSON en streaming para visualización en tiempo real |
-| `gemini_client.py` | Wrapper sobre Gemini vía Vertex AI con `google-genai` SDK. Autenticación por cuenta de servicio. Si no hay credenciales, devuelve `None` y todos los módulos caen a mocks |
+| `backend/ai/gemini.py` | Wrapper sobre Gemini vía Vertex AI con `google-genai` SDK. Autenticación por cuenta de servicio. Si no hay credenciales, devuelve `None` y todos los módulos caen a mocks |
 | `backend/storage/autonomous_state.py` | Persistencia en `data/runtime/autonomous_state.json`: último refresco del Oráculo, historial de contactos, contadores de ticks y campañas |
 
 ---

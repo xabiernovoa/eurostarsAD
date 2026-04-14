@@ -11,11 +11,9 @@ Manages three moments in the customer lifecycle:
 import json
 import logging
 import sys
-from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -23,6 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.personalization import embeddings as emb_module
+from backend.personalization.travel_prediction import predict_next_trip
 from backend.storage.customers import load_customers_df
 from backend.storage.embeddings import load_embeddings
 from backend.storage.segments import load_segments as load_segments_data
@@ -73,33 +72,6 @@ MOCK_EVENTS = {
 def _load_data() -> tuple[dict, dict, pd.DataFrame]:
     """Load embeddings, segments, and customer reservations."""
     return load_embeddings(), load_segments_data(), load_customers_df()
-
-
-def _predict_travel_window(customer_rows: pd.DataFrame) -> tuple[str, str, int]:
-    """
-    Predict the most likely travel month and send date.
-    Returns (send_date, checkin_suggested, stay_nights).
-    """
-    months = customer_rows["CHECKIN_DATE"].dt.month.tolist()
-    most_common_month = Counter(months).most_common(1)[0][0]
-
-    avg_leadtime = customer_rows["AVG_BOOKING_LEADTIME"].iloc[0]
-    avg_stay = customer_rows["AVG_LENGTH_STAY"].iloc[0]
-
-    # Suggested checkin: 15th of the most common month, next occurrence
-    now = datetime.now()
-    year = now.year if most_common_month >= now.month else now.year + 1
-    checkin = datetime(year, most_common_month, 15)
-
-    # Send date: checkin minus leadtime (at least 14 days before)
-    send_offset = max(int(avg_leadtime), 14)
-    send_date = checkin - timedelta(days=send_offset)
-
-    return (
-        send_date.strftime("%Y-%m-%d"),
-        checkin.strftime("%Y-%m-%d"),
-        max(1, int(round(avg_stay))),
-    )
 
 
 def _get_events(city: str, month: int) -> list[dict]:
@@ -175,8 +147,15 @@ def _upsell_recommendations(value_tier: str, travel_profile: str) -> list[str]:
 
 # ── Campaign generators ──────────────────────────────────────────────────
 
-def generate_pre_arrival(guest_id: str, embeddings: dict, segments: dict,
-                         customers: pd.DataFrame) -> dict | None:
+def generate_pre_arrival(
+    guest_id: str,
+    embeddings: dict,
+    segments: dict,
+    customers: pd.DataFrame,
+    *,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
+) -> dict | None:
     """Generate pre-arrival campaign data for a specific guest."""
     seg = segments.get(str(guest_id))
     if seg is None:
@@ -197,7 +176,15 @@ def generate_pre_arrival(guest_id: str, embeddings: dict, segments: dict,
     user_emb = embeddings["user_embeddings"].get(str(guest_id), {})
 
     # Travel window
-    send_date, checkin_suggested, stay_nights = _predict_travel_window(user_rows)
+    timing = predict_next_trip(
+        user_rows,
+        mode=timing_mode,
+        send_offset_days=send_offset_days,
+        today=datetime.now(),
+    )
+    send_date = timing["send_date"]
+    checkin_suggested = timing["predicted_checkin_date"]
+    stay_nights = timing["stay_nights"]
     checkin_dt = datetime.strptime(checkin_suggested, "%Y-%m-%d")
     season = SEASON_MAP.get(checkin_dt.month, "primavera")
 
@@ -228,6 +215,7 @@ def generate_pre_arrival(guest_id: str, embeddings: dict, segments: dict,
         "preferences": preferences,
         "avg_length_stay": float(user_rows["AVG_LENGTH_STAY"].iloc[0]),
         "avg_booking_leadtime": float(user_rows["AVG_BOOKING_LEADTIME"].iloc[0]),
+        "travel_prediction": timing,
     }
 
 
@@ -334,19 +322,36 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
 
 # ── Batch generators ─────────────────────────────────────────────────────
 
-def generate_all(moment: str, guest_id: str | None = None) -> list[dict]:
+def generate_all(
+    moment: str,
+    guest_id: str | None = None,
+    *,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
+) -> list[dict]:
     """Generate campaign data for all users (or a specific one)."""
     embeddings, segments, customers = _load_data()
 
-    generators = {
-        "pre_arrival": generate_pre_arrival,
-        "checkin_report": generate_checkin_report,
-        "post_stay": generate_post_stay,
-    }
+    generator_names = ["pre_arrival", "checkin_report", "post_stay"]
+    if moment == "pre_arrival":
+        def gen_fn(uid: str, emb: dict, segs: dict, cust: pd.DataFrame) -> dict | None:
+            return generate_pre_arrival(
+                uid,
+                emb,
+                segs,
+                cust,
+                timing_mode=timing_mode,
+                send_offset_days=send_offset_days,
+            )
+    else:
+        generators = {
+            "checkin_report": generate_checkin_report,
+            "post_stay": generate_post_stay,
+        }
+        gen_fn = generators.get(moment)
 
-    gen_fn = generators.get(moment)
     if gen_fn is None:
-        raise ValueError(f"Unknown moment: {moment}. Choose: {list(generators.keys())}")
+        raise ValueError(f"Unknown moment: {moment}. Choose: {generator_names}")
 
     results = []
     if guest_id:

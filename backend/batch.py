@@ -107,7 +107,13 @@ def phase_marketing():
     return payload
 
 
-def phase_campaign(moment: str, guest_id: str | None = None, dry_run: bool = True):
+def phase_campaign(
+    moment: str,
+    guest_id: str | None = None,
+    dry_run: bool = True,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
+):
     """Phase 3-8: Run campaign pipeline for a specific moment."""
     logger.info("=" * 60)
     logger.info("PHASE 3-8 — Campaign pipeline: %s", moment)
@@ -126,7 +132,12 @@ def phase_campaign(moment: str, guest_id: str | None = None, dry_run: bool = Tru
 
     # Step 3: Generate campaign data
     logger.info("Step 3: Generating campaign data...")
-    campaigns = campaign_engine.generate_all(moment, guest_id)
+    campaigns = campaign_engine.generate_all(
+        moment,
+        guest_id,
+        timing_mode=timing_mode,
+        send_offset_days=send_offset_days,
+    )
     if not campaigns:
         logger.warning("No campaigns generated for moment=%s guest_id=%s", moment, guest_id)
         return []
@@ -221,7 +232,11 @@ def phase_campaign(moment: str, guest_id: str | None = None, dry_run: bool = Tru
     return results
 
 
-def run_all(dry_run: bool = True):
+def run_all(
+    dry_run: bool = True,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
+):
     """Run the complete pipeline."""
     logger.info("*" * 60)
     logger.info("EUROSTARS AI PERSONALIZATION ENGINE — Full pipeline")
@@ -240,7 +255,13 @@ def run_all(dry_run: bool = True):
 
     # Phase 3-8: Run campaigns
     for moment in ["pre_arrival", "checkin_report", "post_stay"]:
-        phase_campaign(moment, guest_id=None, dry_run=dry_run)
+        phase_campaign(
+            moment,
+            guest_id=None,
+            dry_run=dry_run,
+            timing_mode=timing_mode,
+            send_offset_days=send_offset_days,
+        )
 
     # Phase 9
     phase_marketing()
@@ -259,6 +280,7 @@ Examples:
   python main.py --phase all
   python main.py --phase segment
   python main.py --phase campaign --moment pre_arrival
+  python main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression
   python main.py --phase campaign --moment checkin_report --guest_id 1014907189
   python main.py --phase campaign --moment post_stay
   python main.py --phase marketing
@@ -294,12 +316,37 @@ Examples:
         default=False,
         help="Actually send emails via SendGrid (requires API key)",
     )
+    parser.add_argument(
+        "--travel-prediction-mode",
+        choices=["heuristic", "regression"],
+        default=None,
+        help=(
+            "Strategy for pre-arrival timing. "
+            "'heuristic' keeps month+leadtime logic; 'regression' predicts the next trip "
+            "from historical travel dates and simulates the send 21 days before by default."
+        ),
+    )
+    parser.add_argument(
+        "--regression-send-offset-days",
+        type=int,
+        default=None,
+        help="When using regression mode, number of days before the predicted trip to simulate the send (default: 21).",
+    )
 
     args = parser.parse_args()
     dry_run = not args.send
+    if args.travel_prediction_mode == "regression" and args.send:
+        logger.warning(
+            "Regression timing mode is simulation-only in this backend. Ignoring --send and forcing dry-run."
+        )
+        dry_run = True
 
     if args.phase == "all":
-        run_all(dry_run=dry_run)
+        run_all(
+            dry_run=dry_run,
+            timing_mode=args.travel_prediction_mode,
+            send_offset_days=args.regression_send_offset_days,
+        )
     elif args.phase == "embeddings":
         phase_embeddings()
     elif args.phase == "segment":
@@ -309,7 +356,13 @@ Examples:
     elif args.phase == "campaign":
         if not args.moment:
             parser.error("--moment is required when --phase=campaign")
-        phase_campaign(args.moment, args.guest_id, dry_run=dry_run)
+        phase_campaign(
+            args.moment,
+            args.guest_id,
+            dry_run=dry_run,
+            timing_mode=args.travel_prediction_mode,
+            send_offset_days=args.regression_send_offset_days,
+        )
     elif args.phase == "marketing":
         phase_marketing()
 

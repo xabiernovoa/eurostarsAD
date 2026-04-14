@@ -31,6 +31,8 @@ def run_tick(
     force_generic: bool = False,
     max_candidates: int | None = None,
     force_mock: bool = False,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> dict[str, Any]:
     """Ejecuta un único tick del sistema y devuelve un resumen."""
     config.ensure_output_dirs()
@@ -69,6 +71,8 @@ def run_tick(
             now=now,
             max_candidates=max_candidates,
             blocked_destinations=blocked,
+            timing_mode=timing_mode,
+            send_offset_days=send_offset_days,
         )
     except Exception as exc:  # pragma: no cover — defensivo
         logger.exception("Fallo al calcular candidatos")
@@ -86,6 +90,8 @@ def run_tick(
                 guest_id,
                 oracle_context=oracle_context,
                 force_mock=force_mock,
+                timing_mode=timing_mode,
+                send_offset_days=send_offset_days,
             )
         except Exception as exc:  # pragma: no cover — defensivo
             logger.exception("Error generando campaña para %s", guest_id)
@@ -145,6 +151,8 @@ def run_loop(
     interval_minutes: int | None = None,
     max_ticks: int | None = None,
     force_mock: bool = False,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
 ) -> None:
     """Ejecuta ticks en bucle con pausa ``interval_minutes`` entre iteraciones."""
     import time
@@ -159,7 +167,11 @@ def run_loop(
 
     try:
         while True:
-            run_tick(force_mock=force_mock)
+            run_tick(
+                force_mock=force_mock,
+                timing_mode=timing_mode,
+                send_offset_days=send_offset_days,
+            )
             tick_count += 1
             if max_ticks and tick_count >= max_ticks:
                 logger.info("Alcanzado max_ticks=%d — deteniendo", max_ticks)

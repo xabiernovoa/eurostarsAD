@@ -2,7 +2,7 @@
 """
 text_generator.py — Phase 5: AI Text Generation
 
-Generates email copy using the OpenAI API.
+Generates email copy using Gemini via Vertex AI.
 Falls back to structured mock copy in dry-run mode.
 Produces structured JSON output: subject, preheader, headline, body, CTA, etc.
 """

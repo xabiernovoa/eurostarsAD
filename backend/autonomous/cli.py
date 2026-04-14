@@ -5,6 +5,7 @@ Uso:
     python -m backend.autonomous.cli --mode tick
     python -m backend.autonomous.cli --mode loop
     python -m backend.autonomous.cli --mode demo
+    python -m backend.autonomous.cli --mode tick --travel-prediction-mode regression
 """
 
 from __future__ import annotations
@@ -54,7 +55,11 @@ def _print_summary(title: str, data: dict) -> None:
             print(f"  {key}: {value}")
 
 
-def _run_demo(force_mock: bool) -> int:
+def _run_demo(
+    force_mock: bool,
+    timing_mode: str | None = None,
+    send_offset_days: int | None = None,
+) -> int:
     """Genera 5 campañas personalizadas + 1 genérica y persiste todo en disco."""
     logger = logging.getLogger("autonomous.run.demo")
     shutil.rmtree(config.OUTPUT_DIR, ignore_errors=True)
@@ -77,10 +82,15 @@ def _run_demo(force_mock: bool) -> int:
         cooldown_days=0,
         max_candidates=5,
         blocked_destinations=oracle.get_blocked_destinations(ctx),
+        timing_mode=timing_mode,
+        send_offset_days=send_offset_days,
     )
     if not candidates:
         logger.warning("No se encontraron candidatos — cargando top 5 por lead time")
-        plans = user_scheduler.compute_user_plans()
+        plans = user_scheduler.compute_user_plans(
+            timing_mode=timing_mode,
+            send_offset_days=send_offset_days,
+        )
         candidates = plans[:5]
 
     logger.info("Generando %d campañas personalizadas…", len(candidates))
@@ -90,6 +100,8 @@ def _run_demo(force_mock: bool) -> int:
             cand["guest_id"],
             oracle_context=ctx,
             force_mock=force_mock,
+            timing_mode=timing_mode,
+            send_offset_days=send_offset_days,
         )
         if result:
             generated.append(result)
@@ -180,6 +192,21 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Activa logs DEBUG.",
     )
+    parser.add_argument(
+        "--travel-prediction-mode",
+        choices=["heuristic", "regression"],
+        default=None,
+        help=(
+            "Estrategia temporal para campañas pre-arrival. "
+            "'regression' predice el próximo check-in desde el histórico y simula el envío antes de la estancia."
+        ),
+    )
+    parser.add_argument(
+        "--regression-send-offset-days",
+        type=int,
+        default=None,
+        help="Días de antelación para simular el envío cuando se usa regresión (default: 21).",
+    )
     return parser
 
 
@@ -200,10 +227,18 @@ def main(argv: list[str] | None = None) -> int:
         logger.warning("dry_run desactivado — el envío real no está implementado en este sistema")
 
     if args.mode == "demo":
-        return _run_demo(force_mock=args.force_mock)
+        return _run_demo(
+            force_mock=args.force_mock,
+            timing_mode=args.travel_prediction_mode,
+            send_offset_days=args.regression_send_offset_days,
+        )
 
     if args.mode == "tick":
-        summary = heartbeat.run_tick(force_mock=args.force_mock)
+        summary = heartbeat.run_tick(
+            force_mock=args.force_mock,
+            timing_mode=args.travel_prediction_mode,
+            send_offset_days=args.regression_send_offset_days,
+        )
         _print_summary("Tick completado", summary)
         return 0
 
@@ -212,6 +247,8 @@ def main(argv: list[str] | None = None) -> int:
             interval_minutes=args.interval_minutes,
             max_ticks=args.max_ticks,
             force_mock=args.force_mock,
+            timing_mode=args.travel_prediction_mode,
+            send_offset_days=args.regression_send_offset_days,
         )
         return 0
 

@@ -241,6 +241,9 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
         max_recs = max(1, min(50, _int("max", 20)))
         workers = max(1, min(6, _int("workers", 3)))
         campaigns = max(0, min(10, _int("campaigns", 5)))
+        timing_mode_raw = params.get("timing_mode", [""])[0].strip().lower()
+        timing_mode = timing_mode_raw if timing_mode_raw in {"heuristic", "regression"} else None
+        regression_offset_days = _int("offset_days", 21) if timing_mode == "regression" else None
         # Compatibilidad: clientes antiguos que pasen ``generic_every_n``
         # reciben silencio (el parámetro ya no existe).
 
@@ -254,6 +257,8 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 pacing_seconds=0.15 if force_mock else 0.05,
                 recommender_workers=workers,
                 campaigns_per_tick=campaigns,
+                timing_mode=timing_mode,
+                send_offset_days=regression_offset_days,
             ):
                 try:
                     self._emit_ndjson(event)

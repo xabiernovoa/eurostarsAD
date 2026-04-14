@@ -66,8 +66,14 @@ DRY_RUN = _env_bool("AUTONOMOUS_DRY_RUN", True)
 # ── API Vertex AI (Gemini) ───────────────────────────────────────────────
 VERTEX_PROJECT_ID = os.environ.get("VERTEX_PROJECT_ID", "")
 VERTEX_LOCATION = os.environ.get("VERTEX_LOCATION", "us-central1")
-GEMINI_MODEL = os.environ.get("AUTONOMOUS_GEMINI_MODEL", "gemini-2.5-flash")
-GEMINI_TEMPERATURE = _env_float("AUTONOMOUS_GEMINI_TEMPERATURE", 0.7)
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL") or os.environ.get(
+    "AUTONOMOUS_GEMINI_MODEL",
+    "gemini-2.5-flash",
+)
+GEMINI_TEMPERATURE = _env_float(
+    "GEMINI_TEMPERATURE",
+    _env_float("AUTONOMOUS_GEMINI_TEMPERATURE", 0.7),
+)
 
 
 def _resolve_credentials_path() -> Path | None:
