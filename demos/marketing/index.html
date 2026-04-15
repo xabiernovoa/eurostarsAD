@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eurostars · Centro de Control de Marketing</title>
     <meta name="description"
-        content="Dashboard operativo de marketing para Eurostars Hotel Company. Análisis de campañas, segmentos de audiencia y acciones recomendadas.">
+        content="Panel operativo de marketing para Eurostars Hotel Company. Análisis de campañas, segmentos de audiencia y acciones recomendadas.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -56,7 +56,7 @@
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-section-label">Dashboard</div>
+                <div class="nav-section-label">Panel</div>
                 <button class="nav-item active" data-section="overview" id="navOverview">
                     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -130,7 +130,7 @@
         <!-- ═══════════════════ MAIN ═══════════════════ -->
         <main class="main-content">
 
-            <!-- ── OVERVIEW ───────────────────── -->
+            <!-- ── RESUMEN ────────────────────── -->
             <div class="section-view active" id="viewOverview">
                 <div class="section-header">
                     <h1 class="section-title">Resumen ejecutivo</h1>
@@ -151,11 +151,11 @@
 
                     <div class="viz-row">
                         <div class="viz-card">
-                            <h3>Distribución por perfil de viaje</h3>
+                            <h3>Distribución por afinidad principal</h3>
                             <div id="donutProfile"></div>
                         </div>
                         <div class="viz-card">
-                            <h3>Engagement: canal × segmento edad</h3>
+                            <h3>Interacción: canal × segmento de edad</h3>
                             <div id="heatmapGrid"></div>
                         </div>
                     </div>
@@ -168,11 +168,11 @@
                             <div id="ageBreakdown"></div>
                         </div>
                         <div class="breakdown-card">
-                            <h3>Perfil de viaje</h3>
+                            <h3>Afinidad principal</h3>
                             <div id="profileBreakdown"></div>
                         </div>
                         <div class="breakdown-card">
-                            <h3>Valor cliente</h3>
+                            <h3>Nivel de valor</h3>
                             <div id="valueBreakdown"></div>
                         </div>
                         <div class="breakdown-card">
@@ -191,7 +191,7 @@
                 <div class="section-body">
                     <div class="viz-row">
                         <div class="viz-card">
-                            <h3>Distribución por valor de cliente</h3>
+                            <h3>Distribución por nivel de valor</h3>
                             <div id="donutValue"></div>
                         </div>
                         <div class="viz-card">
@@ -202,12 +202,12 @@
 
                     <h2 class="section-subtitle">Segmentos prioritarios</h2>
                     <p class="form-help" style="margin-bottom:16px">Segmentos con mayor tracción y potencial de
-                        conversión, ordenados por índice de engagement.</p>
+                        conversión, ordenados por índice de interacción.</p>
                     <div class="segment-grid" id="segmentGrid"></div>
                 </div>
             </div>
 
-            <!-- ── CAMPAIGNS ──────────────────── -->
+            <!-- ── CAMPAÑAS ───────────────────── -->
             <div class="section-view" id="viewCampaigns">
                 <div class="section-header">
                     <h1 class="section-title">Campañas</h1>
@@ -216,9 +216,9 @@
                     <div class="campaign-counters" id="campaignCounters"></div>
                     <div class="table-filters" id="campaignFilters">
                         <button class="filter-chip active" data-filter="all">Todas</button>
-                        <button class="filter-chip" data-filter="pre_arrival">Pre-Arrival</button>
-                        <button class="filter-chip" data-filter="post_stay">Post-Stay</button>
-                        <button class="filter-chip" data-filter="checkin_report">Check-in</button>
+                        <button class="filter-chip" data-filter="pre_arrival">Prellegada</button>
+                        <button class="filter-chip" data-filter="post_stay">Postestancia</button>
+                        <button class="filter-chip" data-filter="checkin_report">Recepción</button>
                     </div>
                     <div class="table-wrapper">
                         <table class="campaign-table">
@@ -238,7 +238,7 @@
                 </div>
             </div>
 
-            <!-- ── ACTIONS ────────────────────── -->
+            <!-- ── ACCIONES ───────────────────── -->
             <div class="section-view" id="viewActions">
                 <div class="section-header">
                     <h1 class="section-title">Acciones recomendadas</h1>
@@ -266,7 +266,7 @@
                 </div>
             </div>
 
-            <!-- ── AUTONOMOUS ────────────────────── -->
+            <!-- ── AUTÓNOMO ───────────────────── -->
             <div class="section-view" id="viewAutonomous">
                 <div class="section-header">
                     <h1 class="section-title">Modo autónomo</h1>

@@ -1,7 +1,7 @@
 (function () {
     "use strict";
 
-    /* ── DOM References ──────────────────────────────────── */
+    /* ── Referencias DOM ─────────────────────────────────── */
 
     var refs = {
         navItems: document.querySelectorAll(".nav-item[data-section]"),
@@ -51,10 +51,10 @@
     var activeCampaignFilter = "all";
     var chatHistory = [];
 
-    /* ── Theme (always light) ────────────────────────────── */
+    /* ── Tema (siempre claro) ────────────────────────────── */
     document.documentElement.setAttribute("data-theme", "light");
 
-    /* ── Navigation ──────────────────────────────────────── */
+    /* ── Navegación ──────────────────────────────────────── */
 
     function switchSection(sectionId) {
         refs.navItems.forEach(function (item) {
@@ -70,7 +70,7 @@
         item.addEventListener("click", function () { switchSection(item.dataset.section); });
     });
 
-    /* ── Helpers ──────────────────────────────────────────── */
+    /* ── Utilidades ──────────────────────────────────────── */
 
     function setStatus(msg) { if (refs.statusLine) refs.statusLine.textContent = msg; }
 
@@ -89,17 +89,30 @@
     function engClass(v) { return v >= 0.85 ? "high" : v >= 0.65 ? "mid" : "low"; }
     function typeLabel(t) {
         return {
-            pre_arrival: "Pre-Arrival", post_stay: "Post-Stay", checkin_report: "Check-in",
-            contenido_rrss: "Contenido RRSS", hotel_insite: "In-Hotel",
-            local_partnership: "Partnership local", branding: "Branding",
+            pre_arrival: "Prellegada", post_stay: "Postestancia", checkin_report: "Recepción",
+            contenido_rrss: "Contenido RRSS", hotel_insite: "Dentro del hotel",
+            local_partnership: "Colaboración local", branding: "Marca",
             geolocalizacion: "Geolocalización", evento: "Evento", decoracion: "Decoración"
         }[t] || t;
     }
     function categoryIcon(cat) {
         return {
-            rrss: "RRSS", hotel: "Hotel", local: "Local", branding: "Brand",
+            rrss: "RRSS", hotel: "Hotel", local: "Local", branding: "Marca",
             geolocalizacion: "Geo", evento: "Evento", decoracion: "Deco"
         }[cat] || cat || "";
+    }
+
+    function segmentAgeTag(seg) {
+        return (((seg || {}).tags || {}).demografia || {}).edad || "—";
+    }
+
+    function segmentPrimaryAffinity(seg) {
+        var list = ((seg || {}).tags || {}).afinidades_destino || [];
+        return list.length ? list[0] : "—";
+    }
+
+    function segmentValueLevel(seg) {
+        return ((seg || {}).tags || {}).nivel_valor || "—";
     }
 
     function linesFromTextarea(ta) {
@@ -136,14 +149,14 @@
         return r.json();
     }
 
-    /* ── Render: KPIs ────────────────────────────────────── */
+    /* ── Pintar KPIs ─────────────────────────────────────── */
 
     function renderKpis(kpis) {
         var items = [
             { label: "Campañas", value: kpis.total_campaigns, note: "Campañas deduplicadas", indicator: "good" },
             { label: "Audiencia", value: kpis.audience_size, note: "Usuarios segmentados", indicator: "good" },
-            { label: "Segmentos activos", value: kpis.active_segments, note: "Cruces edad-perfil", indicator: kpis.active_segments >= 10 ? "good" : "neutral" },
-            { label: "Índice medio", value: fmtPct(kpis.avg_engagement_index), note: "Engagement estimado", indicator: kpis.avg_engagement_index >= 0.75 ? "good" : kpis.avg_engagement_index >= 0.5 ? "neutral" : "low" },
+            { label: "Segmentos activos", value: kpis.active_segments, note: "Cruces edad-afinidad-valor", indicator: kpis.active_segments >= 10 ? "good" : "neutral" },
+            { label: "Índice medio", value: fmtPct(kpis.avg_engagement_index), note: "Interacción estimada", indicator: kpis.avg_engagement_index >= 0.75 ? "good" : kpis.avg_engagement_index >= 0.5 ? "neutral" : "low" },
             { label: "Presión estratégica", value: kpis.priority_pressure + "/100", note: "Intensidad señales", indicator: kpis.priority_pressure >= 70 ? "good" : "neutral" },
         ];
         refs.kpiGrid.innerHTML = items.map(function (k) {
@@ -151,7 +164,7 @@
         }).join("");
     }
 
-    /* ── Render: Opportunities ───────────────────────────── */
+    /* ── Pintar oportunidades ───────────────────────────── */
 
     function renderOpportunities(dashboard) {
         var segs = dashboard.segment_cards || [];
@@ -176,12 +189,12 @@
         });
 
         refs.opportunityRow.innerHTML =
-            '<div class="opportunity-card"><div><div class="opportunity-label">Segmento top</div><div class="opportunity-value">' + esc(topSeg.segment_label || "—") + '</div><div class="opportunity-detail">' + (topSeg.users || 0) + ' usuarios · ' + fmtPct(topSeg.avg_engagement_index) + ' engagement · ' + Math.round(topSeg.avg_adr || 0) + '€ ADR</div></div></div>' +
+            '<div class="opportunity-card"><div><div class="opportunity-label">Segmento líder</div><div class="opportunity-value">' + esc(topSeg.segment_label || "—") + '</div><div class="opportunity-detail">' + (topSeg.users || 0) + ' usuarios · ' + fmtPct(topSeg.avg_engagement_index) + ' de interacción · ' + Math.round(topSeg.avg_adr || 0) + '€ ADR</div></div></div>' +
             '<div class="opportunity-card"><div><div class="opportunity-label">Ciudad con más tracción</div><div class="opportunity-value">' + esc(topCity) + '</div><div class="opportunity-detail">Destino con mayor concentración de campañas y señales externas activas</div></div></div>' +
-            '<div class="opportunity-card"><div><div class="opportunity-label">Mejor canal</div><div class="opportunity-value">' + esc(bestChannel) + '</div><div class="opportunity-detail">Engagement medio ' + fmtPct(bestChAvg) + ' sobre ' + (channelMap[bestChannel] ? channelMap[bestChannel].count : 0) + ' campañas recientes</div></div></div>';
+            '<div class="opportunity-card"><div><div class="opportunity-label">Mejor canal</div><div class="opportunity-value">' + esc(bestChannel) + '</div><div class="opportunity-detail">Interacción media ' + fmtPct(bestChAvg) + ' sobre ' + (channelMap[bestChannel] ? channelMap[bestChannel].count : 0) + ' campañas recientes</div></div></div>';
     }
 
-    /* ── Render: Focus ───────────────────────────────────── */
+    /* ── Pintar foco ─────────────────────────────────────── */
 
     function renderFocus(dashboard) {
         refs.priorityText.textContent = dashboard.context.strategic_priority || "Sin prioridad definida.";
@@ -191,7 +204,7 @@
         refs.sidebarUpdated.textContent = "Actualizado " + fmtDate(dashboard.generated_at);
     }
 
-    /* ── Render: SVG Donut ───────────────────────────────── */
+    /* ── Pintar donut SVG ────────────────────────────────── */
 
     var DONUT_COLORS = ["#b8943e", "#c9a96e", "#4a8ec9", "#3d9a5f", "#c49a2a", "#84754e", "#c94a4a", "#6b5fa5"];
 
@@ -237,7 +250,7 @@
         container.innerHTML = '<div class="donut-container">' + svgParts.join("") + legendParts.join("") + '</div>';
     }
 
-    /* ── Render: Heatmap ─────────────────────────────────── */
+    /* ── Pintar mapa de calor ────────────────────────────── */
 
     function renderHeatmap(dashboard) {
         var rows = dashboard.campaign_rows || dashboard.recent_campaigns || [];
@@ -249,7 +262,7 @@
             channels.forEach(function (c) { grid[a + "|" + c] = { sum: 0, count: 0 }; });
         });
         rows.forEach(function (r) {
-            var key = r.age_segment + "|" + r.channel;
+            var key = r.demographic_age + "|" + r.channel;
             if (grid[key]) { grid[key].sum += r.engagement_index || 0; grid[key].count++; }
         });
 
@@ -277,7 +290,7 @@
         refs.heatmapGrid.innerHTML = html;
     }
 
-    /* ── Render: Breakdowns ──────────────────────────────── */
+    /* ── Pintar desgloses ────────────────────────────────── */
 
     function renderBreakdown(container, items) {
         var html = '<div class="breakdown-list">';
@@ -289,7 +302,7 @@
         container.innerHTML = html;
     }
 
-    /* ── Render: Segments ────────────────────────────────── */
+    /* ── Pintar segmentos ────────────────────────────────── */
 
     function renderSegments(cards) {
         refs.segmentGrid.innerHTML = cards.map(function (c) {
@@ -298,20 +311,19 @@
         if (refs.audienceCount) refs.audienceCount.textContent = cards.length + " segmentos activos";
     }
 
-    /* ── Render: Country Stats ───────────────────────────── */
+    /* ── Pintar estadísticas por país ────────────────────── */
 
     function renderCountryStats(dashboard) {
         var rows = dashboard.campaign_rows || dashboard.recent_campaigns || [];
         var countries = {};
         rows.forEach(function (r) {
-            var seg = r.age_segment || "";
-            // We don't have country directly on campaign_rows, but we can infer from segment_cards
+            var seg = r.demographic_age || "";
+            // campaign_rows no trae el país directamente; aquí se usa una estimación
         });
-        // Use segment_cards which have user counts, but aggregate by looking at campaign data
-        // Since we don't have country per campaign, let's show a simplified version
+        // Se usa segment_cards, que sí aporta conteos de usuarios, para mostrar una versión simplificada
         var flags = { ES: "🇪🇸", PT: "🇵🇹", IT: "🇮🇹" };
         var names = { ES: "España", PT: "Portugal", IT: "Italia" };
-        // We need to count from the segments data — use a rough estimate from the dashboard
+        // Se estima el reparto desde el dashboard disponible
         var segs = dashboard.segment_cards || [];
         var totalUsers = segs.reduce(function (s, c) { return s + c.users; }, 0);
 
@@ -323,7 +335,7 @@
         refs.countryRow.innerHTML = html;
     }
 
-    /* ── Render: Campaign Counters ───────────────────────── */
+    /* ── Pintar contadores de campañas ───────────────────── */
 
     function renderCampaignCounters(rows) {
         var counts = { pre_arrival: 0, post_stay: 0, checkin_report: 0 };
@@ -331,16 +343,16 @@
             if (counts[r.campaign_type] !== undefined) counts[r.campaign_type]++;
         });
         var items = [
-            { label: "Pre-Arrival", count: counts.pre_arrival, cls: "pre_arrival" },
-            { label: "Post-Stay", count: counts.post_stay, cls: "post_stay" },
-            { label: "Check-in", count: counts.checkin_report, cls: "checkin_report" },
+            { label: "Prellegada", count: counts.pre_arrival, cls: "pre_arrival" },
+            { label: "Postestancia", count: counts.post_stay, cls: "post_stay" },
+            { label: "Recepción", count: counts.checkin_report, cls: "checkin_report" },
         ];
         refs.campaignCounters.innerHTML = items.map(function (i) {
             return '<div class="counter-card"><div class="counter-value">' + i.count + '</div><div class="counter-label">' + i.label + '</div></div>';
         }).join("");
     }
 
-    /* ── Render: Campaigns ───────────────────────────────── */
+    /* ── Pintar campañas ─────────────────────────────────── */
 
     function renderCampaigns(rows, filter) {
         var filtered = rows;
@@ -348,12 +360,12 @@
             filtered = rows.filter(function (r) { return r.campaign_type === filter; });
         }
         refs.campaignTableBody.innerHTML = filtered.map(function (r) {
-            return '<tr><td>' + esc(fmtDate(r.timestamp)) + '</td><td>' + typeLabel(r.campaign_type) + '</td><td><span class="table-segment">' + esc(r.age_segment) + '</span><span class="table-sub">' + esc(r.travel_profile) + '</span></td><td>' + esc(r.channel) + '<span class="table-sub">' + esc(r.channel_alignment) + '</span></td><td>' + esc(r.hotel || "Sin asignar") + '</td><td>' + fmtPct(r.engagement_index) + '</td></tr>';
+            return '<tr><td>' + esc(fmtDate(r.timestamp)) + '</td><td>' + typeLabel(r.campaign_type) + '</td><td><span class="table-segment">' + esc(r.segment_label) + '</span><span class="table-sub">' + esc(r.loyalty || "") + '</span></td><td>' + esc(r.channel) + '<span class="table-sub">' + esc(r.channel_alignment) + '</span></td><td>' + esc(r.hotel || "Sin asignar") + '</td><td>' + fmtPct(r.engagement_index) + '</td></tr>';
         }).join("");
         if (refs.campaignCount) refs.campaignCount.textContent = filtered.length + " de " + rows.length + " campañas";
     }
 
-    /* ── Render: Actions ─────────────────────────────────── */
+    /* ── Pintar acciones ─────────────────────────────────── */
 
     function renderActions(recommendations) {
         var sourceLabel = recommendations.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
@@ -370,7 +382,7 @@
         }).join("");
     }
 
-    /* ── Render: Config Form ─────────────────────────────── */
+    /* ── Rellenar formulario de configuración ────────────── */
 
     function fillForm(ctx) {
         refs.strategicPriority.value = ctx.strategic_priority || "";
@@ -379,7 +391,7 @@
         refs.externalSignals.value = (ctx.external_signals || []).join("\n");
     }
 
-    /* ── Render: Full Dashboard ──────────────────────────── */
+    /* ── Pintar dashboard completo ───────────────────────── */
 
     function renderDashboard(dashboard) {
         currentDashboard = dashboard;
@@ -387,43 +399,43 @@
         renderOpportunities(dashboard);
         renderFocus(dashboard);
 
-        // Donut: profile distribution
-        var profileData = (dashboard.performance_by_profile || []).map(function (p) {
+        // Donut: distribución por afinidad principal
+        var profileData = (dashboard.performance_by_affinity || []).map(function (p) {
             return { label: p.label, value: p.count };
         });
         renderDonut(refs.donutProfile, profileData);
 
-        // Heatmap
+        // Mapa de calor
         renderHeatmap(dashboard);
 
-        // Breakdowns
+        // Desgloses
         renderBreakdown(refs.ageBreakdown, dashboard.performance_by_age);
-        renderBreakdown(refs.profileBreakdown, dashboard.performance_by_profile);
-        renderBreakdown(refs.valueBreakdown, dashboard.performance_by_value);
+        renderBreakdown(refs.profileBreakdown, dashboard.performance_by_affinity);
+        renderBreakdown(refs.valueBreakdown, dashboard.performance_by_value_level);
         renderBreakdown(refs.momentBreakdown, dashboard.performance_by_moment);
 
-        // Audience
-        var valueData = (dashboard.performance_by_value || []).map(function (v) {
+        // Audiencia
+        var valueData = (dashboard.performance_by_value_level || []).map(function (v) {
             return { label: v.label, value: v.count };
         });
         renderDonut(refs.donutValue, valueData);
         renderCountryStats(dashboard);
         renderSegments(dashboard.segment_cards);
 
-        // Campaigns
+        // Campañas
         renderCampaignCounters(dashboard.campaign_rows || dashboard.recent_campaigns || []);
         renderCampaigns(dashboard.campaign_rows || dashboard.recent_campaigns || [], activeCampaignFilter);
 
-        // Actions
+        // Acciones
         renderActions(dashboard.recommendations);
 
-        // Config
+        // Configuración
         fillForm(dashboard.context);
 
-        setStatus("Dashboard listo. Última lectura: " + fmtDate(dashboard.generated_at));
+        setStatus("Panel listo. Última lectura: " + fmtDate(dashboard.generated_at));
     }
 
-    /* ── Campaign Filters ────────────────────────────────── */
+    /* ── Filtros de campañas ─────────────────────────────── */
 
     refs.campaignFilters.addEventListener("click", function (e) {
         var chip = e.target.closest(".filter-chip");
@@ -991,6 +1003,7 @@
     function renderCampaignDone(ev) {
         var existing = document.getElementById("auto-campaign-" + ev.guest_id);
         var seg = ev.segment || {};
+        var summary = ev.segment_overview || {};
         var hotel = ev.hotel || {};
         var copy = ev.copy || {};
         var matched = ev.matched_events || [];
@@ -1011,9 +1024,9 @@
             '<div class="auto-card-head">' +
             workerTag +
             '<span class="auto-guest">guest ' + esc(ev.guest_id) + '</span>' +
-            '<span class="auto-tag">' + esc(seg.age_segment || "—") + '</span>' +
-            '<span class="auto-tag">' + esc(seg.travel_profile || "—") + '</span>' +
-            '<span class="auto-tag">' + esc(seg.client_value || "—") + '</span>' +
+            '<span class="auto-tag">' + esc((summary.age_label || segmentAgeTag(seg) || "—")) + '</span>' +
+            '<span class="auto-tag">' + esc((summary.primary_affinity_label || segmentPrimaryAffinity(seg) || "—")) + '</span>' +
+            '<span class="auto-tag">' + esc((summary.value_label || segmentValueLevel(seg) || "—")) + '</span>' +
             channelBadge +
             '</div>' +
             channelReason +

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-image_selector.py — Phase 4: Intelligent Image Selection
+image_selector.py — Fase 4: selección inteligente de imágenes
 
-Selects 3-5 images per email based on the user's profile, embedding,
-and segment by matching image tags with user preferences.
+Selecciona entre 3 y 5 imágenes por email según el perfil del usuario, su
+embedding y el segmento, cruzando las etiquetas de imagen con sus preferencias.
 """
 
 import json
@@ -16,6 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.paths import EMBEDDINGS_PATH, IMAGES_DIR, SEGMENTS_PATH
+from backend.personalization.segment_views import get_age_key, is_high_value
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,34 +24,44 @@ logging.basicConfig(
 )
 logger = logging.getLogger("image_selector")
 
-# Placeholder image for hotels without images
+# Imagen de respaldo para hoteles sin imágenes
 PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600"
 
-# ── Tag priority rules ───────────────────────────────────────────────────
+# ── Reglas de prioridad por etiquetas ────────────────────────────────────
 
 TAG_RULES = [
-    # (condition_fn, priority_tags, weight)
+    # (función_condición, etiquetas_prioritarias, peso)
     (lambda emb, seg: emb.get("BEACH", 0) > 0.7,
      ["piscina", "playa", "terraza"], 3.0),
     (lambda emb, seg: emb.get("MOUNTAIN", 0) > 0.7,
      ["paisaje", "naturaleza", "senderismo"], 3.0),
     (lambda emb, seg: emb.get("HERITAGE", 0) > 0.7,
      ["exterior histórico", "sala clásica", "fachada", "histórico"], 3.0),
-    (lambda emb, seg: seg.get("client_value") == "HIGH_VALUE",
+    (lambda emb, seg: is_high_value(seg),
      ["suite", "spa", "minibar", "experiencias premium", "premium"], 2.5),
     (lambda emb, seg: emb.get("TEMP_NORM", 0) > 0.7,
      ["exterior soleado", "piscina", "terraza"], 2.0),
-    (lambda emb, seg: seg.get("age_segment") == "JOVEN",
+    (lambda emb, seg: get_age_key(seg) == "JOVEN",
      ["lifestyle", "social", "moderno"], 2.0),
-    (lambda emb, seg: seg.get("age_segment") == "SENIOR",
+    (lambda emb, seg: get_age_key(seg) == "SENIOR",
      ["comfort", "tranquilidad", "restaurante"], 2.0),
     (lambda emb, seg: emb.get("GASTRONOMY", 0) > 0.7,
      ["restaurante", "platos", "bar", "gastronomía"], 2.5),
 ]
 
+TAG_DESTINO_A_IMAGEN = {
+    "playero": ["piscina", "playa", "terraza", "exterior soleado"],
+    "montana": ["paisaje", "naturaleza", "senderismo"],
+    "cultural": ["exterior histórico", "fachada", "histórico", "museo"],
+    "gastronomico": ["restaurante", "platos", "bar", "gastronomía"],
+    "clima_calido": ["exterior soleado", "terraza", "piscina"],
+    "mediterraneo": ["terraza", "vistas", "exterior soleado"],
+    "continental": ["interior", "salón", "arquitectura"],
+}
+
 
 def _load_image_metadata(hotel_id: str) -> list[dict]:
-    """Load image metadata for a hotel."""
+    """Carga los metadatos de imagen de un hotel."""
     meta_path = IMAGES_DIR / str(hotel_id) / "metadata.json"
     if not meta_path.exists():
         return []
@@ -63,7 +74,7 @@ def _score_image(
     user_embedding: dict[str, float],
     segment: dict,
 ) -> float:
-    """Score an image based on tag matches with user profile."""
+    """Puntúa una imagen según el encaje entre sus tags y el perfil del usuario."""
     score = 0.0
     image_tags = set(t.lower() for t in image.get("tags", []))
     image_audience = set(a.lower() for a in image.get("audience", []))
@@ -74,22 +85,35 @@ def _score_image(
                 if tag.lower() in image_tags:
                     score += weight
 
-    # Audience matching
-    age_seg = segment.get("age_segment", "").lower()
+    segment_tags = segment.get("tags", {}) if isinstance(segment, dict) else {}
+    destination_tags = segment_tags.get("afinidades_destino", [])
+    for destination_tag in destination_tags:
+        for preferred_image_tag in TAG_DESTINO_A_IMAGEN.get(destination_tag, []):
+            if preferred_image_tag.lower() in image_tags:
+                score += 1.8
+
+    value_level = str(segment_tags.get("nivel_valor", "")).strip().lower()
+    if value_level in {"premium", "lujo"} and image.get("premium", False):
+        score += 2.0
+    elif value_level == "esencial" and "premium" in image_tags:
+        score -= 0.5
+
+    # Ajuste por audiencia
+    age_seg = get_age_key(segment).lower()
     if age_seg == "joven" and "joven" in image_audience:
         score += 1.5
     elif age_seg == "senior" and any(a in image_audience for a in ["senior", "familia"]):
         score += 1.5
 
-    # Premium bonus for high-value clients
-    if segment.get("client_value") == "HIGH_VALUE" and image.get("premium", False):
+    # Bonus premium para clientes de alto valor
+    if is_high_value(segment) and image.get("premium", False):
         score += 2.0
 
-    # Mood bonus
+    # Bonus de mood
     mood = image.get("mood", "").lower()
-    if segment.get("age_segment") == "JOVEN" and mood == "aspiracional":
+    if get_age_key(segment) == "JOVEN" and mood == "aspiracional":
         score += 1.0
-    elif segment.get("age_segment") == "SENIOR" and mood == "cálido":
+    elif get_age_key(segment) == "SENIOR" and mood == "cálido":
         score += 1.0
 
     return score
@@ -103,13 +127,13 @@ def select_images(
     min_images: int = 3,
 ) -> list[dict]:
     """
-    Select and rank images for a user/hotel combination.
-    Returns list of {filename, path, score} dicts.
+    Selecciona y ordena imágenes para una combinación usuario/hotel.
+    Devuelve una lista de diccionarios con filename, path y score.
     """
     metadata = _load_image_metadata(hotel_id)
 
     if not metadata:
-        logger.info("No images found for hotel %s, using placeholder", hotel_id)
+        logger.info("No se han encontrado imágenes para el hotel %s; se usará el placeholder", hotel_id)
         return [{"filename": "placeholder.jpg", "path": PLACEHOLDER_IMAGE,
                  "score": 0, "is_placeholder": True}] * min_images
 
@@ -125,10 +149,10 @@ def select_images(
             "is_placeholder": not img_path.exists(),
         })
 
-    # Sort by score descending
+    # Ordenar por puntuación descendente
     scored.sort(key=lambda x: x["score"], reverse=True)
 
-    # Return between min and max images
+    # Devolver entre min_images y max_images
     result = scored[:max_images]
     while len(result) < min_images:
         result.append({
@@ -142,7 +166,7 @@ def select_images(
 
 
 def main():
-    """Test with sample user."""
+    """Prueba la selección con un usuario de ejemplo."""
     emb_path = EMBEDDINGS_PATH
     seg_path = SEGMENTS_PATH
 
@@ -155,13 +179,13 @@ def main():
     user_emb = embeddings["user_embeddings"].get(test_user, {})
     seg = segments.get(test_user, {})
 
-    # Get recommended hotel
+    # Obtener el hotel recomendado
     from backend.personalization import embeddings as build_embeddings
-    recs = build_embeddings.recommend_hotel(test_user, embeddings, top_n=1)
+    recs = build_embeddings.recommend_hotel(test_user, embeddings, top_n=1, segment=seg)
     if recs:
         hotel_id = recs[0][0]
         images = select_images(hotel_id, user_emb, seg)
-        logger.info("Selected %d images for user %s, hotel %s:",
+        logger.info("Seleccionadas %d imágenes para el usuario %s y el hotel %s:",
                      len(images), test_user, hotel_id)
         for img in images:
             logger.info("  %s (score=%.1f, placeholder=%s)",

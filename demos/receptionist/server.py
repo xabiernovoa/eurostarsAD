@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reception demo backed by guest identities in `data/` and reports in `output/`."""
+"""Demo de recepción apoyada en identidades de huéspedes en `data/` e informes en `output/`."""
 
 from __future__ import annotations
 
@@ -37,36 +37,36 @@ MIME_TYPES = {
 }
 
 
-# ── Guest data extractor ──────────────────────────────────────────────
+# ── Extractor de datos de huésped ─────────────────────────────────────
 def extract_guest_data(html_content: str, guest_id: str) -> dict:
-    """Parse key data points from a checkin report HTML."""
+    """Extrae los datos clave desde un HTML de informe de check-in."""
     data = {"id": guest_id}
 
-    # Name / title
+    # Nombre / título
     m = re.search(r'Guest\s*#(\d+)', html_content)
     if m:
         data["guest_number"] = m.group(1)
 
-    # Demographics line: "Masculino · 46-65 años · País: ES"
+    # Línea demográfica: "Masculino · 46-65 años · País: ES"
     m = re.search(r'(Masculino|Femenino|No especificado)\s*·\s*([\d\-\+]+\s*años)\s*·\s*País:\s*(\w+)', html_content)
     if m:
         data["gender"] = m.group(1)
         data["age_range"] = m.group(2)
         data["country"] = m.group(3)
 
-    # Value badge
-    if "HIGH VALUE" in html_content:
-        data["value"] = "HIGH VALUE"
-    elif "MID VALUE" in html_content:
-        data["value"] = "MID VALUE"
-    elif "LOW VALUE" in html_content:
-        data["value"] = "LOW VALUE"
-    elif "VIP" in html_content:
-        data["value"] = "VIP"
+    # Insignia de valor
+    if "PERFIL VIP ELITE" in html_content:
+        data["value"] = "VIP ELITE"
+    elif "PERFIL PREMIUM" in html_content:
+        data["value"] = "PREMIUM"
+    elif "PERFIL CONFORT" in html_content:
+        data["value"] = "CONFORT"
+    elif "PERFIL ESENCIAL" in html_content:
+        data["value"] = "ESENCIAL"
     else:
-        data["value"] = "STANDARD"
+        data["value"] = "ESTANDAR"
 
-    # Metrics
+    # Métricas
     metrics_pattern = re.compile(
         r'font-size:\s*22px;[^>]*>(\d+[\.,]?\d*[€]?)</p>\s*'
         r'<p[^>]*>(Estancias|Hoteles|ADR medio|Nota media)</p>',
@@ -76,24 +76,24 @@ def extract_guest_data(html_content: str, guest_id: str) -> dict:
         key = label.lower().replace(" ", "_")
         data[key] = val.strip()
 
-    # Profile / segment
-    m = re.search(r'<strong>Perfil:</strong>\s*(\w+)', html_content)
+    # Perfil / segmento
+    m = re.search(r'<strong>Afinidad principal:</strong>\s*([^<]+)', html_content)
     if m:
-        data["profile"] = m.group(1)
+        data["profile"] = m.group(1).strip()
 
-    m = re.search(r'<strong>Patrón:</strong>\s*(\w+)', html_content)
+    m = re.search(r'<strong>Fidelidad:</strong>\s*([^<]+)', html_content)
     if m:
-        data["pattern"] = m.group(1)
+        data["pattern"] = m.group(1).strip()
 
-    m = re.search(r'<strong>Edad:</strong>\s*(\w+)', html_content)
+    m = re.search(r'<strong>Edad:</strong>\s*([^<]+)', html_content)
     if m:
-        data["age_segment"] = m.group(1)
+        data["age_segment"] = m.group(1).strip()
 
     m = re.search(r'<strong>Estancia media:</strong>\s*([\d\.]+)\s*noches', html_content)
     if m:
         data["avg_nights"] = m.group(1)
 
-    # Hotels from history
+    # Hoteles del histórico
     hotels = re.findall(r'padding-top:\s*4px;["\']>\s*([^<]+)</td>\s*<td[^>]*>\s*(\d{4}-\d{2}-\d{2})', html_content)
     if hotels:
         data["last_hotel"] = hotels[-1][0].strip()
@@ -104,11 +104,11 @@ def extract_guest_data(html_content: str, guest_id: str) -> dict:
 
 
 def build_guest_index() -> list:
-    """Scan all checkin_report HTML files and extract guest summaries."""
+    """Recorre los HTML checkin_report y extrae resúmenes por huésped."""
     guests = []
     report_files = sorted(REPORT_DIR.glob("checkin_report_*.html"))
     guest_directory = load_guest_directory()
-    print(f"  Indexing {len(report_files)} guest reports...")
+    print(f"  Indexando {len(report_files)} informes de huéspedes...")
 
     for f in report_files:
         guest_id = f.stem.replace("checkin_report_", "")
@@ -124,13 +124,13 @@ def build_guest_index() -> list:
             )
             guests.append(guest)
         except Exception as e:
-            print(f"  Error parsing {f.name}: {e}")
+            print(f"  Error al procesar {f.name}: {e}")
 
-    print(f"  Indexed {len(guests)} guests")
+    print(f"  Se han indexado {len(guests)} huéspedes")
     return guests
 
 
-# ── HTTP Server ───────────────────────────────────────────────────────
+# ── Servidor HTTP ─────────────────────────────────────────────────────
 class ReceptionHandler(http.server.BaseHTTPRequestHandler):
     guest_index = []
 
@@ -149,7 +149,7 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
 
     def _send_file(self, filepath: Path):
         if not filepath.exists():
-            self._send(404, "text/plain", "Not found")
+            self._send(404, "text/plain", "No encontrado")
             return
         ext = filepath.suffix.lower()
         mime = MIME_TYPES.get(ext, "application/octet-stream")
@@ -160,7 +160,7 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
         pathname = urllib.parse.unquote(parsed.path)
         query = urllib.parse.parse_qs(parsed.query)
 
-        # API: guest index (searchable)
+        # API: índice de huéspedes con búsqueda
         if pathname == "/api/guests":
             search = query.get("q", [""])[0].lower()
             results = self.guest_index
@@ -183,18 +183,18 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
             self._send(200, "application/json", json.dumps(results))
             return
 
-        # API: single guest report HTML
+        # API: HTML de informe para un único huésped
         if pathname.startswith("/api/report/"):
             guest_id = pathname[len("/api/report/"):]
             filepath = REPORT_DIR / f"checkin_report_{guest_id}.html"
             if not filepath.exists():
-                self._send(404, "text/plain", "Report not found")
+                self._send(404, "text/plain", "Informe no encontrado")
                 return
             content = filepath.read_text(encoding="utf-8")
             self._send(200, "text/html; charset=utf-8", content)
             return
 
-        # Serve static files
+        # Servir ficheros estáticos
         if pathname == "/":
             self._send_file(BASE_DIR / "index.html")
         else:
@@ -208,15 +208,15 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    # Build the index at startup
+    # Construir el índice al arrancar
     ReceptionHandler.guest_index = build_guest_index()
 
     server = http.server.HTTPServer(("", PORT), ReceptionHandler)
-    print(f"\n  Eurostars Reception Server running at http://localhost:{PORT}\n")
+    print(f"\n  Servidor de recepción Eurostars ejecutándose en http://localhost:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n  Server stopped.")
+        print("\n  Servidor detenido.")
         server.server_close()
 
 

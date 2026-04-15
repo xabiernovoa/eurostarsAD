@@ -18,6 +18,14 @@ from typing import Any
 from backend import config
 from backend.ai import gemini as gemini_client
 from backend.autonomous import oracle
+from backend.personalization.segment_views import (
+    get_age_key,
+    get_primary_affinity,
+    get_primary_affinity_label,
+    get_segment_label,
+    get_value_label,
+    get_value_level,
+)
 from backend.storage.embeddings import load_embeddings
 from backend.storage.segments import load_segments as load_segments_data
 
@@ -36,24 +44,28 @@ def _largest_segments(
     segments: dict[str, dict[str, Any]],
     min_size: int,
 ) -> list[tuple[str, int]]:
-    """Agrupa por ``age_segment`` + ``travel_profile`` y devuelve los mayores."""
-    counter: Counter[tuple[str, str]] = Counter()
+    """Agrupa por edad + afinidad principal + nivel de valor y devuelve los mayores."""
+    counter: Counter[tuple[str, str, str]] = Counter()
     for seg in segments.values():
-        key = (seg.get("age_segment", "ADULTO"), seg.get("travel_profile", "EXPLORADOR_CULTURAL"))
+        key = (
+            get_age_key(seg),
+            get_primary_affinity(seg),
+            get_value_level(seg),
+        )
         counter[key] += 1
 
     ordered = sorted(counter.items(), key=lambda kv: kv[1], reverse=True)
     labeled = [
-        (f"{age}_{profile}", count) for (age, profile), count in ordered if count >= min_size
+        (f"{age}|{affinity}|{value}", count) for (age, affinity, value), count in ordered if count >= min_size
     ]
     return labeled
 
 
-def _segment_key_to_parts(key: str) -> tuple[str, str]:
-    if "_" not in key:
-        return key, "EXPLORADOR_CULTURAL"
-    first, *rest = key.split("_")
-    return first, "_".join(rest)
+def _segment_key_to_parts(key: str) -> tuple[str, str, str]:
+    parts = key.split("|")
+    if len(parts) != 3:
+        return "ADULTO", "cultural", "confort"
+    return parts[0], parts[1], parts[2]
 
 
 def _pick_hotel_for_city(
@@ -79,18 +91,20 @@ def _build_gemini_prompt(
     city: str,
     oracle_city_context: list[dict[str, Any]],
 ) -> str:
-    age, profile = _segment_key_to_parts(segment_key)
+    age, affinity, value = _segment_key_to_parts(segment_key)
+    segment_label = f"{age.title()} · {get_primary_affinity_label({'tags': {'afinidades_destino': [affinity]}})} · {get_value_label({'tags': {'nivel_valor': value}})}"
     context_lines = "\n".join(
         f"- [{e.get('category')}] {e.get('summary')} (rel {e.get('relevance')})"
         for e in oracle_city_context[:4]
     ) or "- (sin contexto específico)"
 
     return f"""Eres un estratega de marketing para la cadena hotelera Eurostars.
-Diseña una propuesta de campaña GENÉRICA en español dirigida al segmento "{segment_key}".
+Diseña una propuesta de campaña GENÉRICA en español dirigida al segmento "{segment_label}".
 
 DATOS DEL SEGMENTO:
 - Edad: {age}
-- Perfil de viaje: {profile}
+- Afinidad principal: {affinity}
+- Nivel de valor: {value}
 - Tamaño estimado: {segment_size} usuarios
 
 DESTINO SUGERIDO:
@@ -103,7 +117,7 @@ CONTEXTO DEL ORÁCULO (tendencias y eventos en {city}):
 Devuelve un JSON con EXACTAMENTE estos campos:
 {{
   "campaign_name": "Nombre interno de la campaña",
-  "target_segment": "{segment_key}",
+  "target_segment": "{segment_label}",
   "hotel_id": "{hotel.get('id', '')}",
   "subject": "Asunto del email (máx 60 car.)",
   "headline": "Título principal",
@@ -121,7 +135,8 @@ def _fallback_proposal(
     city: str,
     oracle_city_context: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    age, profile = _segment_key_to_parts(segment_key)
+    age, affinity, value = _segment_key_to_parts(segment_key)
+    segment_label = f"{age.title()} · {get_primary_affinity_label({'tags': {'afinidades_destino': [affinity]}})} · {get_value_label({'tags': {'nivel_valor': value}})}"
     headline = f"{city.title()} te espera"
     if age == "SENIOR":
         headline = f"Descubra {city.title()} con todo el confort"
@@ -133,22 +148,22 @@ def _fallback_proposal(
         oracle_hook = oracle_city_context[0].get("summary", "")
 
     body = (
-        f"Proponemos al segmento {segment_key} una escapada a {city.title()} "
+        f"Proponemos al segmento {segment_label} una escapada a {city.title()} "
         f"alojada en {hotel.get('HOTEL_NAME', 'nuestros hoteles')}. "
     )
     if oracle_hook:
         body += f"Contexto actual: {oracle_hook}"
 
     return {
-        "campaign_name": f"{segment_key}_{city.upper()}_auto",
-        "target_segment": segment_key,
+        "campaign_name": f"{age.lower()}_{affinity}_{value}_{city.upper()}_auto",
+        "target_segment": segment_label,
         "hotel_id": hotel_id,
         "subject": f"{city.title()}: una experiencia pensada para ti",
         "headline": headline,
         "body_summary": body,
         "recommended_dates": "Próximas 4-6 semanas",
         "rationale": (
-            f"Segmento {segment_key} con {segment_size} usuarios y tendencia positiva "
+            f"Segmento {segment_label} con {segment_size} usuarios y tendencia positiva "
             f"del Oráculo en {city.title()}."
         ),
     }
@@ -204,7 +219,7 @@ def generate_generic_campaigns(
 
     trending = oracle.get_trending_destinations(oracle_context, limit=max_campaigns * 2)
     if not trending:
-        # Fallback a ciudades configuradas sin contexto
+        # Recurso de respaldo: usar las ciudades configuradas si no hay contexto
         trending = [(city, 5) for city in config.ORACLE_CITIES]
 
     proposals: list[dict[str, Any]] = []

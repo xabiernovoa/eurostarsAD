@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-email_renderer.py — Phase 6: Email Rendering with Jinja2
+email_renderer.py — Fase 6: renderizado de emails con Jinja2
 
-Renders personalized HTML emails using segment-specific templates:
-  - template_joven.html for JOVEN segment
-  - template_adulto.html for ADULTO segment
-  - template_senior.html for SENIOR segment
-  - receptionist_report.html for check-in reports
+Renderiza emails HTML personalizados con plantillas específicas por segmento:
+  - template_joven.html para el segmento JOVEN
+  - template_adulto.html para el segmento ADULTO
+  - template_senior.html para el segmento SENIOR
+  - receptionist_report.html para informes de check-in
 """
 
 import logging
@@ -21,6 +21,14 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.paths import EMBEDDINGS_PATH, OUTPUT_DIR, SEGMENTS_PATH, TEMPLATES_DIR
+from backend.personalization.segment_views import (
+    get_age_key,
+    get_propensity_text,
+    get_theme_key,
+    get_theme_label,
+    get_value_badge,
+    summarize_segment,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,7 +36,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("email_renderer")
 
-# Template mapping by age segment
+# Mapa de plantillas por segmento de edad
 TEMPLATE_MAP = {
     "JOVEN": "template_joven.html",
     "ADULTO": "template_adulto.html",
@@ -49,10 +57,10 @@ def render_email(
     images: list[str],
     moment: str = "pre_arrival",
 ) -> str:
-    """Render an email HTML from campaign data and generated copy."""
+    """Renderiza un email HTML a partir de la campaña y el copy generado."""
     env = _get_env()
     seg = campaign_data.get("segment", {})
-    age_segment = seg.get("age_segment", "ADULTO")
+    age_segment = get_age_key(seg)
 
     if moment == "checkin_report":
         template_name = "receptionist_report.html"
@@ -61,11 +69,14 @@ def render_email(
 
     template = env.get_template(template_name)
 
-    # Build context
+    # Construir contexto
     if moment == "checkin_report":
         context = {
             "profile": campaign_data.get("profile_summary", {}),
             "segment": seg,
+            "segment_overview": campaign_data.get("segment_overview", summarize_segment(seg)),
+            "segment_value_badge": get_value_badge(seg),
+            "segment_propensity_text": get_propensity_text(seg),
             "preferences": campaign_data.get("preferences", []),
             "upsell_recommendations": campaign_data.get("upsell_recommendations", []),
             "visit_history": campaign_data.get("visit_history", []),
@@ -73,9 +84,9 @@ def render_email(
         }
         context["profile"]["guest_id"] = campaign_data.get("guest_id", "")
     else:
-        # Pre-arrival or post-stay
+        # Pre-arrival o post-stay
         if moment == "post_stay":
-            # For post_stay, use last_stay for display but recommended_hotel for next destination
+            # En post_stay se muestra last_stay, pero el siguiente destino sale de recommended_hotel
             display_hotel = campaign_data.get("last_stay", {})
             next_hotel = campaign_data.get("recommended_hotel", {})
             hotel_name = display_hotel.get("hotel_name", display_hotel.get("name", ""))
@@ -90,12 +101,14 @@ def render_email(
             stars = hotel.get("stars", hotel.get("STARS", 4))
 
         context = {
-            "user_name": None,  # No real names in data → "Estimado viajero"
+            "user_name": None,  # No hay nombres reales en los datos -> "Estimado viajero"
             "hotel_name": hotel_name,
             "city_name": city_name,
             "country": country,
             "stars": stars,
-            "travel_profile": seg.get("travel_profile", ""),
+            "theme_key": get_theme_key(seg),
+            "theme_label": get_theme_label(seg),
+            "segment_overview": campaign_data.get("segment_overview", summarize_segment(seg)),
             "checkin_suggested": campaign_data.get("checkin_suggested", ""),
             "stay_nights": campaign_data.get("stay_nights", 0),
             "season": campaign_data.get("season", ""),
@@ -109,26 +122,26 @@ def render_email(
     html = template.render(**context)
     if not html.strip():
         raise ValueError(
-            f"Rendered template {template_name} for guest {campaign_data.get('guest_id', '?')} is empty"
+            f"La plantilla renderizada {template_name} para el huésped {campaign_data.get('guest_id', '?')} está vacía"
         )
-    logger.info("Rendered %s template for guest %s (%s)",
+    logger.info("Plantilla %s renderizada para el huésped %s (%s)",
                 template_name, campaign_data.get("guest_id", "?"), moment)
     return html
 
 
 def save_email(html: str, guest_id: str, moment: str) -> str:
-    """Save rendered email to output directory."""
+    """Guarda el email renderizado en el directorio de salida."""
     OUTPUT_DIR.mkdir(exist_ok=True)
     filename = f"{moment}_{guest_id}.html"
     path = OUTPUT_DIR / filename
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
-    logger.info("Saved email to %s", path)
+    logger.info("Email guardado en %s", path)
     return path
 
 
 def main():
-    """Test rendering with sample data."""
+    """Prueba el renderizado con datos de ejemplo."""
     import json
 
     with open(EMBEDDINGS_PATH) as f:
@@ -139,7 +152,7 @@ def main():
     from backend.campaigns import copy as text_generator
     from backend.campaigns import planner as campaign_engine
 
-    # Test all three templates with different users
+    # Probar las tres plantillas con distintos usuarios
     test_cases = [
         ("1018922044", "pre_arrival"),   # JOVEN
         ("1014907189", "pre_arrival"),   # ADULTO

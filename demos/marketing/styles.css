@@ -1,10 +1,10 @@
 /* ============================================================
-   Eurostars — Marketing Command Center v2
-   Design System, Layout, Chat & Visualizations
+   Eurostars — Centro de Control de Marketing v2
+   Sistema de diseño, maquetación, chat y visualizaciones
    ============================================================ */
 
 :root {
-    /* Surface */
+    /* Superficies */
     --bg-base: #0b0b11;
     --bg-raised: #12121a;
     --bg-card: #17171f;
@@ -12,24 +12,24 @@
     --bg-input: #12121a;
     --bg-sidebar: #0e0e15;
 
-    /* Borders — brighter for better card separation */
+    /* Bordes: más luminosos para separar mejor las tarjetas */
     --border: rgba(255, 255, 255, 0.09);
     --border-active: rgba(184, 148, 62, 0.5);
 
-    /* Text — significantly brighter for readability */
+    /* Texto: más luminoso para mejorar la legibilidad */
     --text-primary: #f1efea;
     --text-secondary: #b5b5ba;
     --text-muted: #76767f;
     --text-inverse: #0b0b11;
 
-    /* Brand — Eurostars gold (warmer) */
+    /* Marca: dorado Eurostars más cálido */
     --gold: #c9a244;
     --gold-light: #dbb96a;
     --gold-dark: #8a7a4f;
     --gold-bg: rgba(201, 162, 68, 0.08);
     --gold-bg-strong: rgba(201, 162, 68, 0.16);
 
-    /* Semantic — slightly brighter */
+    /* Semánticos: algo más luminosos */
     --success: #4caf6a;
     --success-bg: rgba(76, 175, 106, 0.12);
     --warning: #d4a832;
@@ -39,19 +39,19 @@
     --danger: #d45a5a;
     --danger-bg: rgba(212, 90, 90, 0.12);
 
-    /* Layout */
+    /* Maquetación */
     --sidebar-w: 244px;
     --header-h: 60px;
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
 
-    /* Typography */
+    /* Tipografía */
     --font-sans: "Manrope", system-ui, -apple-system, sans-serif;
     --font-display: "Playfair Display", Georgia, serif;
 }
 
-/* ── Light Theme ───────────────────────────────────────────── */
+/* ── Tema claro ───────────────────────────────────────────── */
 
 [data-theme="light"] {
     --bg-base: #f4f3f0;
@@ -85,17 +85,17 @@
     --danger-bg: rgba(176, 58, 58, 0.08);
 }
 
-/* ── Reset ─────────────────────────────────────────────────── */
+/* ── Reinicio base ────────────────────────────────────────── */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 15px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; line-height: 1.6; }
 
-/* ── App Shell ─────────────────────────────────────────────── */
+/* ── Contenedor principal ─────────────────────────────────── */
 
 .app-shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
 
-/* ── Sidebar ───────────────────────────────────────────────── */
+/* ── Barra lateral ────────────────────────────────────────── */
 
 .sidebar {
     position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
@@ -138,7 +138,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .theme-toggle:hover { border-color: var(--border-active); color: var(--text-primary); }
 .theme-toggle-icon { width: 16px; height: 16px; flex-shrink: 0; }
 
-/* ── Main Content ──────────────────────────────────────────── */
+/* ── Contenido principal ──────────────────────────────────── */
 
 .main-content { grid-column: 2; min-height: 100vh; }
 
@@ -155,7 +155,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .section-view { display: none; }
 .section-view.active { display: block; }
 
-/* ── KPI Row ───────────────────────────────────────────────── */
+/* ── Fila de KPI ──────────────────────────────────────────── */
 
 .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
 
@@ -276,7 +276,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .segment-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .segment-chip { padding: 6px 12px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); border: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--text-secondary); }
 
-/* ── Country Stats ─────────────────────────────────────────── */
+/* ── Estadísticas por país ────────────────────────────────── */
 
 .country-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
 .country-card {
@@ -288,7 +288,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .country-count { font-size: 1.7rem; font-weight: 800; color: #ffffff; }
 .country-detail { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
-/* ── Campaign Table ────────────────────────────────────────── */
+/* ── Tabla de campañas ────────────────────────────────────── */
 
 .campaign-counters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 14px; }
 .counter-card {
@@ -334,7 +334,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .type-tag.post_stay { background: var(--warning-bg); color: var(--warning); }
 .type-tag.checkin_report { background: var(--success-bg); color: var(--success); }
 
-/* ── Action Cards ──────────────────────────────────────────── */
+/* ── Tarjetas de acción ───────────────────────────────────── */
 
 .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 
@@ -357,7 +357,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .action-list li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
 .action-source { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 
-/* ── Config Form ───────────────────────────────────────────── */
+/* ── Formulario de configuración ──────────────────────────── */
 
 .config-layout { max-width: 680px; }
 .form-grid { display: grid; gap: 20px; }
@@ -374,7 +374,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 .field-textarea::placeholder { color: var(--text-muted); }
 .form-help { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 4px; }
 
-/* ── Campaign Proposals ────────────────────────────────────── */
+/* ── Propuestas de campaña ────────────────────────────────── */
 
 .proposal-grid { display: grid; gap: 20px; }
 
@@ -1363,7 +1363,7 @@ body { font-family: var(--font-sans); background: var(--bg-base); color: var(--t
 }
 .auto-proposal-rationale-toggle:hover { color: var(--gold); }
 
-/* ── Channel badge + rationale on recommendation cards ── */
+/* ── Insignia de canal y justificación en tarjetas de recomendación ── */
 .auto-channel-badge {
     display: inline-flex;
     align-items: center;

@@ -23,7 +23,7 @@
 
     <!-- ── TOP BAR ── -->
     <header class="top-bar">
-        <!-- LEFT: Brand -->
+        <!-- IZQUIERDA: marca -->
         <div class="top-bar-left">
             <div class="brand-text">
                 <span class="brand-main">RECEPCIÓN INTELIGENTE</span>
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <!-- CENTER: Search -->
+        <!-- CENTRO: búsqueda -->
         <div class="top-bar-center">
             <div class="global-search">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" class="search-icon" stroke="currentColor"
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <!-- RIGHT: Clock + Actions -->
+        <!-- DERECHA: reloj + acciones -->
         <div class="top-bar-right">
             <div class="clock-block">
                 <span class="clock-date" id="clockDate"></span>
@@ -77,22 +77,22 @@
     <!-- ── MAIN CONTENT ── -->
     <main class="main-container">
 
-        <!-- ── LEFT: CHECK-IN PANEL ── -->
+        <!-- ── IZQUIERDA: PANEL DE RECEPCIÓN ── -->
         <aside class="checkin-panel" id="checkinPanel">
 
 
 
-            <!-- Guest List Items -->
+            <!-- Elementos de la lista de huéspedes -->
             <div class="guest-list-body">
                 <ul class="guest-list" id="guestList">
-                    <!-- Populated by JS -->
+                    <!-- Rellenado por JS -->
                 </ul>
             </div>
         </aside>
 
-        <!-- ── RIGHT: REPORT VIEWER ── -->
+        <!-- ── DERECHA: VISOR DE INFORMES ── -->
         <section class="report-section" id="reportSection">
-            <!-- Empty state -->
+            <!-- Estado vacío -->
             <div class="empty-state" id="emptyState">
                 <div class="empty-icon">
                     <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"
@@ -103,7 +103,7 @@
                         <path d="M16 3.13a4 4 0 010 7.75" />
                     </svg>
                 </div>
-                <h2 class="empty-title">Esperando Check-in</h2>
+                <h2 class="empty-title">Esperando recepción</h2>
                 <p class="empty-subtitle">Seleccione un huésped de la lista o escanee su documento de identidad para
                     cargar el informe personalizado.</p>
                 <div class="empty-hint">
@@ -119,12 +119,12 @@
                     <div class="hint-arrow">→</div>
                     <div class="hint-step">
                         <span class="hint-num">3</span>
-                        <span>Check-in personalizado</span>
+                        <span>Recepción personalizada</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Loading state -->
+            <!-- Estado de carga -->
             <div class="loading-state hidden" id="loadingState">
                 <div class="scan-animation">
                     <div class="scan-line"></div>
@@ -141,7 +141,7 @@
                 <p class="loading-sub">Consultando base de datos de perfiles</p>
             </div>
 
-            <!-- Report display -->
+            <!-- Visualización del informe -->
             <div class="report-viewer hidden" id="reportViewer">
                 <div class="report-toolbar" style="display:none;"></div>
                 <div class="report-frame-wrapper">
@@ -151,7 +151,7 @@
         </section>
     </main>
 
-    <!-- ── CHECK-IN SUCCESS OVERLAY ── -->
+    <!-- ── CAPA DE ÉXITO DE RECEPCIÓN ── -->
     <div class="checkin-overlay hidden" id="checkinOverlay">
         <div class="checkin-modal">
             <div class="success-animation">
@@ -161,11 +161,11 @@
                         d="M14.1 27.2l7.1 7.2 16.7-16.8" />
                 </svg>
             </div>
-            <h2 class="success-title">Check-in Completado</h2>
-            <p class="success-sub" id="successGuestName">Guest #0000000000</p>
+            <h2 class="success-title">Entrada completada</h2>
+            <p class="success-sub" id="successGuestName">Huésped #0000000000</p>
             <p class="success-detail">El huésped ha sido registrado correctamente. El informe ha sido enviado al equipo
                 de planta.</p>
-            <button class="success-btn" id="successCloseBtn">Nuevo Check-in</button>
+            <button class="success-btn" id="successCloseBtn">Nueva entrada</button>
         </div>
     </div>
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-dashboard_engine.py — Marketing insights engine.
+dashboard_engine.py — Motor de insights de marketing.
 
-Builds an executive dashboard from:
-- campaign execution logs
-- audience segmentation
-- reservation history
-- manager / reception / external context inputs
+Construye un dashboard ejecutivo a partir de:
+- logs de ejecución de campañas
+- segmentación de audiencia
+- histórico de reservas
+- contexto de dirección, recepción y señales externas
 
-The engine can optionally use Anthropic for narrative recommendations.
-If no API key is available, it falls back to a deterministic heuristic model.
+El motor puede usar Anthropic para recomendaciones narrativas.
+Si no hay API key, cae a un modelo heurístico determinista.
 """
 
 from __future__ import annotations
@@ -35,6 +35,17 @@ except ModuleNotFoundError:
         return False
 
 from backend.paths import MARKETING_CONTEXT_PATH
+from backend.personalization.segment_views import (
+    get_age_key,
+    get_age_order,
+    get_loyalty_principal,
+    get_primary_affinity,
+    get_primary_affinity_label,
+    get_segment_label,
+    get_value_label,
+    get_value_level,
+    get_value_weight,
+)
 from backend.storage.campaign_log import load_campaign_log as load_campaign_log_data
 from backend.storage.customers import load_customers_df
 from backend.storage.marketing_context import (
@@ -71,27 +82,28 @@ DEFAULT_CONTEXT = {
     ],
 }
 
-AGE_ORDER = {"JOVEN": 0, "ADULTO": 1, "SENIOR": 2}
-VALUE_WEIGHT = {"STANDARD": 0.48, "MID_VALUE": 0.64, "HIGH_VALUE": 0.82}
 MOMENT_WEIGHT = {"pre_arrival": 0.68, "post_stay": 0.56, "checkin_report": 0.61}
 CHANNEL_WEIGHT = {"email": 0.72, "sms": 0.67, "push": 0.75, "internal_report": 0.58}
-PROFILE_BOOST = {
-    "EXPLORADOR_CULTURAL": 0.08,
-    "LUJO": 0.06,
-    "AVENTURERO": 0.09,
-    "GASTRONOMIA_CIUDAD": 0.07,
+AFFINITY_BOOST = {
+    "cultural": 0.08,
+    "montana": 0.09,
+    "gastronomico": 0.07,
+    "playero": 0.06,
+    "clima_calido": 0.05,
+    "mediterraneo": 0.06,
+    "continental": 0.05,
 }
 
 
 def ensure_context_file() -> Path:
-    """Create the marketing context file if it does not exist."""
+    """Crea el fichero de contexto de marketing si no existe."""
     if not CONTEXT_PATH.exists():
         save_marketing_context(DEFAULT_CONTEXT)
     return CONTEXT_PATH
 
 
 def load_context() -> dict:
-    """Load the editable marketing context."""
+    """Carga el contexto de marketing editable."""
     ensure_context_file()
     context = load_marketing_context(DEFAULT_CONTEXT)
     for key in ("manager_notes", "reception_notes", "external_signals"):
@@ -104,7 +116,7 @@ def load_context() -> dict:
 
 
 def save_context(context: dict) -> dict:
-    """Persist context after normalizing it."""
+    """Persiste el contexto tras normalizarlo."""
     normalized = {
         "strategic_priority": str(context.get("strategic_priority", "")).strip(),
         "manager_notes": _normalize_lines(context.get("manager_notes", [])),
@@ -166,10 +178,10 @@ def _build_reservation_metrics(customers: pd.DataFrame) -> dict[str, dict]:
 
 
 def _engagement_index(segment: dict, campaign: dict, reservation: dict) -> float:
-    value_score = VALUE_WEIGHT.get(segment.get("client_value", "STANDARD"), 0.5)
+    value_score = get_value_weight(segment)
     moment_score = MOMENT_WEIGHT.get(campaign.get("campaign_type", "pre_arrival"), 0.55)
     channel_score = CHANNEL_WEIGHT.get(campaign.get("channel", "email"), 0.65)
-    profile_score = PROFILE_BOOST.get(segment.get("travel_profile", ""), 0.04)
+    profile_score = AFFINITY_BOOST.get(get_primary_affinity(segment), 0.04)
     quality_score = min(max((reservation.get("avg_score", 7.0) - 5.0) / 5.0, 0.0), 1.0) * 0.15
     stay_score = min(reservation.get("avg_stay", 2.0) / 5.0, 1.0) * 0.08
     leadtime = reservation.get("avg_leadtime", 15.0)
@@ -181,7 +193,7 @@ def _engagement_index(segment: dict, campaign: dict, reservation: dict) -> float
 
 def _channel_alignment(segment: dict, campaign: dict, reservation: dict) -> str:
     channel = campaign.get("channel", "email")
-    age_segment = segment.get("age_segment", "ADULTO")
+    age_segment = get_age_key(segment)
     leadtime = reservation.get("avg_leadtime", 15.0)
     if channel == "push" and age_segment == "JOVEN":
         return "Alta"
@@ -205,6 +217,7 @@ def _build_campaign_rows(
         segment = segments.get(guest_id, {})
         reservation = reservations.get(guest_id, {})
         engagement = _engagement_index(segment, entry, reservation)
+        primary_affinity = get_primary_affinity(segment)
         rows.append({
             "guest_id": guest_id,
             "campaign_type": entry.get("campaign_type", ""),
@@ -213,10 +226,13 @@ def _build_campaign_rows(
             "hotel": entry.get("hotel_recommended", ""),
             "status": entry.get("status", ""),
             "timestamp": entry.get("timestamp", ""),
-            "age_segment": segment.get("age_segment", "N/A"),
-            "travel_profile": segment.get("travel_profile", "N/A"),
-            "client_value": segment.get("client_value", "N/A"),
-            "travel_pattern": segment.get("travel_pattern", "N/A"),
+            "demographic_age": get_age_key(segment),
+            "primary_affinity": primary_affinity,
+            "primary_affinity_label": get_primary_affinity_label(segment),
+            "value_level": get_value_level(segment),
+            "value_label": get_value_label(segment),
+            "loyalty": get_loyalty_principal(segment),
+            "segment_label": get_segment_label(segment),
             "avg_leadtime": round(reservation.get("avg_leadtime", 0.0), 1),
             "avg_stay": round(reservation.get("avg_stay", 0.0), 1),
             "avg_score": round(reservation.get("avg_score", segment.get("avg_score", 0.0)), 1),
@@ -232,7 +248,7 @@ def _build_segment_cards(rows: list[dict], segments: dict, reservations: dict) -
     cards = []
     grouped: dict[str, list[dict]] = defaultdict(list)
     for row in rows:
-        key = f"{row['age_segment']} · {row['travel_profile']}"
+        key = row["segment_label"]
         grouped[key].append(row)
 
     for key, items in grouped.items():
@@ -240,8 +256,11 @@ def _build_segment_cards(rows: list[dict], segments: dict, reservations: dict) -
         revenue = sum(reservations.get(guest_id, {}).get("avg_adr", 0.0) for guest_id in guest_ids)
         cards.append({
             "segment_label": key,
-            "age_segment": items[0]["age_segment"],
-            "travel_profile": items[0]["travel_profile"],
+            "demographic_age": items[0]["demographic_age"],
+            "primary_affinity": items[0]["primary_affinity"],
+            "primary_affinity_label": items[0]["primary_affinity_label"],
+            "value_level": items[0]["value_level"],
+            "value_label": items[0]["value_label"],
             "users": len(guest_ids),
             "campaigns": len(items),
             "avg_engagement_index": round(sum(item["engagement_index"] for item in items) / len(items), 2),
@@ -255,7 +274,7 @@ def _build_segment_cards(rows: list[dict], segments: dict, reservations: dict) -
         key=lambda item: (
             -item["avg_engagement_index"],
             -item["users"],
-            AGE_ORDER.get(item["age_segment"], 9),
+            get_age_order({"tags": {"demografia": {"edad": item["demographic_age"].lower()}}}),
         )
     )
     return cards[:8]
@@ -263,7 +282,7 @@ def _build_segment_cards(rows: list[dict], segments: dict, reservations: dict) -
 
 def _build_kpis(rows: list[dict], segments: dict, context: dict) -> dict:
     campaigns_count = len(rows)
-    active_segments = len({(row["age_segment"], row["travel_profile"]) for row in rows})
+    active_segments = len({row["segment_label"] for row in rows})
     avg_index = round(sum(row["engagement_index"] for row in rows) / max(campaigns_count, 1), 2)
     priority_pressure = min(
         100,
@@ -346,7 +365,7 @@ def _heuristic_recommendations(rows: list[dict], context: dict, segment_cards: l
     )
     ads_actions = [
         "Concentrar inversión en búsqueda y metasearch para ciudades con señales externas activas y mejor ADR medio.",
-        "Abrir campañas lookalike desde segmentos HIGH_VALUE y MID_VALUE con histórico cultural y premium.",
+        "Abrir campañas lookalike desde segmentos premium y confort con histórico cultural y gastronómico.",
         "Separar campañas de branding y performance para medir mejor qué creatividad empuja reserva directa."
     ]
 
@@ -359,11 +378,12 @@ def _heuristic_recommendations(rows: list[dict], context: dict, segment_cards: l
 
 
 def _build_ai_prompt(payload: dict) -> str:
+    context = payload.get("context", {})
     return f"""
 Eres un director de marketing hotelero. Analiza los datos resumidos y devuelve SOLO JSON.
 
 OBJETIVO:
-{payload['strategic_priority']}
+{context.get('strategic_priority', '')}
 
 RESUMEN KPI:
 {json.dumps(payload['kpis'], ensure_ascii=False)}
@@ -372,10 +392,10 @@ SEGMENTOS PRIORITARIOS:
 {json.dumps(payload['segment_cards'][:4], ensure_ascii=False)}
 
 SEÑALES DE RECEPCIÓN:
-{json.dumps(payload['reception_notes'], ensure_ascii=False)}
+{json.dumps(context.get('reception_notes', []), ensure_ascii=False)}
 
 SEÑALES EXTERNAS:
-{json.dumps(payload['external_signals'], ensure_ascii=False)}
+{json.dumps(context.get('external_signals', []), ensure_ascii=False)}
 
 Devuelve este JSON:
 {{
@@ -419,12 +439,12 @@ def _generate_recommendations(payload: dict) -> dict:
         data["source"] = "anthropic"
         return data
     except Exception as exc:
-        logger.warning("Marketing AI recommendations failed: %s", exc)
+        logger.warning("Han fallado las recomendaciones de IA de marketing: %s", exc)
         return _heuristic_recommendations(payload["campaign_rows"], payload["context"], payload["segment_cards"])
 
 
 def build_dashboard_data() -> dict:
-    """Build a complete marketing dashboard payload."""
+    """Construye el payload completo del dashboard de marketing."""
     context = load_context()
     segments = _load_segments()
     customers = _load_customers()
@@ -439,9 +459,10 @@ def build_dashboard_data() -> dict:
         "kpis": kpis,
         "campaign_rows": campaign_rows,
         "segment_cards": segment_cards,
-        "performance_by_age": _build_breakdown(campaign_rows, "age_segment", "age"),
-        "performance_by_profile": _build_breakdown(campaign_rows, "travel_profile", "profile"),
-        "performance_by_value": _build_breakdown(campaign_rows, "client_value", "value"),
+        "performance_by_age": _build_breakdown(campaign_rows, "demographic_age", "age"),
+        "performance_by_affinity": _build_breakdown(campaign_rows, "primary_affinity_label", "affinity"),
+        "performance_by_value_level": _build_breakdown(campaign_rows, "value_label", "value"),
+        "performance_by_loyalty": _build_breakdown(campaign_rows, "loyalty", "loyalty"),
         "performance_by_moment": _build_breakdown(campaign_rows, "campaign_type", "moment"),
     }
     payload["recommendations"] = _generate_recommendations(payload | {"context": context})

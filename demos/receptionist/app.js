@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════════════════════
-   Eurostars · Recepción Inteligente — Application Logic
+   Eurostars · Recepción Inteligente — Lógica de aplicación
    ═══════════════════════════════════════════════════════════ */
 
 (function () {
     'use strict';
 
-    // ── DOM references ──────────────────────────────────
+    // ── Referencias DOM ─────────────────────────────────
     const searchInput = document.getElementById('searchInput') || document.getElementById('globalSearch');
     const scanBtn = document.getElementById('scanBtn');
     const guestList = document.getElementById('guestList');
@@ -24,13 +24,13 @@
     const successCloseBtn = document.getElementById('successCloseBtn');
     const clockEl = document.getElementById('clock');
 
-    // ── State ───────────────────────────────────────────
+    // ── Estado ──────────────────────────────────────────
     let allGuests = [];
     let filteredGuests = [];
     let activeGuestId = null;
     let activeFilter = '';
 
-    // ── Clock ───────────────────────────────────────────
+    // ── Reloj ────────────────────────────────────────────
     const clockDateEl = document.getElementById('clockDate');
 
     function updateClock() {
@@ -49,22 +49,22 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // ── Fetch guests ────────────────────────────────────
+    // ── Cargar huéspedes ────────────────────────────────
     async function fetchGuests(query = '') {
         const url = query
             ? `/api/guests?q=${encodeURIComponent(query)}`
             : '/api/guests';
         try {
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch');
+            if (!res.ok) throw new Error('No se pudo cargar la lista');
             return await res.json();
         } catch (err) {
-            console.error('Error fetching guests:', err);
+            console.error('Error al cargar los huéspedes:', err);
             return [];
         }
     }
 
-    // ── Render guest list ───────────────────────────────
+    // ── Pintar lista de huéspedes ───────────────────────
     function renderGuestList(guests) {
         filteredGuests = guests;
         if (guestCount) {
@@ -83,7 +83,7 @@
 
         guestList.innerHTML = guests.map(g => {
             const tagClass = getValueTagClass(g.value);
-            const tagLabel = g.value || 'STANDARD';
+            const tagLabel = g.value || 'ESTANDAR';
             const meta = [g.gender, g.age_range, g.country]
                 .filter(Boolean).join(' · ');
             const isActive = g.id === activeGuestId;
@@ -121,27 +121,29 @@
         if (v.includes('high')) return 'tag-high';
         if (v.includes('mid')) return 'tag-mid';
         if (v.includes('vip')) return 'tag-vip';
+        if (v.includes('premium')) return 'tag-high';
+        if (v.includes('confort')) return 'tag-mid';
         return 'tag-low';
     }
 
-    // ── Select guest ────────────────────────────────────
+    // ── Seleccionar huésped ─────────────────────────────
     window.__selectGuest = async function (id) {
         activeGuestId = id;
 
-        // Update sidebar active state
+        // Actualizar el estado activo de la barra lateral
         document.querySelectorAll('.guest-card').forEach(el => {
             el.classList.toggle('active', el.dataset.id === id);
         });
 
-        // Show loading
+        // Mostrar carga
         showView('loading');
 
-        // Simulate scanning delay for demo effect
+        // Simular el retardo de escaneo para la demo
         await sleep(randomInt(800, 1600));
 
-        // Load the report
+        // Cargar el informe
         const guest = allGuests.find(g => g.id === id);
-        const displayName = guest && guest.name ? guest.name : `Guest #${id}`;
+        const displayName = guest && guest.name ? guest.name : `Huésped #${id}`;
         if (toolbarTitle) {
             toolbarTitle.textContent = `Informe de Recepción — ${displayName}`;
         }
@@ -149,7 +151,7 @@
         reportFrame.srcdoc = '';
         try {
             const res = await fetch(`/api/report/${id}`);
-            if (!res.ok) throw new Error('Not found');
+            if (!res.ok) throw new Error('No encontrado');
             const html = await res.text();
             reportFrame.srcdoc = html;
         } catch (err) {
@@ -162,14 +164,14 @@
         showView('report');
     };
 
-    // ── View management ─────────────────────────────────
+    // ── Gestión de vistas ───────────────────────────────
     function showView(view) {
         emptyState.classList.toggle('hidden', view !== 'empty');
         loadingState.classList.toggle('hidden', view !== 'loading');
         reportViewer.classList.toggle('hidden', view !== 'report');
     }
 
-    // ── Search handling ─────────────────────────────────
+    // ── Gestión de búsqueda ─────────────────────────────
     let searchTimeout;
     if (searchInput) {
         searchInput.addEventListener('input', () => {
@@ -206,7 +208,7 @@
         );
     }
 
-    // ── Filter chips ────────────────────────────────────
+    // ── Chips de filtro ─────────────────────────────────
     if (quickFilters) {
         quickFilters.addEventListener('click', (e) => {
             const chip = e.target.closest('.filter-chip');
@@ -232,7 +234,7 @@
         });
     }
 
-    // ── Scan button (simulated random guest) ────────────
+    // ── Botón de escaneo (huésped aleatorio simulado) ──
     if (scanBtn) {
         scanBtn.addEventListener('click', async () => {
             scanBtn.style.transform = 'scale(0.9)';
@@ -253,7 +255,7 @@
         });
     }
 
-    // ── Toolbar buttons ─────────────────────────────────
+    // ── Botones de la barra de herramientas ─────────────
     if (backBtn) {
         backBtn.addEventListener('click', () => {
             activeGuestId = null;
@@ -273,12 +275,12 @@
         });
     }
 
-    // ── Check-in confirmation ───────────────────────────
+    // ── Confirmación de check-in ────────────────────────
     if (checkinBtn) {
         checkinBtn.addEventListener('click', () => {
             if (!activeGuestId) return;
             const guest = allGuests.find(g => g.id === activeGuestId);
-            successGuestName.textContent = guest && guest.name ? guest.name : `Guest #${activeGuestId}`;
+            successGuestName.textContent = guest && guest.name ? guest.name : `Huésped #${activeGuestId}`;
             checkinOverlay.classList.remove('hidden');
         });
     }
@@ -295,16 +297,16 @@
         });
     }
 
-    // Close overlay on backdrop click
+    // Cerrar la capa al hacer clic en el fondo
     checkinOverlay.addEventListener('click', (e) => {
         if (e.target === checkinOverlay) {
             checkinOverlay.classList.add('hidden');
         }
     });
 
-    // ── Keyboard shortcut ───────────────────────────────
+    // ── Atajos de teclado ───────────────────────────────
     document.addEventListener('keydown', (e) => {
-        // Escape to go back
+        // Escape para volver
         if (e.key === 'Escape') {
             if (!checkinOverlay.classList.contains('hidden')) {
                 checkinOverlay.classList.add('hidden');
@@ -314,7 +316,7 @@
                 }
             }
         }
-        // Ctrl+K to focus search
+        // Ctrl+K para enfocar la búsqueda
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
             if (searchInput) {
@@ -323,7 +325,7 @@
         }
     });
 
-    // ── Helpers ──────────────────────────────────────────
+    // ── Utilidades ──────────────────────────────────────
     function sleep(ms) {
         return new Promise(r => setTimeout(r, ms));
     }
@@ -331,7 +333,7 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // ── Initialize ──────────────────────────────────────
+    // ── Inicialización ──────────────────────────────────
     async function init() {
         allGuests = await fetchGuests();
         renderGuestList(allGuests);

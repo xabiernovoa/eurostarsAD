@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-chat_engine.py — Marketing AI Assistant.
+chat_engine.py — Asistente de IA para marketing.
 
-Conversational agent with full access to dashboard data.
-Uses Gemini via Vertex AI (backend.ai.gemini) when available,
-falls back to a contextual heuristic engine otherwise.
+Agente conversacional con acceso completo a los datos del dashboard.
+Usa Gemini vía Vertex AI cuando está disponible y, si no, recurre
+a un motor heurístico contextual.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ load_dotenv()
 
 logger = logging.getLogger("marketing_chat")
 
-# Cache dashboard data to avoid rebuilding on every message
+# Caché del dashboard para evitar reconstruirlo en cada mensaje
 _dashboard_cache: dict | None = None
 
 CAMPAIGN_CREATE_PATTERNS = (
@@ -259,19 +259,19 @@ def _heuristic_campaign_reply(brief: dict, dashboard: dict) -> str:
         f"- Mensaje principal: beneficio concreto y accionable para ese público.\n"
         f"- Activación: salida en {channel} con ventana {moment} durante {timing}.\n"
         f"- CTA: una sola acción prioritaria, sin fricción.\n"
-        f"- KPI a vigilar: conversión y engagement frente al índice medio actual del {round(kpis.get('avg_engagement_index', 0) * 100)}%.\n\n"
+        f"- KPI a vigilar: conversión e interacción frente al índice medio actual del {round(kpis.get('avg_engagement_index', 0) * 100)}%.\n\n"
         "Si quieres, en el siguiente mensaje te la convierto ya en una versión completa con asunto, preview, cuerpo y rationale."
     )
 
 
 def _build_system_prompt(dashboard: dict) -> str:
-    """Build the system prompt with full dashboard context."""
+    """Construye el prompt de sistema con todo el contexto del dashboard."""
     context = dashboard.get("context", {})
     kpis = dashboard.get("kpis", {})
     segment_cards = dashboard.get("segment_cards", [])
     perf_age = dashboard.get("performance_by_age", [])
-    perf_profile = dashboard.get("performance_by_profile", [])
-    perf_value = dashboard.get("performance_by_value", [])
+    perf_affinity = dashboard.get("performance_by_affinity", [])
+    perf_value = dashboard.get("performance_by_value_level", [])
     perf_moment = dashboard.get("performance_by_moment", [])
     recommendations = dashboard.get("recommendations", {})
     focus_cities = dashboard.get("focus_cities", [])
@@ -281,8 +281,8 @@ def _build_system_prompt(dashboard: dict) -> str:
         [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_age],
         ensure_ascii=False,
     )
-    perf_profile_json = json.dumps(
-        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_profile],
+    perf_affinity_json = json.dumps(
+        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_affinity],
         ensure_ascii=False,
     )
     perf_value_json = json.dumps(
@@ -311,7 +311,7 @@ def _build_system_prompt(dashboard: dict) -> str:
         [
             {
                 "type": c["campaign_type"],
-                "segment": c["age_segment"] + " / " + c["travel_profile"],
+                "segment": c["segment_label"],
                 "channel": c["channel"],
                 "hotel": c["hotel"],
                 "engagement": c["engagement_index"],
@@ -348,10 +348,10 @@ CIUDADES EN FOCO: {', '.join(focus_cities)}
 RENDIMIENTO POR EDAD:
 {perf_age_json}
 
-RENDIMIENTO POR PERFIL DE VIAJE:
-{perf_profile_json}
+RENDIMIENTO POR AFINIDAD PRINCIPAL:
+{perf_affinity_json}
 
-RENDIMIENTO POR VALOR DE CLIENTE:
+RENDIMIENTO POR NIVEL DE VALOR:
 {perf_value_json}
 
 RENDIMIENTO POR MOMENTO:
@@ -401,14 +401,14 @@ def _detect_intent(message: str) -> str:
 
 
 def _heuristic_reply(message: str, dashboard: dict) -> str:
-    """Generate contextual reply using dashboard data without AI API."""
+    """Genera una respuesta contextual con datos del dashboard sin usar API de IA."""
     intent = _detect_intent(message)
     kpis = dashboard.get("kpis", {})
     context = dashboard.get("context", {})
     segments = dashboard.get("segment_cards", [])
     perf_age = dashboard.get("performance_by_age", [])
-    perf_profile = dashboard.get("performance_by_profile", [])
-    perf_value = dashboard.get("performance_by_value", [])
+    perf_affinity = dashboard.get("performance_by_affinity", [])
+    perf_value = dashboard.get("performance_by_value_level", [])
     focus_cities = dashboard.get("focus_cities", [])
     recommendations = dashboard.get("recommendations", {})
     recent = dashboard.get("recent_campaigns", [])
@@ -419,7 +419,7 @@ def _heuristic_reply(message: str, dashboard: dict) -> str:
         return (
             f"Situación actual del pipeline de marketing:\n\n"
             f"Tenemos {kpis.get('total_campaigns', 0)} campañas activas sobre una base de "
-            f"{kpis.get('audience_size', 0)} usuarios segmentados en {kpis.get('active_segments', 0)} cruces de edad y perfil.\n\n"
+            f"{kpis.get('audience_size', 0)} usuarios segmentados en {kpis.get('active_segments', 0)} cruces de edad, afinidad y valor.\n\n"
             f"El índice de engagement medio es del {round(kpis.get('avg_engagement_index', 0) * 100)}%, "
             f"con una presión estratégica de {kpis.get('priority_pressure', 0)}/100.\n\n"
             f"El segmento con mejor tracción es {top_seg.get('segment_label', 'N/A')} "
@@ -439,10 +439,13 @@ def _heuristic_reply(message: str, dashboard: dict) -> str:
                 f"{seg['campaigns']} campañas, engagement {round(seg['avg_engagement_index'] * 100)}%, "
                 f"ADR medio {round(seg['avg_adr'])}€, canal dominante: {seg['dominant_channel']}"
             )
-        lines.append(f"\nLos segmentos de mayor valor (HIGH_VALUE) son los que más margen ofrecen para upselling.")
-        hv = [s for s in perf_value if s["label"] == "HIGH_VALUE"]
+        lines.append("\nLos segmentos premium y lujo son los que más margen ofrecen para upselling.")
+        hv = [s for s in perf_value if s["label"] in {"Premium", "Lujo"}]
         if hv:
-            lines.append(f"HIGH_VALUE tiene un engagement del {round(hv[0]['avg_engagement_index'] * 100)}% sobre {hv[0]['count']} campañas.")
+            lines.append(
+                f"Los segmentos de mayor valor concentran un engagement del {round(hv[0]['avg_engagement_index'] * 100)}% "
+                f"sobre {hv[0]['count']} campañas."
+            )
         return "\n".join(lines)
 
     if intent == "social_media":
@@ -539,7 +542,7 @@ def _heuristic_reply(message: str, dashboard: dict) -> str:
             f"3. Activación gastronómica en {focus_cities[0] if focus_cities else 'destinos clave'}:\n"
             f"   - Colaboración con restaurantes locales para paquetes de escapada\n"
             f"   - Contenido en redes: behind-the-scenes con chef local\n"
-            f"   - Target: segmentos GASTRONOMIA_CIUDAD y EXPLORADOR_CULTURAL\n\n"
+            f"   - Target: segmentos con afinidad gastronómica y cultural\n\n"
             f"4. Campaña de re-engagement post-stay:\n"
             f"   - Los post-stay actuales tienen un engagement del "
             f"{round(next((p['avg_engagement_index'] for p in dashboard.get('performance_by_moment', []) if p['label'] == 'post_stay'), 0.5) * 100)}%\n"
@@ -635,24 +638,24 @@ def _gemini_reply(message: str, history: list[dict], dashboard: dict) -> str | N
     return str(reply).strip() or None
 
 
-# ── Campaign Proposal Generator ──────────────────────────────
+# ── Generador de propuestas de campaña ───────────────────────
 
 def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
-    """Generate diverse campaign proposals across all marketing channels."""
+    """Genera propuestas de campaña diversas para todos los canales de marketing."""
     segments = dashboard.get("segment_cards", [])
     context = dashboard.get("context", {})
     kpis = dashboard.get("kpis", {})
     focus_cities = dashboard.get("focus_cities", [])
     external = context.get("external_signals", [])
     reception = context.get("reception_notes", [])
-    perf_profile = dashboard.get("performance_by_profile", [])
+    perf_affinity = dashboard.get("performance_by_affinity", [])
 
     proposals = []
     city1 = focus_cities[0] if focus_cities else "destino principal"
     city2 = focus_cities[1] if len(focus_cities) >= 2 else "destino secundario"
     top_seg = segments[0] if segments else {}
-    cultural_seg = next((s for s in segments if "CULTURAL" in s.get("travel_profile", "")), segments[0] if segments else {})
-    gastro_seg = next((s for s in segments if "GASTRO" in s.get("travel_profile", "")), segments[0] if segments else {})
+    cultural_seg = next((s for s in segments if s.get("primary_affinity") == "cultural"), segments[0] if segments else {})
+    gastro_seg = next((s for s in segments if s.get("primary_affinity") == "gastronomico"), segments[0] if segments else {})
 
     # ── 1. RRSS: Serie de contenido ──────────────────────────
     proposals.append({
@@ -661,7 +664,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "category_label": "Redes sociales",
         "name": f"Serie «Vive como un local» — {city1}",
         "objective": "Awareness orgánico y tráfico a web de reserva directa",
-        "segment": cultural_seg.get("segment_label", "CULTURAL"),
+        "segment": cultural_seg.get("segment_label", "Cultural"),
         "segment_users": cultural_seg.get("users", 0),
         "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
         "channel": "Instagram + TikTok",
@@ -729,7 +732,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "body_summary": (
             f"Crear una red de partnerships locales en {city1}: "
             f"1) 3 restaurantes con menú «Selección Eurostars» con descuento para huéspedes (exposición cruzada en ambas marcas). "
-            f"2) Bodega/cata de vinos con visita privada para huéspedes premium y HIGH_VALUE. "
+            f"2) Bodega/cata de vinos con visita privada para huéspedes premium y de alto valor. "
             f"3) Galería de arte o taller de artesanía local: experiencia reservable desde el QR de habitación. "
             f"4) Ruta guiada a pie con guía local, exclusiva para huéspedes (sábados por la mañana). "
             f"Todos los partners deben generar contenido co-branded para RRSS (mínimo 2 posts/mes cada uno). "
@@ -777,7 +780,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             "category_label": "Geolocalización",
             "name": f"Campaña de proximidad en {city1}",
             "objective": "Captar reservas de último minuto y walk-ins premium",
-            "segment": "ADULTO · Todos los perfiles",
+            "segment": "Adulto · Afinidad mixta · Confort",
             "segment_users": top_seg.get("users", 0),
             "segment_engagement": top_seg.get("avg_engagement_index", 0.75),
             "channel": "Push + SMS + Google Ads local",
@@ -821,7 +824,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
                 f"1) Email con 3 opciones de upgrade personalizadas por segmento (habitación superior, late checkout, pack gastronómico). "
                 f"2) Si no abre el email en 12h, enviar recordatorio por WhatsApp Business con carrusel visual. "
                 f"3) Incluir mapa interactivo con los partnerships locales activos y botón de reserva directa. "
-                f"4) Variante para HIGH_VALUE: ofrecer acceso exclusivo a experiencia privada (cata, rooftop sunset). "
+                f"4) Variante para premium y lujo: ofrecer acceso exclusivo a experiencia privada (cata, rooftop sunset). "
                 f"Basado en señal de recepción: «{reception[0]}»."
             ),
             "deliverables": "Flujo automatizado (email + WhatsApp), 3 plantillas segmentadas, mapa interactivo, landing upsell",
@@ -838,7 +841,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             "category_label": "Evento",
             "name": f"Activación 360° — {signal[:55]}",
             "objective": "Captar demanda del evento y generar contenido de marca",
-            "segment": cultural_seg.get("segment_label", "EXPLORADOR_CULTURAL"),
+            "segment": cultural_seg.get("segment_label", "Cultural"),
             "segment_users": cultural_seg.get("users", 0),
             "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
             "channel": "Multicanal (email + RRSS + hotel + partners)",
@@ -851,11 +854,11 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
                 f"Campaña 360° alrededor de «{signal}»: "
                 f"PRE-EVENTO: Email a base de datos segmentada con paquete hotel+evento. Stories cuenta atrás 5 días. "
                 f"DURANTE: Decoración temática en lobby (roll-up + flores/ambientación del evento). Stories en directo desde el evento. "
-                f"Check-in con welcome gift temático (mapa del evento + posavasos ilustrado). "
+                f"Recepción con detalle de bienvenida temático (mapa del evento + posavasos ilustrado). "
                 f"POST-EVENTO: Email UGC recopilando fotos de huéspedes durante el evento. Reels resumen 60s. "
                 f"Cada fase tiene KPIs: reservas (pre), menciones social (durante), reservas futuras (post)."
             ),
-            "deliverables": "Pack email (3), 15 stories, roll-up lobby, welcome gift, reels post-evento, UGC email",
+            "deliverables": "Pack de emails (3), 15 stories, roll-up de lobby, detalle de bienvenida, reels postevento, email UGC",
             "priority": "alta",
             "rationale": f"Señal externa activa. Los eventos generan picos de demanda predecibles y contenido de alto valor para RRSS.",
         })
@@ -1063,13 +1066,13 @@ def _modify_messaging_ai(campaign: dict, instructions: str) -> dict | None:
     return result
 
 
-# ── Public API ────────────────────────────────────────────────
+# ── API pública ──────────────────────────────────────────────
 
 def generate_campaign_proposals() -> dict:
     """
-    Generate structured campaign proposals from dashboard data.
+    Genera propuestas de campaña estructuradas a partir del dashboard.
 
-    Returns: {"proposals": [...], "source": "gemini"|"heuristic"}
+    Devuelve: {"proposals": [...], "source": "gemini"|"heuristic"}
     """
     dashboard = _get_dashboard()
 
@@ -1083,9 +1086,9 @@ def generate_campaign_proposals() -> dict:
 
 def handle_modify_messaging(campaign_id: str, instructions: str) -> dict:
     """
-    Modify the messaging of a generated campaign based on instructions.
+    Modifica el mensaje de una campaña generada a partir de instrucciones.
 
-    Returns: {"campaign": {...}, "source": "gemini"|"heuristic"}
+    Devuelve: {"campaign": {...}, "source": "gemini"|"heuristic"}
     """
     dashboard = _get_dashboard()
     proposals = _generate_heuristic_proposals(dashboard)
@@ -1104,9 +1107,9 @@ def handle_modify_messaging(campaign_id: str, instructions: str) -> dict:
 
 def handle_chat_message(message: str, history: list[dict] | None = None) -> dict:
     """
-    Handle a chat message from the marketing director.
+    Procesa un mensaje de chat del director de marketing.
 
-    Returns: {"reply": "...", "source": "gemini"|"heuristic"}
+    Devuelve: {"reply": "...", "source": "gemini"|"heuristic"}
     """
     if history is None:
         history = []

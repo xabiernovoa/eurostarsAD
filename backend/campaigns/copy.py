@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-text_generator.py — Phase 5: AI Text Generation
+text_generator.py — Fase 5: generación de texto con IA
 
-Generates email copy using Gemini via Vertex AI.
-Falls back to structured mock copy in dry-run mode.
-Produces structured JSON output: subject, preheader, headline, body, CTA, etc.
+Genera el copy del email con Gemini vía Vertex AI.
+Hace fallback a copy simulado si Gemini no está disponible o si se fuerza mock.
+Produce una salida JSON con subject, preheader, headline, body, CTA, etc.
 """
 
 import json
@@ -25,7 +25,7 @@ except ModuleNotFoundError:
 
 load_dotenv()
 
-# ── Logging — only WARNING+ to stderr to avoid polluting stdout output ───────
+# ── Logs: solo WARNING+ por stderr para no contaminar stdout ─────────────────
 logging.basicConfig(
     level=logging.WARNING,
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
@@ -33,7 +33,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger("text_generator")
 
-# ── Tone instructions by age segment ─────────────────────────────────────
+from backend.personalization.segment_views import (
+    get_age_key,
+    get_affinities,
+    get_loyalty_label,
+    get_primary_affinity_label,
+    get_segment_label,
+    get_segment_slug,
+    get_value_label,
+)
+
+# ── Instrucciones de tono por segmento de edad ───────────────────────────
 
 TONE_INSTRUCTIONS = {
     "JOVEN": (
@@ -54,14 +64,49 @@ TONE_INSTRUCTIONS = {
 }
 
 
+def _env_bool(name: str, default: bool = False) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _format_segment_tags(seg: dict) -> str:
+    """Convierte las etiquetas enriquecidas en texto legible para el prompt."""
+    tags = seg.get("tags", {}) if isinstance(seg, dict) else {}
+    if not tags:
+        return "- Sin etiquetas enriquecidas disponibles"
+
+    affinities = ", ".join(tags.get("afinidades_destino", [])) or "sin afinidades claras"
+    booking = tags.get("comportamiento_reserva", {}) or {}
+    loyalty = tags.get("fidelidad", {}) or {}
+    demographics = tags.get("demografia", {}) or {}
+
+    secondary_loyalty = ", ".join(loyalty.get("secundarias", [])) or "ninguna"
+
+    return (
+        f"- Afinidades de destino: {affinities}\n"
+        f"- Nivel de valor: {tags.get('nivel_valor', 'desconocido')}\n"
+        f"- Reserva: antelación={booking.get('antelacion', 'desconocida')}, "
+        f"duración={booking.get('duracion', 'desconocida')}, "
+        f"frecuencia={booking.get('frecuencia', 'desconocida')}\n"
+        f"- Fidelidad: principal={loyalty.get('principal', 'desconocida')}, "
+        f"secundarias={secondary_loyalty}\n"
+        f"- Demografía: edad={demographics.get('edad', 'desconocida')}, "
+        f"género={demographics.get('genero', '')}, país={demographics.get('pais', '')}"
+    )
+
+
 def _build_prompt(campaign_data: dict, moment: str) -> str:
-    """Build the prompt for the AI model."""
+    """Construye el prompt para el modelo de IA."""
     seg = campaign_data["segment"]
-    age_segment = seg.get("age_segment", "ADULTO")
-    travel_profile = seg.get("travel_profile", "EXPLORADOR_CULTURAL")
-    client_value = seg.get("client_value", "MID_VALUE")
+    age_segment = get_age_key(seg)
     country = seg.get("country", "ES")
     gender = seg.get("gender", "")
+    primary_affinity = get_primary_affinity_label(seg)
+    destination_tags = ", ".join(get_affinities(seg)) or "sin afinidades claras"
+    value_level = get_value_label(seg)
+    loyalty = get_loyalty_label(seg)
 
     tone = TONE_INSTRUCTIONS.get(age_segment, TONE_INSTRUCTIONS["ADULTO"])
 
@@ -78,12 +123,18 @@ def _build_prompt(campaign_data: dict, moment: str) -> str:
 Genera el contenido de un email pre-estancia personalizado en español.
 
 PERFIL DEL USUARIO:
-- Segmento de edad: {age_segment}
-- Perfil de viaje: {travel_profile}
-- Valor del cliente: {client_value}
+- Edad: {age_segment}
+- Etiqueta principal: {get_segment_label(seg)}
+- Afinidad principal de destino: {primary_affinity}
+- Afinidades detectadas: {destination_tags}
+- Nivel de valor: {value_level}
+- Fidelidad principal: {loyalty}
 - País de origen: {country}
 - Género: {gender}
 - Puntuación media que da: {seg.get('avg_score', 7)}
+
+ETIQUETAS ENRIQUECIDAS:
+{_format_segment_tags(seg)}
 
 HOTEL RECOMENDADO:
 - Nombre: {hotel['name']}
@@ -126,16 +177,22 @@ IMPORTANTE: Devuelve SOLO el JSON, sin markdown ni explicaciones."""
 Genera el contenido de un email post-estancia personalizado en español.
 
 PERFIL DEL USUARIO:
-- Segmento de edad: {age_segment}
-- Perfil de viaje: {travel_profile}
-- Valor del cliente: {client_value}
+- Edad: {age_segment}
+- Etiqueta principal: {get_segment_label(seg)}
+- Afinidad principal de destino: {primary_affinity}
+- Afinidades detectadas: {destination_tags}
+- Nivel de valor: {value_level}
+- Fidelidad principal: {loyalty}
 - País: {country}
+
+ETIQUETAS ENRIQUECIDAS:
+{_format_segment_tags(seg)}
 
 ÚLTIMA ESTANCIA:
 - Hotel: {last['hotel_name']}
 - Ciudad: {last['city']}
-- Check-in: {last['checkin']}
-- Check-out: {last['checkout']}
+- Entrada: {last['checkin']}
+- Salida: {last['checkout']}
 
 PRÓXIMO DESTINO RECOMENDADO:
 - Hotel: {next_hotel.get('HOTEL_NAME', 'por descubrir')}
@@ -166,9 +223,10 @@ IMPORTANTE: Devuelve SOLO el JSON, sin markdown ni explicaciones."""
 
 
 def _mock_copy(campaign_data: dict, moment: str) -> dict:
-    """Generate mock copy without API call (for --dry-run mode)."""
+    """Genera copy simulado sin llamar a la API."""
     seg = campaign_data["segment"]
-    age = seg.get("age_segment", "ADULTO")
+    age = get_age_key(seg)
+    segment_slug = get_segment_slug(seg)
 
     if moment == "pre_arrival":
         hotel = campaign_data["recommended_hotel"]
@@ -192,7 +250,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"{hotel['city']} lo tiene todo.",
                 ],
                 "cta_text": "Reservar ahora",
-                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign=joven_{season}_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign={segment_slug}_{season}_2025",
                 "ps_line": "PD: Las mejores habitaciones vuelan rápido. ¡No te quedes sin la tuya!",
             },
             "ADULTO": {
@@ -209,7 +267,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"confort que usted merece.",
                 ],
                 "cta_text": "Ver disponibilidad",
-                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign=adulto_{season}_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign={segment_slug}_{season}_2025",
                 "ps_line": f"PD: Como cliente Eurostars, disfruta de condiciones exclusivas en {hotel['name']}.",
             },
             "SENIOR": {
@@ -228,7 +286,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"para cualquier necesidad que pueda tener durante su visita.",
                 ],
                 "cta_text": "Consultar fechas y precios",
-                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign=senior_{season}_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=pre_arrival&utm_campaign={segment_slug}_{season}_2025",
                 "ps_line": f"PD: Para reservas telefónicas, llámenos al +34 900 100 200. Estaremos encantados de ayudarle.",
             },
         }
@@ -254,7 +312,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"{next_name} te espera con una oferta exclusiva solo para ti.",
                 ],
                 "cta_text": f"Descubrir {next_city}",
-                "cta_url_suffix": "utm_source=email&utm_medium=post_stay&utm_campaign=joven_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=post_stay&utm_campaign={segment_slug}_2025",
                 "ps_line": "PD: Reserva en las próximas 48h y consigue un 15% de descuento",
             },
             "ADULTO": {
@@ -271,7 +329,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"conocer las condiciones especiales que tenemos para usted?",
                 ],
                 "cta_text": "Ver oferta exclusiva",
-                "cta_url_suffix": "utm_source=email&utm_medium=post_stay&utm_campaign=adulto_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=post_stay&utm_campaign={segment_slug}_2025",
                 "ps_line": f"PD: Como cliente Eurostars, disfruta de un 10% de descuento en {next_name}.",
             },
             "SENIOR": {
@@ -289,7 +347,7 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                     f"Nuestro equipo estará encantado de ayudarle con la reserva.",
                 ],
                 "cta_text": "Más información",
-                "cta_url_suffix": "utm_source=email&utm_medium=post_stay&utm_campaign=senior_2025",
+                "cta_url_suffix": f"utm_source=email&utm_medium=post_stay&utm_campaign={segment_slug}_2025",
                 "ps_line": "PD: Puede llamarnos al +34 900 100 200 para reservar cómodamente por teléfono.",
             },
         }
@@ -312,9 +370,9 @@ def _default_copy() -> dict:
 
 
 def _log_generation_source(source: str, guest_id: str, moment: str) -> None:
-    """Keep generation diagnostics off stdout while preserving traceability."""
+    """Mantiene el diagnóstico fuera de stdout sin perder trazabilidad."""
     logger.debug(
-        "Generated email copy via %s for guest=%s moment=%s",
+        "Copy de email generado vía %s para guest=%s moment=%s",
         source,
         guest_id,
         moment,
@@ -344,27 +402,29 @@ def generate_copy(
     verbose: bool = False,
 ) -> dict:
     """
-    Generate email copy for a campaign.
+    Genera el copy de email para una campaña.
 
-    Parameters
+    Parámetros
     ----------
     campaign_data : dict
-        Campaign payload as produced by campaign_engine.
+        Payload de campaña tal como lo produce campaign_engine.
     moment : str
-        'pre_arrival' or 'post_stay'.
+        'pre_arrival' o 'post_stay'.
     dry_run : bool
-        If True, skips the API call and returns deterministic mock copy.
+        Si es True, la campaña se mantiene en modo simulación para entrega.
+        El copy seguirá siendo mock salvo que ``GEMINI_COPY_IN_DRY_RUN=true``.
     verbose : bool
-        Deprecated flag kept for backward compatibility.
+        Indicador obsoleto que se mantiene por compatibilidad hacia atrás.
 
-    Returns
-    -------
+    Devuelve
+    --------
     dict
-        Structured email copy.
+        Copy estructurado del email.
     """
     guest_id = str(campaign_data.get("guest_id", "?"))
+    use_gemini = (not dry_run) or _env_bool("GEMINI_COPY_IN_DRY_RUN", False)
 
-    if dry_run:
+    if not use_gemini:
         copy = _mock_copy(campaign_data, moment)
         if verbose:
             _log_generation_source("mock", guest_id, moment)
@@ -379,7 +439,7 @@ def generate_copy(
         return copy
 
     except Exception as exc:
-        logger.warning("Gemini email generation failed: %s. Using mock copy.", exc)
+        logger.warning("Ha fallado la generación con Gemini: %s. Se usará copy simulado.", exc)
         copy = _mock_copy(campaign_data, moment)
         if verbose:
             _log_generation_source("mock", guest_id, moment)
@@ -387,8 +447,7 @@ def generate_copy(
 
 
 def generate_sms(campaign_data: dict, dry_run: bool = True) -> str:
-    """Generate ultra-short SMS copy (max 160 chars)."""
-    seg = campaign_data.get("segment", {})
+    """Genera un SMS ultracorto para la campaña (máximo 160 caracteres)."""
 
     if campaign_data.get("campaign_type") == "pre_arrival":
         hotel = campaign_data.get("recommended_hotel", {})
@@ -399,7 +458,7 @@ def generate_sms(campaign_data: dict, dry_run: bool = True) -> str:
         last = campaign_data.get("last_stay", {})
         msg = f"Eurostars: Gracias por tu estancia en {last.get('city', '')}. -15% en tu próximo viaje: eurostars.com/r"
 
-    # Truncate to 160 chars
+    # Recortar a 160 caracteres
     if len(msg) > 160:
         msg = msg[:157] + "..."
     return msg
@@ -407,8 +466,8 @@ def generate_sms(campaign_data: dict, dry_run: bool = True) -> str:
 
 def main():
     """
-    Quick sanity-check: generates one pre-arrival copy using the real API
-    (set DRY_RUN=1 to force mock mode).
+    Comprobación rápida: genera un copy pre-arrival usando la API real
+    (usa DRY_RUN=1 para forzar el modo simulado).
     """
     dry_run = os.environ.get("DRY_RUN", "0") == "1"
 
@@ -416,18 +475,18 @@ def main():
 
     results = campaign_engine.generate_all("pre_arrival", "1014907189")
     if not results:
-        logger.warning("No campaign results returned.")
+        logger.warning("No se han obtenido resultados de campaña.")
         return
 
     copy = generate_copy(results[0], "pre_arrival", dry_run=dry_run, verbose=True)
     sms = generate_sms(results[0])
     logger.info(
-        "Generated sample assets for guest %s using model %s",
+        "Se han generado activos de ejemplo para el huésped %s usando el modelo %s",
         results[0].get("guest_id", "?"),
         "mock" if dry_run else "gemini",
     )
-    logger.debug("Sample copy: %s", json.dumps(copy, ensure_ascii=False))
-    logger.debug("Sample sms: %s", sms)
+    logger.debug("Copy de ejemplo: %s", json.dumps(copy, ensure_ascii=False))
+    logger.debug("SMS de ejemplo: %s", sms)
     # print(json.dumps(copy, indent=2, ensure_ascii=False))
     # print(f"\nSMS: {sms}")
 

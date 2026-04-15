@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-send_campaign.py — Phase 8: Campaign Sending & Tracking
+send_campaign.py — Fase 8: envío y trazabilidad de campañas
 
-Sends emails via SendGrid (or saves to disk in --dry-run mode).
-Tracks all sent campaigns in campaign_log.json with UTM parameters.
+Envía emails vía SendGrid o los guarda en disco en modo --dry-run.
+Registra todas las campañas en campaign_log.json con parámetros UTM.
 """
 
 import json
@@ -27,6 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.paths import OUTPUT_DIR
+from backend.personalization.segment_views import get_age_key, get_segment_label, get_segment_slug
 from backend.storage.campaign_log import load_campaign_log, save_campaign_log
 
 logging.basicConfig(
@@ -37,20 +38,20 @@ logger = logging.getLogger("send_campaign")
 _LOG_LOCK = Lock()
 
 def _load_log() -> list[dict]:
-    """Load existing campaign log."""
+    """Carga el registro actual de campañas."""
     return load_campaign_log()
 
 
 def _save_log(log: list[dict]) -> None:
-    """Save campaign log."""
+    """Guarda el registro de campañas."""
     save_campaign_log(log)
 
 
 def _inject_utm(html: str, segment: dict, moment: str) -> str:
-    """Ensure all links have UTM parameters."""
-    # UTM params are already in templates via copy.cta_url_suffix
-    # This adds utm_content with segment info to any remaining links
-    utm_content = f"seg_{segment.get('age_segment', 'unknown')}_{segment.get('travel_profile', 'unknown')}"
+    """Garantiza que todos los enlaces incluyan parámetros UTM."""
+    # Los parámetros UTM ya salen de copy.cta_url_suffix en las plantillas.
+    # Aquí añadimos utm_content con información de segmento al resto de enlaces.
+    utm_content = f"seg_{get_segment_slug(segment)}"
     html = html.replace("utm_content=joven", f"utm_content={utm_content}")
     html = html.replace("utm_content=adulto", f"utm_content={utm_content}")
     html = html.replace("utm_content=senior", f"utm_content={utm_content}")
@@ -62,10 +63,10 @@ def send_email_sendgrid(
     subject: str,
     html_content: str,
 ) -> bool:
-    """Send email via SendGrid API."""
+    """Envía un email usando la API de SendGrid."""
     api_key = os.environ.get("SENDGRID_API_KEY")
     if not api_key or api_key.startswith("SG.xxxxx"):
-        logger.warning("No valid SendGrid API key")
+        logger.warning("No hay una API key válida de SendGrid")
         return False
 
     try:
@@ -81,11 +82,11 @@ def send_email_sendgrid(
         )
         sg = SendGridAPIClient(api_key)
         response = sg.send(message)
-        logger.info("SendGrid response: %d", response.status_code)
+        logger.info("Respuesta de SendGrid: %d", response.status_code)
         return response.status_code in (200, 201, 202)
 
     except Exception as e:
-        logger.error("SendGrid send failed: %s", e)
+        logger.error("Ha fallado el envío con SendGrid: %s", e)
         return False
 
 
@@ -97,12 +98,12 @@ def send_campaign(
     sms_text: str = "",
     dry_run: bool = True,
 ) -> dict:
-    """Send or save a campaign and log the result."""
+    """Envía o guarda una campaña y registra el resultado."""
     guest_id = campaign_data.get("guest_id", "")
     moment = campaign_data.get("campaign_type", "unknown")
     segment = campaign_data.get("segment", {})
 
-    # Inject UTM parameters
+    # Inyectar parámetros UTM
     html = _inject_utm(html, segment, moment)
 
     primary_channel = channel.get("primary_channel", "email")
@@ -110,21 +111,22 @@ def send_campaign(
     log_entry = {
         "guest_id": guest_id,
         "channel": primary_channel,
-        "template": f"template_{segment.get('age_segment', 'adulto').lower()}.html",
+        "template": f"template_{get_age_key(segment).lower()}.html",
         "campaign_type": moment,
         "hotel_recommended": "",
+        "segment_label": get_segment_label(segment),
         "subject": copy.get("subject", ""),
         "timestamp": datetime.now().isoformat(),
         "status": "pending",
         "dry_run": dry_run,
     }
 
-    # Extract hotel info
+    # Extraer información del hotel
     hotel = campaign_data.get("recommended_hotel", campaign_data.get("last_stay", {}))
     log_entry["hotel_recommended"] = hotel.get("name", hotel.get("hotel_name", ""))
 
     if dry_run:
-        # Save HTML to disk
+        # Guardar HTML en disco
         OUTPUT_DIR.mkdir(exist_ok=True)
         filename = f"{moment}_{guest_id}.html"
         path = OUTPUT_DIR / filename
@@ -132,30 +134,30 @@ def send_campaign(
             f.write(html)
         log_entry["status"] = "saved_to_disk"
         log_entry["output_file"] = filename
-        logger.info("Dry-run: saved %s to %s", filename, OUTPUT_DIR)
+        logger.info("Dry-run: %s guardado en %s", filename, OUTPUT_DIR)
 
-        # La demo no usa ficheros SMS sueltos; guardamos solo una preview en log.
+        # La demo no usa ficheros SMS sueltos; solo guardamos una vista previa en el log.
         if sms_text and primary_channel == "sms":
             log_entry["sms_preview"] = sms_text[:160]
 
     else:
-        # Real send
+        # Envío real
         if primary_channel == "email":
             success = send_email_sendgrid(
-                to_email=f"guest_{guest_id}@example.com",  # Placeholder
+                to_email=f"guest_{guest_id}@example.com",  # Marcador de posición
                 subject=copy.get("subject", "Eurostars Hotels"),
                 html_content=html,
             )
             log_entry["status"] = "sent" if success else "failed"
         elif primary_channel == "sms":
-            # SMS would be sent via Twilio or similar — mock for now
+            # El SMS se enviaría por Twilio o similar; aquí queda simulado
             log_entry["status"] = "sms_mock_sent"
             log_entry["sms_text"] = sms_text[:160]
         else:
-            # Push notification — mock
+            # Notificación push simulada
             log_entry["status"] = "push_mock_sent"
 
-    # Append to campaign log
+    # Añadir al registro de campañas
     with _LOG_LOCK:
         log = _load_log()
         log.append(log_entry)
@@ -172,7 +174,7 @@ def send_batch(
     sms_texts: list[str],
     dry_run: bool = True,
 ) -> list[dict]:
-    """Send a batch of campaigns."""
+    """Envía un lote de campañas."""
     results = []
     for i, (campaign, html, copy, channel) in enumerate(
         zip(campaigns, htmls, copies, channels)
@@ -181,19 +183,19 @@ def send_batch(
         result = send_campaign(campaign, html, copy, channel, sms, dry_run)
         results.append(result)
 
-    # Summary
+    # Resumen
     statuses = {}
     for r in results:
         s = r["status"]
         statuses[s] = statuses.get(s, 0) + 1
-    logger.info("Batch complete — %d campaigns: %s", len(results), statuses)
+    logger.info("Lote completado — %d campañas: %s", len(results), statuses)
 
     return results
 
 
 def main():
     log = _load_log()
-    logger.info("Campaign log has %d entries", len(log))
+    logger.info("El registro de campañas tiene %d entradas", len(log))
     if log:
         for entry in log[-5:]:
             logger.info("  %s — %s — %s — %s",

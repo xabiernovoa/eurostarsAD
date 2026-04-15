@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Eurostars Marketing Dashboard server."""
+"""Servidor del dashboard de marketing de Eurostars."""
 
 from __future__ import annotations
 
@@ -87,7 +87,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
 
     def _send_file(self, filepath: Path):
         if not filepath.exists():
-            self._send(404, "text/plain; charset=utf-8", "Not found")
+            self._send(404, "text/plain; charset=utf-8", "No encontrado")
             return
         mime = MIME_TYPES.get(filepath.suffix.lower(), "application/octet-stream")
         self._send(200, mime, filepath.read_bytes())
@@ -184,7 +184,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 history = payload.get("history", [])
                 if not message:
                     self._send(400, "application/json; charset=utf-8",
-                               json.dumps({"error": "No message provided"}, ensure_ascii=False))
+                               json.dumps({"error": "No se ha proporcionado ningún mensaje"}, ensure_ascii=False))
                     return
                 result = handle_chat_message(message, history)
                 self._send(200, "application/json; charset=utf-8",
@@ -204,7 +204,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 instructions = payload.get("instructions", "").strip()
                 if not campaign_id or not instructions:
                     self._send(400, "application/json; charset=utf-8",
-                               json.dumps({"error": "campaign_id and instructions required"}, ensure_ascii=False))
+                               json.dumps({"error": "campaign_id e instructions son obligatorios"}, ensure_ascii=False))
                     return
                 result = handle_modify_messaging(campaign_id, instructions)
                 self._send(200, "application/json; charset=utf-8",
@@ -217,7 +217,7 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 )
             return
 
-        self._send(404, "application/json; charset=utf-8", json.dumps({"error": "Not found"}))
+        self._send(404, "application/json; charset=utf-8", json.dumps({"error": "No encontrado"}))
 
     def _handle_autonomous_stream(self, query: str) -> None:
         params = urllib.parse.parse_qs(query or "")
@@ -291,11 +291,11 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
 
 def main():
     server = ThreadedHTTPServer(("", PORT), MarketingHandler)
-    print(f"\n  Eurostars Marketing Dashboard running at http://localhost:{PORT}\n")
+    print(f"\n  Panel de marketing de Eurostars ejecutándose en http://localhost:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print("\n  Server stopped.")
+        print("\n  Servidor detenido.")
         server.server_close()
 
 

@@ -33,6 +33,7 @@ from backend import config  # noqa: E402
 from backend.autonomous import generic_campaigns, heartbeat, oracle  # noqa: E402
 from backend.autonomous import generator as campaign_generator  # noqa: E402
 from backend.autonomous import scheduler as user_scheduler  # noqa: E402
+from backend.personalization.segment_views import get_segment_label  # noqa: E402
 from backend.storage import autonomous_state as state_module  # noqa: E402
 
 
@@ -130,7 +131,7 @@ def _run_demo(
     for g in generated:
         seg = g["segment"]
         print(
-            f"    • {g['guest_id']} [{seg.get('age_segment')}/{seg.get('travel_profile')}] "
+            f"    • {g['guest_id']} [{get_segment_label(seg)}] "
             f"→ {g['hotel'].get('name')} ({g['hotel'].get('city')}) "
             f"[copy={g['copy_source']}]"
         )

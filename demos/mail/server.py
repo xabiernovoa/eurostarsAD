@@ -54,7 +54,7 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
 
     def _send_file(self, filepath: Path):
         if not filepath.exists():
-            self._send(404, "text/plain", "Not found")
+            self._send(404, "text/plain", "No encontrado")
             return
         ext = filepath.suffix.lower()
         mime = MIME_TYPES.get(ext, "application/octet-stream")
@@ -99,7 +99,7 @@ class GmailDemoHandler(http.server.BaseHTTPRequestHandler):
             filename = pathname[len("/api/email/"):]
             filepath = self._safe_output_email_path(filename)
             if filepath is None or not filepath.exists():
-                self._send(404, "text/plain", "Not found")
+                self._send(404, "text/plain", "No encontrado")
                 return
             content = filepath.read_text(encoding="utf-8")
             content = content.replace(

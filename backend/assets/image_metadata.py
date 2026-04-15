@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-auto_tag_images.py — Generate image metadata from filenames.
+auto_tag_images.py — Genera metadatos de imágenes a partir del nombre de archivo.
 
-Scans images/{hotel_id}/ directories, extracts the category from each
-filename (e.g. "eurostars-torre-sevilla-restauracion-03.jpeg" → "restauracion"),
-and assigns appropriate tags, audience, mood and premium flags.
+Recorre los directorios images/{hotel_id}/, extrae la categoría de cada nombre
+de archivo y asigna tags, audiencia, mood y bandera premium.
 
-Usage:
+Uso:
     python auto_tag_images.py
 """
 
@@ -29,9 +28,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger("auto_tag_images")
 
-# ── Category extraction from filename ─────────────────────────────────────
+# ── Extracción de categoría desde el nombre de archivo ───────────────────
 
-# Known hotel name prefixes (will be stripped to find the category)
+# Prefijos conocidos de nombre de hotel que se eliminan para obtener la categoría
 HOTEL_PREFIXES = [
     "eurostars-torre-sevilla",
     "eurostars-sevilla-boutique",
@@ -45,30 +44,30 @@ HOTEL_PREFIXES = [
     "exe-madrid-norte",
 ]
 
-# Sort longest first so greedy match works
+# Ordenar por longitud descendente para que el match codicioso funcione
 HOTEL_PREFIXES.sort(key=len, reverse=True)
 
 
 def _extract_category(filename: str) -> str:
     """
-    Extract the category from a filename like:
-        eurostars-torre-sevilla-restauracion-03.jpeg → restauracion
-        aurea-museum-spa-04.jpeg → spa
-        exe-madrid-norte-piscina-y-fitness-02.jpeg → piscina-y-fitness
+    Extrae la categoría de nombres de archivo como:
+        eurostars-torre-sevilla-restauracion-03.jpeg -> restauracion
+        aurea-museum-spa-04.jpeg -> spa
+        exe-madrid-norte-piscina-y-fitness-02.jpeg -> piscina-y-fitness
     """
     name = Path(filename).stem
     for prefix in HOTEL_PREFIXES:
         if name.startswith(prefix + "-"):
             remainder = name[len(prefix) + 1:]
-            # Strip trailing -NN number
+            # Eliminar el sufijo numérico final -NN
             cat = re.sub(r"-\d+$", "", remainder)
             return cat
-    # Fallback: try generic pattern
+    # Recurso de respaldo: intentar el patrón genérico
     cat = re.sub(r"-\d+$", "", name)
     return cat
 
 
-# ── Tag mapping per category ──────────────────────────────────────────────
+# ── Mapa de tags por categoría ────────────────────────────────────────────
 
 CATEGORY_TAG_MAP = {
     "habitaciones": {
@@ -151,7 +150,7 @@ CATEGORY_TAG_MAP = {
     },
 }
 
-# Default for unknown categories
+# Valor por defecto para categorías desconocidas
 DEFAULT_TAGS = {
     "tags": ["hotel", "interior"],
     "audience": ["pareja", "profesional"],
@@ -159,12 +158,12 @@ DEFAULT_TAGS = {
     "premium": False,
 }
 
-# Image file extensions
+# Extensiones de archivo válidas para imágenes
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 
 
 def generate_metadata():
-    """Scan all hotel image directories and generate metadata.json."""
+    """Recorre todos los directorios de imágenes de hotel y genera metadata.json."""
     hotel_dirs = sorted([
         d for d in os.listdir(IMAGES_DIR)
         if (IMAGES_DIR / d).is_dir()
@@ -175,14 +174,14 @@ def generate_metadata():
     for hotel_id in hotel_dirs:
         hotel_dir = IMAGES_DIR / hotel_id
 
-        # Find all image files
+        # Buscar todos los archivos de imagen
         image_files = sorted([
             f for f in os.listdir(hotel_dir)
             if Path(f).suffix.lower() in IMAGE_EXTENSIONS
         ])
 
         if not image_files:
-            logger.warning("No images found in %s", hotel_dir)
+            logger.warning("No se han encontrado imágenes en %s", hotel_dir)
             continue
 
         metadata = []
@@ -204,18 +203,18 @@ def generate_metadata():
             }
             metadata.append(entry)
 
-        # Write metadata.json
+        # Escribir metadata.json
         meta_path = hotel_dir / "metadata.json"
         with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
         total_images += len(image_files)
         logger.info(
-            "Hotel %s: %d images, categories: %s",
+            "Hotel %s: %d imágenes, categorías: %s",
             hotel_id, len(image_files), sorted(categories_found)
         )
 
-    logger.info("Total: %d images across %d hotels", total_images, len(hotel_dirs))
+    logger.info("Total: %d imágenes repartidas en %d hoteles", total_images, len(hotel_dirs))
 
 
 def main():

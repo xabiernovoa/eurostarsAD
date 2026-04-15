@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-campaign_engine.py — Phase 3: Campaign Engine
+campaign_engine.py — Fase 3: motor de campañas
 
-Manages three moments in the customer lifecycle:
-  - pre_arrival: email before the predicted travel window
-  - checkin_report: receptionist brief at check-in
-  - post_stay: follow-up email after checkout
+Gestiona tres momentos del ciclo de vida del cliente:
+  - pre_arrival: email antes de la ventana de viaje prevista
+  - checkin_report: briefing de recepción en el check-in
+  - post_stay: email de seguimiento tras el checkout
 """
 
 import json
@@ -21,6 +21,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.personalization import embeddings as emb_module
+from backend.personalization.segment_views import (
+    get_affinities,
+    get_loyalty_principal,
+    get_value_level,
+    summarize_segment,
+)
 from backend.personalization.travel_prediction import predict_next_trip
 from backend.storage.customers import load_customers_df
 from backend.storage.embeddings import load_embeddings
@@ -39,7 +45,7 @@ SEASON_MAP = {
     9: "otoño", 10: "otoño", 11: "otoño",
 }
 
-# Mock events database (hook for real API integration)
+# Base de eventos simulada como punto de enganche para una API real
 MOCK_EVENTS = {
     "SEVILLA": [
         {"name": "Festival de las Naciones", "date": "2025-10-01", "type": "cultural"},
@@ -70,46 +76,50 @@ MOCK_EVENTS = {
 
 
 def _load_data() -> tuple[dict, dict, pd.DataFrame]:
-    """Load embeddings, segments, and customer reservations."""
+    """Carga embeddings, segmentos y reservas de clientes."""
     return load_embeddings(), load_segments_data(), load_customers_df()
 
 
 def _get_events(city: str, month: int) -> list[dict]:
-    """Get events in city near the predicted month. Mock implementation."""
-    events = MOCK_EVENTS.get(city.upper(), [])
-    matching = []
-    for ev in events:
+    """Obtiene eventos de la ciudad cercanos al mes previsto."""
+    eventos = MOCK_EVENTS.get(city.upper(), [])
+    coincidencias = []
+    for ev in eventos:
         ev_date = datetime.strptime(ev["date"], "%Y-%m-%d")
         if ev_date.month == month or abs(ev_date.month - month) <= 1:
-            matching.append(ev)
-    return matching
+            coincidencias.append(ev)
+    return coincidencias
 
 
 def _get_embedding_preferences(embedding: dict[str, float]) -> list[str]:
-    """Translate embedding dimensions to natural-language preferences."""
-    prefs = []
+    """Traduce las dimensiones del embedding a preferencias legibles."""
+    preferencias = []
     if embedding.get("HERITAGE", 0) > 0.6:
-        prefs.append("patrimonio histórico y cultural")
+        preferencias.append("patrimonio histórico y cultural")
     if embedding.get("GASTRONOMY", 0) > 0.6:
-        prefs.append("gastronomía local")
+        preferencias.append("gastronomía local")
     if embedding.get("BEACH", 0) > 0.5:
-        prefs.append("playa y actividades al aire libre")
+        preferencias.append("playa y actividades al aire libre")
     if embedding.get("MOUNTAIN", 0) > 0.5:
-        prefs.append("montaña y naturaleza")
+        preferencias.append("montaña y naturaleza")
     if embedding.get("PRICE_LEVEL", 0) > 0.7:
-        prefs.append("experiencias premium y exclusivas")
+        preferencias.append("experiencias premium y exclusivas")
     if embedding.get("STARS_NORM", 0) > 0.7:
-        prefs.append("alojamientos de alta categoría")
+        preferencias.append("alojamientos de alta categoría")
     if embedding.get("TEMP_NORM", 0) > 0.7:
-        prefs.append("destinos cálidos y soleados")
-    if not prefs:
-        prefs.append("diversidad de experiencias")
-    return prefs
+        preferencias.append("destinos cálidos y soleados")
+    if not preferencias:
+        preferencias.append("diversidad de experiencias")
+    return preferencias
 
 
-def _upsell_recommendations(value_tier: str, travel_profile: str) -> list[str]:
-    """Generate upsell recommendations based on client value."""
-    if value_tier == "HIGH_VALUE":
+def _upsell_recommendations(segment: dict) -> list[str]:
+    """Genera recomendaciones de upsell a partir de las nuevas etiquetas."""
+    value_level = get_value_level(segment)
+    affinities = set(get_affinities(segment))
+    loyalty = get_loyalty_principal(segment)
+
+    if value_level in {"premium", "lujo"}:
         recs = [
             "Upgrade a suite con vistas",
             "Acceso premium al spa y zona wellness",
@@ -117,7 +127,7 @@ def _upsell_recommendations(value_tier: str, travel_profile: str) -> list[str]:
             "Late checkout hasta las 14:00",
             "Experiencia gastronómica exclusiva del chef",
         ]
-    elif value_tier == "MID_VALUE":
+    elif value_level == "confort":
         recs = [
             "Desayuno buffet incluido",
             "Parking gratuito durante la estancia",
@@ -131,21 +141,21 @@ def _upsell_recommendations(value_tier: str, travel_profile: str) -> list[str]:
             "Upgrade de habitación sujeto a disponibilidad",
         ]
 
-    # Add profile-specific suggestions
-    profile_recs = {
-        "EXPLORADOR_CULTURAL": "Entrada a museos y monumentos cercanos",
-        "LUJO": "Transfer privado aeropuerto-hotel",
-        "SOL_Y_PLAYA": "Kit de playa premium (toalla, crema solar)",
-        "AVENTURERO": "Excursión guiada de senderismo o naturaleza",
-        "GASTRONOMIA_CIUDAD": "Reserva en restaurantes locales con estrella Michelin",
-    }
-    if travel_profile in profile_recs:
-        recs.append(profile_recs[travel_profile])
+    if "cultural" in affinities:
+        recs.append("Entrada a museos y monumentos cercanos")
+    if "gastronomico" in affinities:
+        recs.append("Reserva prioritaria en restaurante local recomendado")
+    if "playero" in affinities or "clima_calido" in affinities or "mediterraneo" in affinities:
+        recs.append("Pack terraza o piscina con amenities de relax")
+    if "montana" in affinities:
+        recs.append("Excursión guiada de naturaleza o senderismo")
+    if loyalty in {"repetidor", "fiel_pocos_hoteles"}:
+        recs.append("Detalle de bienvenida personalizado según historial")
 
     return recs
 
 
-# ── Campaign generators ──────────────────────────────────────────────────
+# ── Generadores de campañas ──────────────────────────────────────────────
 
 def generate_pre_arrival(
     guest_id: str,
@@ -156,18 +166,18 @@ def generate_pre_arrival(
     timing_mode: str | None = None,
     send_offset_days: int | None = None,
 ) -> dict | None:
-    """Generate pre-arrival campaign data for a specific guest."""
+    """Genera los datos pre-arrival para un huésped concreto."""
     seg = segments.get(str(guest_id))
     if seg is None:
-        logger.warning("No segment found for guest %s", guest_id)
+        logger.warning("No se ha encontrado segmento para el huésped %s", guest_id)
         return None
 
     user_rows = customers[customers["GUEST_ID"] == str(guest_id)]
     if user_rows.empty:
         return None
 
-    # Get recommendation
-    recs = emb_module.recommend_hotel(str(guest_id), embeddings, top_n=1)
+    # Obtener recomendación
+    recs = emb_module.recommend_hotel(str(guest_id), embeddings, top_n=1, segment=seg)
     if not recs:
         return None
 
@@ -175,7 +185,7 @@ def generate_pre_arrival(
     hotel = embeddings["hotel_info"].get(rec_hotel_id, {})
     user_emb = embeddings["user_embeddings"].get(str(guest_id), {})
 
-    # Travel window
+    # Ventana de viaje
     timing = predict_next_trip(
         user_rows,
         mode=timing_mode,
@@ -188,16 +198,17 @@ def generate_pre_arrival(
     checkin_dt = datetime.strptime(checkin_suggested, "%Y-%m-%d")
     season = SEASON_MAP.get(checkin_dt.month, "primavera")
 
-    # Events
+    # Eventos
     events = _get_events(hotel.get("CITY_NAME", ""), checkin_dt.month)
 
-    # Preferences
+    # Preferencias
     preferences = _get_embedding_preferences(user_emb)
 
     return {
         "campaign_type": "pre_arrival",
         "guest_id": str(guest_id),
         "segment": seg,
+        "segment_overview": summarize_segment(seg),
         "recommended_hotel": {
             "id": rec_hotel_id,
             "name": hotel.get("HOTEL_NAME", ""),
@@ -206,6 +217,7 @@ def generate_pre_arrival(
             "stars": hotel.get("STARS", 4),
             "brand": hotel.get("BRAND", "EUROSTARS"),
             "similarity_score": round(similarity, 4),
+            "recommendation_score": round(similarity, 4),
         },
         "send_date": send_date,
         "checkin_suggested": checkin_suggested,
@@ -221,7 +233,7 @@ def generate_pre_arrival(
 
 def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
                             customers: pd.DataFrame) -> dict | None:
-    """Generate receptionist check-in report for a guest."""
+    """Genera el informe de check-in de recepción para un huésped."""
     seg = segments.get(str(guest_id))
     if seg is None:
         return None
@@ -235,9 +247,9 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
     last = ordered_rows.iloc[-1]
     user_emb = embeddings["user_embeddings"].get(str(guest_id), {})
     preferences = _get_embedding_preferences(user_emb)
-    upsells = _upsell_recommendations(seg["client_value"], seg["travel_profile"])
+    upsells = _upsell_recommendations(seg)
 
-    # Hotels visited
+    # Hoteles visitados
     visited = []
     for _, row in ordered_rows.iterrows():
         hinfo = embeddings["hotel_info"].get(str(row["HOTEL_ID"]), {})
@@ -254,6 +266,7 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
         "campaign_type": "checkin_report",
         "guest_id": str(guest_id),
         "segment": seg,
+        "segment_overview": summarize_segment(seg),
         "profile_summary": {
             "country": seg["country"],
             "gender": seg["gender"],
@@ -274,7 +287,7 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
 
 def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
                        customers: pd.DataFrame) -> dict | None:
-    """Generate post-stay campaign data."""
+    """Genera los datos de campaña post-stay."""
     seg = segments.get(str(guest_id))
     if seg is None:
         return None
@@ -283,12 +296,12 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
     if user_rows.empty:
         return None
 
-    # Last stay
+    # Última estancia
     last = user_rows.sort_values("CHECKOUT_DATE").iloc[-1]
     last_hotel = embeddings["hotel_info"].get(str(last["HOTEL_ID"]), {})
 
-    # Next recommendation
-    recs = emb_module.recommend_hotel(str(guest_id), embeddings, top_n=1)
+    # Siguiente recomendación
+    recs = emb_module.recommend_hotel(str(guest_id), embeddings, top_n=1, segment=seg)
     next_hotel = None
     if recs:
         hid, sim = recs[0]
@@ -296,6 +309,7 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
             "id": hid,
             **embeddings["hotel_info"].get(hid, {}),
             "similarity_score": round(sim, 4),
+            "recommendation_score": round(sim, 4),
         }
 
     send_date = (last["CHECKOUT_DATE"] + timedelta(days=7)).strftime("%Y-%m-%d")
@@ -304,6 +318,7 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
         "campaign_type": "post_stay",
         "guest_id": str(guest_id),
         "segment": seg,
+        "segment_overview": summarize_segment(seg),
         "last_stay": {
             "hotel_id": str(last["HOTEL_ID"]),
             "hotel_name": last_hotel.get("HOTEL_NAME", ""),
@@ -320,7 +335,7 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
     }
 
 
-# ── Batch generators ─────────────────────────────────────────────────────
+# ── Generadores batch ────────────────────────────────────────────────────
 
 def generate_all(
     moment: str,
@@ -329,7 +344,7 @@ def generate_all(
     timing_mode: str | None = None,
     send_offset_days: int | None = None,
 ) -> list[dict]:
-    """Generate campaign data for all users (or a specific one)."""
+    """Genera datos de campaña para todos los usuarios o para uno concreto."""
     embeddings, segments, customers = _load_data()
 
     generator_names = ["pre_arrival", "checkin_report", "post_stay"]
@@ -351,7 +366,7 @@ def generate_all(
         gen_fn = generators.get(moment)
 
     if gen_fn is None:
-        raise ValueError(f"Unknown moment: {moment}. Choose: {generator_names}")
+        raise ValueError(f"Momento desconocido: {moment}. Elige entre: {generator_names}")
 
     results = []
     if guest_id:
@@ -364,7 +379,7 @@ def generate_all(
             if result:
                 results.append(result)
 
-    logger.info("Generated %d %s campaigns", len(results), moment)
+    logger.info("Se han generado %d campañas de tipo %s", len(results), moment)
     return results
 
 

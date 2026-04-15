@@ -8,34 +8,43 @@
     <title>{{ copy.subject }}</title>
 
     <!-- THEMATIC ENGINE -->
-    {% set profile = travel_profile | upper %}
+    {% set profile = theme_key | lower %}
     {% set themes = {
-    'SOL_Y_PLAYA': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
+    'playero': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
     'font': "'Nunito', sans-serif", 'primary': '#0284c7', 'bg': '#fef08a'},
-    'AVENTURERO': {'font_url': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap',
+    'montana': {'font_url': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap',
     'font': "'Montserrat', sans-serif", 'primary': '#166534', 'bg': '#f0fdf4'},
-    'EXPLORADOR_CULTURAL': {'font_url':
+    'cultural': {'font_url':
     'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap', 'font':
     "'Playfair Display', serif", 'primary': '#831843', 'bg': '#faf5ff'},
-    'GASTRONOMIA_CIUDAD': {'font_url':
+    'gastronomico': {'font_url':
     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap', 'font': "'Inter', sans-serif",
     'primary': '#c2410c', 'bg': '#fff7ed'},
-    'LUJO': {'font_url':
+    'premium': {'font_url':
     'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap',
-    'font': "'Cormorant Garamond', serif", 'primary': '#0a0a0a', 'bg': '#fefce8'}
+    'font': "'Cormorant Garamond', serif", 'primary': '#0a0a0a', 'bg': '#fefce8'},
+    'mediterraneo': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
+    'font': "'Nunito', sans-serif", 'primary': '#0f766e', 'bg': '#ecfeff'},
+    'continental': {'font_url': 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap',
+    'font': "'Inter', sans-serif", 'primary': '#334155', 'bg': '#f8fafc'},
+    'clima_calido': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
+    'font': "'Nunito', sans-serif", 'primary': '#c2410c', 'bg': '#fff7ed'}
     } %}
     {% set theme = themes.get(profile, {'font_url':
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap', 'font': "'Inter', sans-serif",
     'primary': '#0f172a', 'bg': '#f8fafc'}) %}
 
     {% set labels = {
-    'SOL_Y_PLAYA': 'Escapada Relax',
-    'AVENTURERO': 'Experiencia Activa',
-    'EXPLORADOR_CULTURAL': 'Inmersión Cultural',
-    'GASTRONOMIA_CIUDAD': 'Edición Urbana',
-    'LUJO': 'Colección Exclusiva'
+    'playero': 'Escapada Relax',
+    'montana': 'Experiencia Activa',
+    'cultural': 'Inmersión Cultural',
+    'gastronomico': 'Edición Urbana',
+    'premium': 'Colección Exclusiva',
+    'mediterraneo': 'Escapada Mediterránea',
+    'continental': 'City Break',
+    'clima_calido': 'Destino Luminoso'
     } %}
-    {% set profile_label = labels.get(profile, '') %}
+    {% set profile_label = theme_label or labels.get(profile, '') %}
 
     <link href="{{ theme.font_url }}" rel="stylesheet">
 

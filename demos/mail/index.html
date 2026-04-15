@@ -1272,7 +1272,7 @@
     </div>
 
     <script>
-        // ===== STATE =====
+        // ===== ESTADO =====
         let allProfiles = [];
         let currentProfile = null;
         let emails = [];
@@ -1282,17 +1282,17 @@
 
         const $ = id => document.getElementById(id);
 
-        // ===== DATES =====
+        // ===== FECHAS =====
         const DATES = ['11 abr', '10 abr', '9 abr', '8 abr', '7 abr'];
         const SENDERS = {
             post_stay: { name: 'Eurostars Hotel Company', email: 'feedback@eurostarshotels.com' },
             pre_arrival: { name: 'Eurostars Reservas', email: 'reservas@eurostarshotels.com' },
-            checkin_report: { name: 'Eurostars Check-in', email: 'checkin@eurostarshotels.com' }
+            checkin_report: { name: 'Eurostars Recepción', email: 'checkin@eurostarshotels.com' }
         };
         const TYPE_LABELS = {
-            post_stay: 'Post-Stay',
-            pre_arrival: 'Pre-Arrival',
-            checkin_report: 'Check-in'
+            post_stay: 'Postestancia',
+            pre_arrival: 'Prellegada',
+            checkin_report: 'Recepción'
         };
         const EMOJI_RE = /[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
 
@@ -1307,7 +1307,7 @@
             setTimeout(() => n.classList.remove('show'), 3000);
         }
 
-        // ===== LOAD PROFILES =====
+        // ===== CARGAR PERFILES =====
         async function loadProfiles() {
             const res = await fetch('/api/profiles');
             const data = await res.json();
@@ -1316,7 +1316,7 @@
             $('profileCount').textContent = `${allProfiles.length} perfiles disponibles`;
         }
 
-        // ===== RENDER PROFILE LIST (panel) =====
+        // ===== PINTAR LISTA DE PERFILES (panel) =====
         function renderProfileList(search = '', filter = 'all') {
             const list = $('profileList');
             list.innerHTML = '';
@@ -1360,19 +1360,19 @@
             });
         }
 
-        // ===== SELECT PROFILE =====
+        // ===== SELECCIONAR PERFIL =====
         async function selectProfile(profile) {
             currentProfile = profile;
             emails = [];
             currentEmailIdx = -1;
 
-            // Update avatar button
+            // Actualizar botón del avatar
             const avatarBtn = $('avatarBtn');
             avatarBtn.style.background = profile.avatar_color;
             avatarBtn.textContent = profile.avatar_letter;
             avatarBtn.title = profile.name;
 
-            // Update panel header
+            // Actualizar cabecera del panel
             $('panelAvatar').style.background = profile.avatar_color;
             $('panelAvatar').textContent = profile.avatar_letter;
             $('panelName').textContent = profile.name;
@@ -1381,7 +1381,7 @@
             segDiv.style.display = '';
             $('panelTravelProfile').textContent = `${profile.country} · ${profile.nationality || profile.country} · ${profile.age_segment_label}`;
 
-            // Update sidebar card
+            // Actualizar la tarjeta lateral
             const card = $('sidebarCard');
             card.style.display = '';
             $('sidebarAvatar').style.background = profile.avatar_color;
@@ -1393,7 +1393,7 @@
         <span class="spc-tag">${profile.age_segment_label}</span>
     `;
 
-            // Close panel
+            // Cerrar panel
             closeProfilePanel();
 
             $('emailListView').classList.add('profile-switching');
@@ -1416,7 +1416,7 @@
                 };
             });
 
-            // Go back to list view if we were viewing an email
+            // Volver a la vista de lista si estábamos viendo un email
             if (currentView === 'detail') goBackToList();
             renderEmailList();
             setTimeout(() => $('emailListView').classList.remove('profile-switching'), 300);

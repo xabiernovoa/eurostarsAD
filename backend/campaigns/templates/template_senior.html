@@ -8,19 +8,25 @@
     <title>{{ copy.subject }}</title>
 
     <!-- THEMATIC ENGINE -->
-    {% set profile = travel_profile | upper %}
+    {% set profile = theme_key | lower %}
     {% set themes = {
-    'SOL_Y_PLAYA': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap', 'font':
+    'playero': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap', 'font':
     "'Nunito', sans-serif", 'primary': '#0369a1', 'bg': '#fef08a'},
-    'AVENTURERO': {'font_url': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap',
+    'montana': {'font_url': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap',
     'font': "'Montserrat', sans-serif", 'primary': '#14532d', 'bg': '#f0fdf4'},
-    'EXPLORADOR_CULTURAL': {'font_url':
+    'cultural': {'font_url':
     'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap', 'font': "'Playfair Display',
     serif", 'primary': '#831843', 'bg': '#fdf2f8'},
-    'GASTRONOMIA_CIUDAD': {'font_url': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap',
+    'gastronomico': {'font_url': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap',
     'font': "'Inter', sans-serif", 'primary': '#9a3412', 'bg': '#fff7ed'},
-    'LUJO': {'font_url': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap',
-    'font': "'Cormorant Garamond', serif", 'primary': '#000000', 'bg': '#fefce8'}
+    'premium': {'font_url': 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap',
+    'font': "'Cormorant Garamond', serif", 'primary': '#000000', 'bg': '#fefce8'},
+    'mediterraneo': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap',
+    'font': "'Nunito', sans-serif", 'primary': '#0f766e', 'bg': '#ecfeff'},
+    'continental': {'font_url': 'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap',
+    'font': "'Inter', sans-serif", 'primary': '#334155', 'bg': '#e2e8f0'},
+    'clima_calido': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap',
+    'font': "'Nunito', sans-serif", 'primary': '#c2410c', 'bg': '#fff7ed'}
     } %}
     {% set theme = themes.get(profile, {'font_url': 'https://fonts.googleapis.com/css2?family=Arial&display=swap',
     'font': "Arial, sans-serif", 'primary': '#0f172a', 'bg': '#e2e8f0'}) %}

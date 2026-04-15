@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-main.py — Eurostars AI Personalization Engine Orchestrator
+main.py — Orquestador del motor de personalización Eurostars AI
 
-Runs the complete pipeline or individual phases:
+Ejecuta el pipeline completo o fases individuales:
 
     python main.py --phase all
     python main.py --phase segment
@@ -25,6 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from backend.paths import MARKETING_SNAPSHOT_PATH, OUTPUT_DIR
+from backend.personalization.segment_views import get_segment_label
 from backend.storage.campaign_log import save_campaign_log
 from backend.storage.embeddings import load_embeddings
 from backend.storage.segments import load_segments
@@ -45,26 +46,29 @@ def _reset_batch_artifacts() -> None:
         if path.name.startswith(("pre_arrival_", "post_stay_", "checkin_report_", "sms_")):
             path.unlink(missing_ok=True)
     save_campaign_log([])
-    logger.info("Reset batch outputs and campaign log")
+    logger.info("Se han reiniciado las salidas batch y el registro de campañas")
 
 
 def _campaign_worker_count(total_campaigns: int) -> int:
-    """Choose a bounded thread count for mostly I/O-bound campaign work."""
-    configured = os.environ.get("CAMPAIGN_MAX_WORKERS")
-    if configured:
+    """Elige un número acotado de hilos para campañas mayoritariamente de E/S."""
+    configurado = os.environ.get("CAMPAIGN_MAX_WORKERS")
+    if configurado:
         try:
-            return max(1, min(total_campaigns, int(configured)))
+            return max(1, min(total_campaigns, int(configurado)))
         except ValueError:
-            logger.warning("Invalid CAMPAIGN_MAX_WORKERS=%s; using default.", configured)
+            logger.warning(
+                "CAMPAIGN_MAX_WORKERS=%s no es válido; se usará el valor por defecto.",
+                configurado,
+            )
 
-    default_workers = max(4, (os.cpu_count() or 2) * 2)
-    return max(1, min(total_campaigns, default_workers))
+    trabajadores_por_defecto = max(4, (os.cpu_count() or 2) * 2)
+    return max(1, min(total_campaigns, trabajadores_por_defecto))
 
 
 def phase_embeddings():
-    """Phase 1: Build embeddings."""
+    """Fase 1: construir embeddings."""
     logger.info("=" * 60)
-    logger.info("PHASE 1 — Building hotel & user embeddings")
+    logger.info("FASE 1 — Construyendo embeddings de hoteles y usuarios")
     logger.info("=" * 60)
     from backend.personalization import embeddings as build_embeddings
     data = build_embeddings.build()
@@ -73,9 +77,9 @@ def phase_embeddings():
 
 
 def phase_segment():
-    """Phase 2: Segment users."""
+    """Fase 2: segmentar usuarios."""
     logger.info("=" * 60)
-    logger.info("PHASE 2 — Segmenting users")
+    logger.info("FASE 2 — Segmentando usuarios")
     logger.info("=" * 60)
     from backend.personalization import segmentation as segment_users
     segs = segment_users.segment()
@@ -84,27 +88,27 @@ def phase_segment():
 
 
 def phase_auto_tag():
-    """Phase 4a: Generate image metadata."""
+    """Fase 4a: generar metadatos de imágenes."""
     logger.info("=" * 60)
-    logger.info("PHASE 4a — Generating image metadata")
+    logger.info("FASE 4a — Generando metadatos de imágenes")
     logger.info("=" * 60)
     from backend.assets import image_metadata as auto_tag_images
     auto_tag_images.generate_metadata()
 
 
 def phase_marketing():
-    """Build a marketing dashboard snapshot."""
+    """Construye un snapshot del dashboard de marketing."""
     logger.info("=" * 60)
-    logger.info("PHASE 9 — Building marketing dashboard snapshot")
+    logger.info("FASE 9 — Construyendo snapshot del dashboard de marketing")
     logger.info("=" * 60)
     from backend.marketing import dashboard as dashboard_engine
 
-    payload = dashboard_engine.build_dashboard_data()
-    snapshot_path = MARKETING_SNAPSHOT_PATH
-    with open(snapshot_path, "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)
-    logger.info("Saved marketing dashboard snapshot to %s", snapshot_path)
-    return payload
+    carga = dashboard_engine.build_dashboard_data()
+    ruta_snapshot = MARKETING_SNAPSHOT_PATH
+    with open(ruta_snapshot, "w", encoding="utf-8") as f:
+        json.dump(carga, f, ensure_ascii=False, indent=2)
+    logger.info("Snapshot de marketing guardado en %s", ruta_snapshot)
+    return carga
 
 
 def phase_campaign(
@@ -114,9 +118,9 @@ def phase_campaign(
     timing_mode: str | None = None,
     send_offset_days: int | None = None,
 ):
-    """Phase 3-8: Run campaign pipeline for a specific moment."""
+    """Fases 3-8: ejecuta el pipeline de campañas para un momento concreto."""
     logger.info("=" * 60)
-    logger.info("PHASE 3-8 — Campaign pipeline: %s", moment)
+    logger.info("FASES 3-8 — Pipeline de campañas: %s", moment)
     logger.info("=" * 60)
 
     from backend.assets import image_selector
@@ -126,12 +130,12 @@ def phase_campaign(
     from backend.campaigns import planner as campaign_engine
     from backend.campaigns import renderer as email_renderer
 
-    # Load base data
+    # Cargar los datos base
     embeddings = load_embeddings()
     segments = load_segments()
 
-    # Step 3: Generate campaign data
-    logger.info("Step 3: Generating campaign data...")
+    # Paso 3: generar datos de campaña
+    logger.info("Paso 3: generando datos de campaña...")
     campaigns = campaign_engine.generate_all(
         moment,
         guest_id,
@@ -139,10 +143,10 @@ def phase_campaign(
         send_offset_days=send_offset_days,
     )
     if not campaigns:
-        logger.warning("No campaigns generated for moment=%s guest_id=%s", moment, guest_id)
+        logger.warning("No se han generado campañas para moment=%s guest_id=%s", moment, guest_id)
         return []
 
-    logger.info("Generated %d campaign(s)", len(campaigns))
+    logger.info("Se han generado %d campaña(s)", len(campaigns))
 
     def process_campaign(index: int, camp: dict) -> tuple[int, dict]:
         gid = camp.get("guest_id", "?")
@@ -151,13 +155,13 @@ def phase_campaign(
         try:
             if moment == "checkin_report":
                 logger.info(
-                    "[%d/%d] Rendering checkin report for %s...",
+                    "[%d/%d] Renderizando informe de check-in para %s...",
                     index + 1,
                     len(campaigns),
                     gid,
                 )
                 html = email_renderer.render_email(camp, {}, [], moment)
-                copy = {"subject": f"Informe de Recepción — Guest #{gid}"}
+                copy = {"subject": f"Informe de Recepción — Huésped #{gid}"}
                 channel = {
                     "primary_channel": "internal_report",
                     "reason": "Informe interno",
@@ -165,11 +169,11 @@ def phase_campaign(
                 sms_text = ""
             else:
                 logger.info(
-                    "[%d/%d] Processing guest %s (%s)...",
+                    "[%d/%d] Procesando huésped %s (%s)...",
                     index + 1,
                     len(campaigns),
                     gid,
-                    seg.get("age_segment", "?"),
+                    get_segment_label(seg),
                 )
                 hotel = camp.get("recommended_hotel", camp.get("last_stay", {}))
                 hotel_id = hotel.get("id", hotel.get("hotel_id", ""))
@@ -190,7 +194,7 @@ def phase_campaign(
             return index, result
         except Exception as exc:
             logger.exception(
-                "Campaign processing failed for guest %s (%s): %s",
+                "Ha fallado el procesamiento de la campaña para el huésped %s (%s): %s",
                 gid,
                 moment,
                 exc,
@@ -205,7 +209,11 @@ def phase_campaign(
 
     results = [None] * len(campaigns)
     max_workers = _campaign_worker_count(len(campaigns))
-    logger.info("Processing %d campaign(s) with %d worker thread(s)", len(campaigns), max_workers)
+    logger.info(
+        "Procesando %d campaña(s) con %d hilo(s) de trabajo",
+        len(campaigns),
+        max_workers,
+    )
 
     with ThreadPoolExecutor(
         max_workers=max_workers,
@@ -219,14 +227,14 @@ def phase_campaign(
             index, result = future.result()
             results[index] = result
 
-    # Summary
+    # Resumen
     logger.info("-" * 60)
-    logger.info("Campaign summary for '%s':", moment)
+    logger.info("Resumen de campañas para '%s':", moment)
     statuses = {}
     for r in results:
         s = r["status"]
         statuses[s] = statuses.get(s, 0) + 1
-    logger.info("  Total: %d | Statuses: %s", len(results), statuses)
+    logger.info("  Total: %d | Estados: %s", len(results), statuses)
     logger.info("-" * 60)
 
     return results
@@ -237,23 +245,23 @@ def run_all(
     timing_mode: str | None = None,
     send_offset_days: int | None = None,
 ):
-    """Run the complete pipeline."""
+    """Ejecuta el pipeline completo."""
     logger.info("*" * 60)
-    logger.info("EUROSTARS AI PERSONALIZATION ENGINE — Full pipeline")
+    logger.info("EUROSTARS AI PERSONALIZATION ENGINE — Pipeline completo")
     logger.info("*" * 60)
 
     _reset_batch_artifacts()
 
-    # Phase 1
+    # Fase 1
     phase_embeddings()
 
-    # Phase 2
+    # Fase 2
     phase_segment()
 
-    # Phase 4a: Auto-tag images
+    # Fase 4a: autoetiquetado de imágenes
     phase_auto_tag()
 
-    # Phase 3-8: Run campaigns
+    # Fases 3-8: ejecutar campañas
     for moment in ["pre_arrival", "checkin_report", "post_stay"]:
         phase_campaign(
             moment,
@@ -263,20 +271,20 @@ def run_all(
             send_offset_days=send_offset_days,
         )
 
-    # Phase 9
+    # Fase 9
     phase_marketing()
 
     logger.info("*" * 60)
-    logger.info("Pipeline complete!")
+    logger.info("Pipeline completado")
     logger.info("*" * 60)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Eurostars AI Personalization Engine",
+        description="Motor de personalización Eurostars AI",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
+Ejemplos:
   python main.py --phase all
   python main.py --phase segment
   python main.py --phase campaign --moment pre_arrival
@@ -291,53 +299,53 @@ Examples:
         "--phase",
         choices=["all", "embeddings", "segment", "auto_tag", "campaign", "marketing"],
         default="all",
-        help="Which phase to run (default: all)",
+        help="Qué fase ejecutar (por defecto: all)",
     )
     parser.add_argument(
         "--moment",
         choices=["pre_arrival", "checkin_report", "post_stay"],
         default=None,
-        help="Campaign moment (required when --phase=campaign)",
+        help="Momento de campaña (obligatorio con --phase=campaign)",
     )
     parser.add_argument(
         "--guest_id",
         default=None,
-        help="Specific guest ID to process (optional)",
+        help="ID de huésped concreto a procesar (opcional)",
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
         default=True,
-        help="Save outputs to disk without sending real emails (default: True)",
+        help="Guardar salidas en disco sin enviar emails reales (por defecto: True)",
     )
     parser.add_argument(
         "--send",
         action="store_true",
         default=False,
-        help="Actually send emails via SendGrid (requires API key)",
+        help="Enviar realmente los emails vía SendGrid (requiere API key)",
     )
     parser.add_argument(
         "--travel-prediction-mode",
         choices=["heuristic", "regression"],
         default=None,
         help=(
-            "Strategy for pre-arrival timing. "
-            "'heuristic' keeps month+leadtime logic; 'regression' predicts the next trip "
-            "from historical travel dates and simulates the send 21 days before by default."
+            "Estrategia para el momento pre-arrival. "
+            "'heuristic' mantiene la lógica de mes+leadtime; 'regression' predice el siguiente viaje "
+            "a partir del histórico y simula el envío 21 días antes por defecto."
         ),
     )
     parser.add_argument(
         "--regression-send-offset-days",
         type=int,
         default=None,
-        help="When using regression mode, number of days before the predicted trip to simulate the send (default: 21).",
+        help="Con regression, número de días antes del viaje predicho para simular el envío (por defecto: 21).",
     )
 
     args = parser.parse_args()
     dry_run = not args.send
     if args.travel_prediction_mode == "regression" and args.send:
         logger.warning(
-            "Regression timing mode is simulation-only in this backend. Ignoring --send and forcing dry-run."
+            "El modo regression solo simula el envío en este backend. Se ignora --send y se fuerza dry-run."
         )
         dry_run = True
 
@@ -355,7 +363,7 @@ Examples:
         phase_auto_tag()
     elif args.phase == "campaign":
         if not args.moment:
-            parser.error("--moment is required when --phase=campaign")
+            parser.error("--moment es obligatorio cuando --phase=campaign")
         phase_campaign(
             args.moment,
             args.guest_id,

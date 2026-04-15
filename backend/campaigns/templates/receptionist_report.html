@@ -403,11 +403,7 @@
                 <h1 class="header-title">Informe de Recepción</h1>
                 <p class="header-guest-id">
                     GUEST ID: {{ profile.guest_id }}
-                    <span>
-                        {% if segment.client_value == 'HIGH_VALUE' %}PERFIL VIP ELITE
-                        {% elif segment.client_value == 'MID_VALUE' %}PERFIL MID VALUE
-                        {% else %}PERFIL STANDARD{% endif %}
-                    </span>
+                    <span>{{ segment_value_badge }}</span>
                 </p>
             </div>
             {% set last_visit = visit_history[-1] if visit_history else none %}
@@ -491,20 +487,17 @@
                 <div class="propension-block">
                     <p class="propension-label">Propension</p>
                     <p class="propension-text">
-                        {% if segment.travel_profile == 'LUJO' %}
-                        Cliente muy propenso a servicios premium, upgrade de suite y amenities de alta gama.
-                        {% elif segment.travel_profile == 'GASTRONOMIA_CIUDAD' %}
-                        Cliente muy propenso a reservas en restaurantes destacados y experiencias vinculadas a la
-                        gastronomia.
-                        {% elif segment.travel_profile == 'EXPLORADOR_CULTURAL' %}
-                        Cliente muy propenso a rutas culturales, visitas guiadas a museos y patrimonio.
-                        {% elif segment.travel_profile == 'SOL_Y_PLAYA' %}
-                        Cliente muy propenso a servicios de bienestar, spa nocturno y accesos recreativos.
-                        {% elif segment.travel_profile == 'AVENTURERO' %}
-                        Cliente muy propenso a turismo activo, rutas naturales y actividades deportivas.
-                        {% else %}
-                        Cliente muy propenso a servicios de bienestar y spa nocturno.
-                        {% endif %}
+                        {{ segment_propensity_text }}
+                    </p>
+                </div>
+
+                <div class="propension-block" style="margin-top: 14px;">
+                    <p class="propension-label">Etiquetas clave</p>
+                    <p class="propension-text">
+                        <strong>Edad:</strong> {{ segment_overview.age_label }}<br>
+                        <strong>Afinidad principal:</strong> {{ segment_overview.primary_affinity_label }}<br>
+                        <strong>Nivel de valor:</strong> {{ segment_overview.value_label }}<br>
+                        <strong>Fidelidad:</strong> {{ segment_overview.loyalty_label }}
                     </p>
                 </div>
             </div>

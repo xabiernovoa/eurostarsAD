@@ -24,6 +24,16 @@ from backend.ai import gemini as gemini_client
 from backend.campaigns import channels as channel_selector
 from backend.campaigns import planner as campaign_engine
 from backend.campaigns import renderer as email_renderer
+from backend.personalization.segment_views import (
+    get_age_key,
+    get_affinities,
+    get_loyalty_label,
+    get_primary_affinity,
+    get_primary_affinity_label,
+    get_segment_label,
+    get_segment_slug,
+    get_value_label,
+)
 
 logger = logging.getLogger("autonomous.campaign_generator")
 
@@ -44,18 +54,15 @@ SEGMENT_TONE = {
 }
 
 
-# ── Afinidad perfil de viaje → categoría de evento del Oráculo ──────────
-# Los boost se suman a la relevancia base del evento para decidir cuál es
-# el más interesante para este usuario en concreto. Los perfiles con fuerte
-# componente exploradora (aventurero, explorador_cultural, gastronomia) se
-# ven atraídos por eventos culturales y tendencias turísticas; los de lujo
-# responden mejor a ofertas estacionales; sol_y_playa a tendencias.
-PROFILE_EVENT_AFFINITY: dict[str, dict[str, int]] = {
-    "EXPLORADOR_CULTURAL": {"cultural_event": 4, "tourism_trend": 3, "seasonal_offer": 1},
-    "AVENTURERO":          {"cultural_event": 3, "tourism_trend": 4, "seasonal_offer": 1},
-    "GASTRONOMIA_CIUDAD":  {"cultural_event": 3, "tourism_trend": 2, "seasonal_offer": 2},
-    "SOL_Y_PLAYA":         {"cultural_event": 1, "tourism_trend": 3, "seasonal_offer": 2},
-    "LUJO":                {"cultural_event": 2, "tourism_trend": 2, "seasonal_offer": 3},
+# ── Afinidad de destino → categoría de evento del Oráculo ───────────────
+AFFINITY_EVENT_BOOST: dict[str, dict[str, int]] = {
+    "cultural": {"cultural_event": 4, "tourism_trend": 3, "seasonal_offer": 1},
+    "montana": {"cultural_event": 2, "tourism_trend": 4, "seasonal_offer": 1},
+    "gastronomico": {"cultural_event": 3, "tourism_trend": 2, "seasonal_offer": 2},
+    "playero": {"cultural_event": 1, "tourism_trend": 3, "seasonal_offer": 3},
+    "clima_calido": {"cultural_event": 1, "tourism_trend": 3, "seasonal_offer": 3},
+    "mediterraneo": {"cultural_event": 2, "tourism_trend": 3, "seasonal_offer": 2},
+    "continental": {"cultural_event": 2, "tourism_trend": 3, "seasonal_offer": 1},
 }
 _DEFAULT_AFFINITY = {"cultural_event": 2, "tourism_trend": 2, "seasonal_offer": 1}
 
@@ -63,19 +70,19 @@ _DEFAULT_AFFINITY = {"cultural_event": 2, "tourism_trend": 2, "seasonal_offer": 
 def match_oracle_events(
     oracle_context: list[dict[str, Any]],
     hotel_city: str,
-    travel_profile: str,
+    primary_affinity: str,
     max_events: int = 3,
 ) -> list[dict[str, Any]]:
     """
-    Ordena los eventos del Oráculo relevantes para el destino y el perfil.
+    Ordena los eventos del Oráculo relevantes para el destino y la afinidad.
 
     * Filtra por ciudad del hotel.
     * Elimina alertas de viaje negativas (no accionables).
-    * Puntúa cada evento con ``relevance + boost(perfil, categoría)``.
+    * Puntúa cada evento con ``relevance + boost(afinidad, categoría)``.
     * Devuelve los top-N por puntuación.
     """
     city_up = (hotel_city or "").upper()
-    affinity = PROFILE_EVENT_AFFINITY.get(travel_profile, _DEFAULT_AFFINITY)
+    affinity = AFFINITY_EVENT_BOOST.get(primary_affinity, _DEFAULT_AFFINITY)
 
     scored: list[tuple[int, dict[str, Any]]] = []
     for entry in oracle_context:
@@ -101,6 +108,27 @@ def _format_preferences(prefs: list[str]) -> str:
     return ", ".join(prefs) if prefs else "diversidad de experiencias"
 
 
+def _format_segment_tags(seg: dict[str, Any]) -> str:
+    tags = seg.get("tags", {}) if isinstance(seg, dict) else {}
+    if not tags:
+        return "(sin etiquetas enriquecidas)"
+
+    booking = tags.get("comportamiento_reserva", {}) or {}
+    loyalty = tags.get("fidelidad", {}) or {}
+    demographics = tags.get("demografia", {}) or {}
+
+    return (
+        f"- Afinidades de destino: {', '.join(tags.get('afinidades_destino', [])) or 'sin afinidades claras'}\n"
+        f"- Nivel de valor: {tags.get('nivel_valor', 'desconocido')}\n"
+        f"- Comportamiento de reserva: antelación={booking.get('antelacion', 'desconocida')}, "
+        f"duración={booking.get('duracion', 'desconocida')}, frecuencia={booking.get('frecuencia', 'desconocida')}\n"
+        f"- Fidelidad: principal={loyalty.get('principal', 'desconocida')}, "
+        f"secundarias={', '.join(loyalty.get('secundarias', [])) or 'ninguna'}\n"
+        f"- Demografía: edad={demographics.get('edad', 'desconocida')}, "
+        f"género={demographics.get('genero', '')}, país={demographics.get('pais', '')}"
+    )
+
+
 def _format_matched_events(entries: list[dict[str, Any]]) -> str:
     if not entries:
         return "(sin eventos relevantes detectados para este perfil)"
@@ -118,10 +146,14 @@ def _build_gemini_prompt(
     matched_events: list[dict[str, Any]],
 ) -> str:
     seg = campaign_data["segment"]
-    age_segment = seg.get("age_segment", "ADULTO")
-    travel_profile = seg.get("travel_profile", "EXPLORADOR_CULTURAL")
+    age_segment = get_age_key(seg)
+    primary_affinity = get_primary_affinity(seg)
+    primary_affinity_label = get_primary_affinity_label(seg)
     hotel = campaign_data["recommended_hotel"]
     prefs = campaign_data.get("preferences", [])
+    value_level = get_value_label(seg)
+    loyalty = get_loyalty_label(seg)
+    affinities = ", ".join(get_affinities(seg)) or "sin afinidades claras"
 
     tone = SEGMENT_TONE.get(age_segment, SEGMENT_TONE["ADULTO"])
 
@@ -130,13 +162,13 @@ def _build_gemini_prompt(
         top_event = matched_events[0]
         event_instruction = (
             f"IMPORTANTE — USO DEL ORÁCULO:\n"
-            f"Este usuario tiene perfil de viaje '{travel_profile}'. El evento más\n"
-            f"afín a su perfil ocurriendo ahora en {hotel['city']} es:\n"
+            f"Este usuario tiene afinidad principal '{primary_affinity_label}'. El evento más\n"
+            f"afín a sus etiquetas ocurriendo ahora en {hotel['city']} es:\n"
             f"  «{top_event.get('summary', '')}» ({top_event.get('category', '')}, "
             f"{top_event.get('date', '')}).\n"
             f"DEBES mencionar este evento de forma orgánica en UNO de los body_paragraphs\n"
-            f"como gancho principal: conecta explícitamente el perfil del usuario\n"
-            f"({travel_profile}) con el evento, explicando por qué este momento es\n"
+            f"como gancho principal: conecta explícitamente la afinidad del usuario\n"
+            f"({primary_affinity_label}) con el evento, explicando por qué este momento es\n"
             f"ideal para visitar {hotel['city']}. No inventes detalles adicionales\n"
             f"del evento; usa exclusivamente la información del resumen."
         )
@@ -150,11 +182,16 @@ def _build_gemini_prompt(
 Genera el contenido de un email pre-estancia personalizado en ESPAÑOL.
 
 PERFIL DEL USUARIO:
-- Segmento de edad: {age_segment}
-- Perfil de viaje: {travel_profile}
-- Valor del cliente: {seg.get('client_value', 'MID_VALUE')}
+- Edad: {age_segment}
+- Etiqueta principal: {get_segment_label(seg)}
+- Afinidad principal de destino: {primary_affinity_label}
+- Afinidades detectadas: {affinities}
+- Nivel de valor: {value_level}
 - País de origen: {seg.get('country', 'ES')}
-- Patrón de viaje: {seg.get('travel_pattern', 'EXPLORADOR')}
+- Fidelidad principal: {loyalty}
+
+ETIQUETAS ENRIQUECIDAS:
+{_format_segment_tags(seg)}
 
 HOTEL RECOMENDADO:
 - Nombre: {hotel['name']}
@@ -168,7 +205,7 @@ CONTEXTO TEMPORAL:
 - Duración sugerida: {campaign_data['stay_nights']} noches
 - Temporada: {campaign_data['season']}
 
-EVENTOS DEL ORÁCULO EN {hotel['city']} ORDENADOS POR AFINIDAD CON EL PERFIL:
+EVENTOS DEL ORÁCULO EN {hotel['city']} ORDENADOS POR AFINIDAD CON EL USUARIO:
 {_format_matched_events(matched_events)}
 
 {event_instruction}
@@ -191,7 +228,7 @@ Devuelve un JSON con EXACTAMENTE estos campos:
 def _fallback_copy(campaign_data: dict[str, Any]) -> dict[str, Any]:
     """Copy determinista cuando Gemini no está disponible."""
     seg = campaign_data["segment"]
-    age = seg.get("age_segment", "ADULTO")
+    age = get_age_key(seg)
     hotel = campaign_data["recommended_hotel"]
     stay = campaign_data["stay_nights"]
     season = campaign_data["season"]
@@ -285,10 +322,10 @@ def _generate_copy(
 
 def _cta_suffix(campaign_data: dict[str, Any]) -> str:
     seg = campaign_data["segment"]
-    age = seg.get("age_segment", "ADULTO").lower()
+    segment_slug = get_segment_slug(seg)
     season = campaign_data.get("season", "temporada")
     return (
-        f"utm_source=email&utm_medium=autonomous&utm_campaign={age}_{season}_2026"
+        f"utm_source=email&utm_medium=autonomous&utm_campaign={segment_slug}_{season}_2026"
     )
 
 
@@ -350,7 +387,7 @@ def generate_campaign(
     matched_events = match_oracle_events(
         oracle_context,
         hotel_city,
-        campaign_data["segment"].get("travel_profile", ""),
+        get_primary_affinity(campaign_data["segment"]),
     )
 
     copy, copy_source = _generate_copy(
@@ -371,6 +408,7 @@ def generate_campaign(
     return {
         "guest_id": str(guest_id),
         "segment": campaign_data["segment"],
+        "segment_overview": campaign_data.get("segment_overview", {}),
         "hotel": campaign_data["recommended_hotel"],
         "channel": channel_decision,
         "copy": copy,

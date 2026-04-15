@@ -248,14 +248,14 @@ body::-webkit-scrollbar {
     overflow: hidden;
 }
 
-/* ── Check-in Panel (Left Sidebar) ──────────────────────── */
+/* ── Panel de recepción (barra lateral izquierda) ───────── */
 .checkin-panel {
     width: 380px;
     min-width: 380px;
     display: flex;
     flex-direction: column;
     background: var(--bg-deep);
-    /* Warm off-white */
+    /* Blanco cálido roto */
     border-right: 1px solid #f0f0f0;
 }
 
@@ -320,7 +320,7 @@ body::-webkit-scrollbar {
     border-color: var(--gold-400);
 }
 
-/* ── Guest List ─────────────────────────────────────────── */
+/* ── Lista de huéspedes ─────────────────────────────────── */
 .guest-list-body {
     flex: 1;
     overflow-y: auto;
@@ -421,7 +421,7 @@ body::-webkit-scrollbar {
     border: 1px solid rgba(244, 114, 182, 0.2);
 }
 
-/* ── Report Section (Right) ─────────────────────────────── */
+/* ── Sección de informe (derecha) ───────────────────────── */
 .report-section {
     flex: 1;
     display: flex;
@@ -430,7 +430,7 @@ body::-webkit-scrollbar {
     overflow: hidden;
 }
 
-/* Empty State */
+/* Estado vacío */
 .empty-state {
     flex: 1;
     display: flex;
@@ -618,7 +618,7 @@ body::-webkit-scrollbar {
     color: var(--text-muted);
 }
 
-/* Report Viewer */
+/* Visor de informes */
 .report-viewer {
     flex: 1;
     display: flex;
@@ -720,7 +720,7 @@ body::-webkit-scrollbar {
     flex: 1;
     overflow: hidden;
     padding: 0;
-    /* no padding to let the iframe cover it natively */
+    /* Sin padding para que el iframe ocupe todo el contenedor */
 }
 
 .report-frame {
@@ -730,7 +730,7 @@ body::-webkit-scrollbar {
     background: #ffffff;
 }
 
-/* ── Check-in Success Overlay ───────────────────────────── */
+/* ── Capa de éxito de recepción ─────────────────────────── */
 .checkin-overlay {
     position: fixed;
     inset: 0;
