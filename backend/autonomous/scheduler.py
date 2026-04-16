@@ -1,14 +1,12 @@
 """
 scheduler.py — Cálculo del momento óptimo para contactar a cada usuario.
 
-La lógica es temporal y admite dos estrategias:
+La lógica temporal usa una única estrategia heurística:
 
-1. ``heuristic``: mes habitual + ``AVG_BOOKING_LEADTIME``.
-2. ``regression``: predicción de próximo check-in con regresión lineal sobre el
-   histórico de viajes del usuario.
-3. Si la fecha actual cae dentro de esa ventana (±SEND_WINDOW_DAYS), el usuario
-   pasa a ser candidato.
-4. Se filtran los usuarios contactados recientemente (cooldown).
+1. mes habitual + ``AVG_BOOKING_LEADTIME``;
+2. si la fecha actual cae dentro de esa ventana (±SEND_WINDOW_DAYS),
+   el usuario pasa a ser candidato;
+3. se filtran los usuarios contactados recientemente (cooldown).
 """
 
 from __future__ import annotations
@@ -74,8 +72,6 @@ def compute_user_plans(
                 "prediction_mode_used": timing["mode_used"],
                 "prediction_source": timing["prediction_source"],
                 "history_points_used": timing["history_points_used"],
-                "fallback_reason": timing.get("fallback_reason"),
-                "regression_r2": timing.get("regression_r2"),
             }
         )
 

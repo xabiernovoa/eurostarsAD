@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """
-auto_tag_images.py — Genera metadatos de imágenes a partir del nombre de archivo.
+auto_tag_images.py — Genera metadatos simples de imágenes a partir del nombre.
 
-Recorre los directorios images/{hotel_id}/, extrae la categoría de cada nombre
-de archivo y asigna tags, audiencia, mood y bandera premium.
+Recorre los directorios images/{hotel_id}/ y extrae una categoría estable desde
+el nombre de archivo. A partir de esa categoría solo persiste dos señales
+realmente fiables en este dataset:
+  * ``category``: tipo de imagen deducido del naming
+  * ``premium``: si esa categoría suele representar una experiencia premium
 
 Uso:
     python auto_tag_images.py
@@ -67,96 +70,25 @@ def _extract_category(filename: str) -> str:
     return cat
 
 
-# ── Mapa de tags por categoría ────────────────────────────────────────────
+# ── Metadatos mínimos por categoría ─────────────────────────────────────
 
-CATEGORY_TAG_MAP = {
-    "habitaciones": {
-        "tags": ["habitación", "comfort", "descanso", "interior"],
-        "audience": ["pareja", "profesional", "familia"],
-        "mood": "cálido",
-        "premium": False,
-    },
-    "el-hotel": {
-        "tags": ["fachada", "exterior", "arquitectura", "lobby"],
-        "audience": ["pareja", "profesional", "senior"],
-        "mood": "aspiracional",
-        "premium": False,
-    },
-    "cerca-del-hotel": {
-        "tags": ["paisaje", "exterior histórico", "vistas", "entorno", "ciudad"],
-        "audience": ["joven", "pareja", "senior", "familia"],
-        "mood": "aspiracional",
-        "premium": False,
-    },
-    "restauracion": {
-        "tags": ["restaurante", "platos", "gastronomía", "bar", "gourmet"],
-        "audience": ["pareja", "senior", "profesional"],
-        "mood": "cálido",
-        "premium": False,
-    },
-    "spa": {
-        "tags": ["spa", "wellness", "relax", "premium", "tranquilidad"],
-        "audience": ["senior", "pareja"],
-        "mood": "cálido",
-        "premium": True,
-    },
-    "piscina": {
-        "tags": ["piscina", "exterior soleado", "relax", "verano"],
-        "audience": ["joven", "pareja", "familia"],
-        "mood": "aspiracional",
-        "premium": False,
-    },
-    "piscina-y-fitness": {
-        "tags": ["piscina", "fitness", "exterior soleado", "relax", "deporte"],
-        "audience": ["joven", "pareja", "familia"],
-        "mood": "aspiracional",
-        "premium": False,
-    },
-    "salones": {
-        "tags": ["salón", "eventos", "interior", "elegante", "reuniones"],
-        "audience": ["profesional"],
-        "mood": "aspiracional",
-        "premium": False,
-    },
-    "terraza-atalaya": {
-        "tags": ["terraza", "vistas", "exterior soleado", "social", "rooftop"],
-        "audience": ["joven", "pareja"],
-        "mood": "aspiracional",
-        "premium": True,
-    },
-    "balneario-y-club-termal": {
-        "tags": ["spa", "wellness", "termal", "relax", "premium", "tranquilidad"],
-        "audience": ["senior", "pareja"],
-        "mood": "cálido",
-        "premium": True,
-    },
-    "museo": {
-        "tags": ["museo", "histórico", "patrimonio", "cultura", "interior"],
-        "audience": ["senior", "pareja", "familia"],
-        "mood": "cálido",
-        "premium": False,
-    },
-    "aurea-moments": {
-        "tags": ["experiencia", "premium", "lifestyle", "exclusivo", "lujo"],
-        "audience": ["pareja", "profesional"],
-        "mood": "aspiracional",
-        "premium": True,
-    },
-    "ocio-y-wellness": {
-        "tags": ["ocio", "wellness", "relax", "comfort", "tranquilidad"],
-        "audience": ["senior", "pareja"],
-        "mood": "cálido",
-        "premium": False,
-    },
+CATEGORY_METADATA = {
+    "habitaciones": {"premium": False},
+    "el-hotel": {"premium": False},
+    "cerca-del-hotel": {"premium": False},
+    "restauracion": {"premium": False},
+    "spa": {"premium": True},
+    "piscina": {"premium": False},
+    "piscina-y-fitness": {"premium": False},
+    "salones": {"premium": False},
+    "terraza-atalaya": {"premium": True},
+    "balneario-y-club-termal": {"premium": True},
+    "museo": {"premium": False},
+    "aurea-moments": {"premium": True},
+    "ocio-y-wellness": {"premium": False},
 }
 
-# Valor por defecto para categorías desconocidas
-DEFAULT_TAGS = {
-    "tags": ["hotel", "interior"],
-    "audience": ["pareja", "profesional"],
-    "mood": "cálido",
-    "premium": False,
-}
+DEFAULT_METADATA = {"premium": False}
 
 # Extensiones de archivo válidas para imágenes
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
@@ -191,15 +123,12 @@ def generate_metadata():
             category = _extract_category(filename)
             categories_found.add(category)
 
-            tag_info = CATEGORY_TAG_MAP.get(category, DEFAULT_TAGS)
+            metadata_info = CATEGORY_METADATA.get(category, DEFAULT_METADATA)
 
             entry = {
                 "filename": filename,
                 "category": category,
-                "tags": tag_info["tags"],
-                "audience": tag_info["audience"],
-                "mood": tag_info["mood"],
-                "premium": tag_info["premium"],
+                "premium": metadata_info["premium"],
             }
             metadata.append(entry)
 

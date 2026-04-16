@@ -289,13 +289,18 @@
         .upsell-cards {
             display: flex;
             gap: 16px;
+            align-items: stretch;
         }
 
         .upsell-card {
             flex: 1;
+            min-width: 0;
             background: #fafafa;
             border: 1px solid #ebebeb;
             padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .card-price {
@@ -303,22 +308,25 @@
             font-weight: 700;
             letter-spacing: 1px;
             color: #8a754b;
-            margin-bottom: 14px;
         }
 
         .card-name {
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 400;
             color: #1a1a1a;
-            line-height: 1.2;
-            margin-bottom: 10px;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
         }
 
         .card-desc {
             font-size: 12px;
             color: #666666;
             line-height: 1.55;
+        }
+
+        .card-desc:empty {
+            display: none;
         }
 
         /* ==========  HISTORY TABLE  ========== */
@@ -505,12 +513,11 @@
 
         <!-- UPSELL BLOCK -->
         <div class="upsell-block">
-            {% set price_tags = ['+45€ / Noche', 'Oferta 80€', 'Reserva VIP'] %}
             <div class="upsell-header-row">
                 <div class="upsell-header-left">
-                    <p class="upsell-title">Recomendaciones de Upsell Estrategico</p>
+                    <p class="upsell-title">Recomendaciones de Upsell Estratégico</p>
                     <p class="upsell-subtitle">Generadas por motor de inteligencia predictiva basado en historial
-                        historico</p>
+                        histórico</p>
                 </div>
                 <button class="checkin-btn"
                     onclick="alert('Check-In registrado correctamente.\nEl huesped ha sido procesado y el informe enviado al equipo de planta.')">Confirmar
@@ -521,16 +528,19 @@
 
                 {% for rec in upsell_recommendations[:3] %}
                 <div class="upsell-card">
-                    <p class="card-price">{{ price_tags[loop.index0 % 3] }}</p>
-                    <p class="card-name">{{ rec.split(':')[0] if ':' in rec else rec[:24] }}</p>
-                    <p class="card-desc">{{ rec.split(':')[1].strip() if ':' in rec else rec }}</p>
+                    {% set rec_title = rec.get('title', '') if rec is mapping else (rec.split(':', 1)[0].strip() if ':' in rec else rec) %}
+                    {% set rec_desc = rec.get('description', '') if rec is mapping else (rec.split(':', 1)[1].strip() if ':' in rec else '') %}
+                    {% set rec_price = rec.get('price_label', '') if rec is mapping else '' %}
+                    <p class="card-price">{{ rec_price }}</p>
+                    <p class="card-name">{{ rec_title }}</p>
+                    <p class="card-desc">{{ rec_desc }}</p>
                 </div>
                 {% endfor %}
                 {% if upsell_recommendations|length == 0 %}
                 <div class="upsell-card">
-                    <p class="card-price">+45€ / Noche</p>
-                    <p class="card-name">Suite Superior</p>
-                    <p class="card-desc">Habitacion con vistas panoramicas y check-out extendido.</p>
+                    <p class="card-price">+25€ / noche</p>
+                    <p class="card-name">Upgrade de habitación</p>
+                    <p class="card-desc">Mejora de categoría sujeta a disponibilidad para ganar confort.</p>
                 </div>
                 {% endif %}
             </div>

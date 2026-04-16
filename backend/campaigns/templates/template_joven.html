@@ -11,28 +11,63 @@
     {% set profile = theme_key | lower %}
     {% set themes = {
     'playero': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
-    'font': "'Nunito', sans-serif", 'primary': '#0284c7', 'bg': '#fef08a'},
+    'font': "'Nunito', sans-serif", 'variants': [
+    {'primary': '#0284c7', 'bg': '#fef08a'},
+    {'primary': '#0f766e', 'bg': '#ccfbf1'},
+    {'primary': '#1d4ed8', 'bg': '#dbeafe'}
+    ]},
     'montana': {'font_url': 'https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap',
-    'font': "'Montserrat', sans-serif", 'primary': '#166534', 'bg': '#f0fdf4'},
+    'font': "'Montserrat', sans-serif", 'variants': [
+    {'primary': '#166534', 'bg': '#f0fdf4'},
+    {'primary': '#3f6212', 'bg': '#ecfccb'},
+    {'primary': '#14532d', 'bg': '#dcfce7'}
+    ]},
     'cultural': {'font_url':
     'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap', 'font':
-    "'Playfair Display', serif", 'primary': '#831843', 'bg': '#faf5ff'},
+    "'Playfair Display', serif", 'variants': [
+    {'primary': '#831843', 'bg': '#faf5ff'},
+    {'primary': '#7c2d12', 'bg': '#ffedd5'},
+    {'primary': '#6d28d9', 'bg': '#ede9fe'}
+    ]},
     'gastronomico': {'font_url':
     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap', 'font': "'Inter', sans-serif",
-    'primary': '#c2410c', 'bg': '#fff7ed'},
+    'variants': [
+    {'primary': '#c2410c', 'bg': '#fff7ed'},
+    {'primary': '#b45309', 'bg': '#fef3c7'},
+    {'primary': '#be123c', 'bg': '#ffe4e6'}
+    ]},
     'premium': {'font_url':
     'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap',
-    'font': "'Cormorant Garamond', serif", 'primary': '#0a0a0a', 'bg': '#fefce8'},
+    'font': "'Cormorant Garamond', serif", 'variants': [
+    {'primary': '#0a0a0a', 'bg': '#fefce8'},
+    {'primary': '#1f2937', 'bg': '#f5f3ff'},
+    {'primary': '#3f3f46', 'bg': '#fef2f2'}
+    ]},
     'mediterraneo': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
-    'font': "'Nunito', sans-serif", 'primary': '#0f766e', 'bg': '#ecfeff'},
+    'font': "'Nunito', sans-serif", 'variants': [
+    {'primary': '#0f766e', 'bg': '#ecfeff'},
+    {'primary': '#0369a1', 'bg': '#e0f2fe'},
+    {'primary': '#0f766e', 'bg': '#cffafe'}
+    ]},
     'continental': {'font_url': 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap',
-    'font': "'Inter', sans-serif", 'primary': '#334155', 'bg': '#f8fafc'},
+    'font': "'Inter', sans-serif", 'variants': [
+    {'primary': '#334155', 'bg': '#f8fafc'},
+    {'primary': '#1d4ed8', 'bg': '#eff6ff'},
+    {'primary': '#0f766e', 'bg': '#f0fdfa'}
+    ]},
     'clima_calido': {'font_url': 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700;900&display=swap',
-    'font': "'Nunito', sans-serif", 'primary': '#c2410c', 'bg': '#fff7ed'}
+    'font': "'Nunito', sans-serif", 'variants': [
+    {'primary': '#c2410c', 'bg': '#fff7ed'},
+    {'primary': '#e11d48', 'bg': '#ffe4e6'},
+    {'primary': '#ea580c', 'bg': '#ffedd5'}
+    ]}
     } %}
-    {% set theme = themes.get(profile, {'font_url':
+    {% set theme_base = themes.get(profile, {'font_url':
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap', 'font': "'Inter', sans-serif",
-    'primary': '#0f172a', 'bg': '#f8fafc'}) %}
+    'variants': [{'primary': '#0f172a', 'bg': '#f8fafc'}, {'primary': '#1e293b', 'bg': '#f1f5f9'}]}) %}
+    {% set variant_index = young_theme_variant_index | default(0) | int %}
+    {% set palette = theme_base.variants[variant_index % (theme_base.variants | length)] %}
+    {% set theme = {'font_url': theme_base.font_url, 'font': theme_base.font, 'primary': palette.primary, 'bg': palette.bg} %}
 
     {% set labels = {
     'playero': 'Escapada Relax',

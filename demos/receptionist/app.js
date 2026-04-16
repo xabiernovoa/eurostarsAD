@@ -12,7 +12,6 @@
     const guestCount = document.getElementById('guestCount');
     const quickFilters = document.getElementById('quickFilters');
     const emptyState = document.getElementById('emptyState');
-    const loadingState = document.getElementById('loadingState');
     const reportViewer = document.getElementById('reportViewer');
     const reportFrame = document.getElementById('reportFrame');
     const toolbarTitle = document.getElementById('toolbarTitle');
@@ -135,20 +134,12 @@
             el.classList.toggle('active', el.dataset.id === id);
         });
 
-        // Mostrar carga
-        showView('loading');
-
-        // Simular el retardo de escaneo para la demo
-        await sleep(randomInt(800, 1600));
-
-        // Cargar el informe
         const guest = allGuests.find(g => g.id === id);
         const displayName = guest && guest.name ? guest.name : `Huésped #${id}`;
         if (toolbarTitle) {
             toolbarTitle.textContent = `Informe de Recepción — ${displayName}`;
         }
 
-        reportFrame.srcdoc = '';
         try {
             const res = await fetch(`/api/report/${id}`);
             if (!res.ok) throw new Error('No encontrado');
@@ -167,7 +158,6 @@
     // ── Gestión de vistas ───────────────────────────────
     function showView(view) {
         emptyState.classList.toggle('hidden', view !== 'empty');
-        loadingState.classList.toggle('hidden', view !== 'loading');
         reportViewer.classList.toggle('hidden', view !== 'report');
     }
 
@@ -250,7 +240,6 @@
             const results = allGuests.filter(g => g.id === randomGuest.id);
             renderGuestList(results);
 
-            await sleep(300);
             window.__selectGuest(randomGuest.id);
         });
     }
@@ -326,9 +315,6 @@
     });
 
     // ── Utilidades ──────────────────────────────────────
-    function sleep(ms) {
-        return new Promise(r => setTimeout(r, ms));
-    }
     function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }

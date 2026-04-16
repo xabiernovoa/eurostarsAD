@@ -11,6 +11,7 @@ Renderiza emails HTML personalizados con plantillas específicas por segmento:
 
 import logging
 import sys
+from hashlib import md5
 from datetime import datetime
 from pathlib import Path
 
@@ -42,6 +43,27 @@ TEMPLATE_MAP = {
     "ADULTO": "template_adulto.html",
     "SENIOR": "template_senior.html",
 }
+
+
+def _get_young_theme_variant(
+    campaign_data: dict,
+    moment: str,
+    theme_key: str,
+    hotel_name: str,
+    city_name: str,
+) -> int:
+    """Devuelve una variante visual estable para emails del segmento joven."""
+    seed_parts = [
+        campaign_data.get("guest_id", ""),
+        moment,
+        theme_key,
+        hotel_name,
+        city_name,
+        campaign_data.get("checkin_suggested", ""),
+        campaign_data.get("season", ""),
+    ]
+    seed = "|".join(str(part or "") for part in seed_parts)
+    return int(md5(seed.encode("utf-8")).hexdigest()[:8], 16)
 
 
 def _get_env() -> Environment:
@@ -100,14 +122,22 @@ def render_email(
             country = hotel.get("country", hotel.get("COUNTRY_ID", ""))
             stars = hotel.get("stars", hotel.get("STARS", 4))
 
+        theme_key = get_theme_key(seg)
         context = {
             "user_name": None,  # No hay nombres reales en los datos -> "Estimado viajero"
             "hotel_name": hotel_name,
             "city_name": city_name,
             "country": country,
             "stars": stars,
-            "theme_key": get_theme_key(seg),
+            "theme_key": theme_key,
             "theme_label": get_theme_label(seg),
+            "young_theme_variant_index": _get_young_theme_variant(
+                campaign_data,
+                moment,
+                theme_key,
+                hotel_name,
+                city_name,
+            ),
             "segment_overview": campaign_data.get("segment_overview", summarize_segment(seg)),
             "checkin_suggested": campaign_data.get("checkin_suggested", ""),
             "stay_nights": campaign_data.get("stay_nights", 0),

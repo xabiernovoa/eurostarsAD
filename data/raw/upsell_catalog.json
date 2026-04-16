@@ -1,0 +1,82 @@
+{
+  "suite_upgrade": {
+    "title": "Upgrade a suite con vistas",
+    "description": "Subida de categoría con más amplitud, mejores vistas y amenities premium.",
+    "price_label": "+65€ / noche"
+  },
+  "spa_access_premium": {
+    "title": "Acceso premium al spa",
+    "description": "Circuito wellness con acceso a zona termal y amenities exclusivos.",
+    "price_label": "+35€ / persona"
+  },
+  "premium_minibar": {
+    "title": "Minibar premium de bienvenida",
+    "description": "Selección de bebidas y snacks premium preparada antes de la llegada.",
+    "price_label": "+28€ / estancia"
+  },
+  "late_checkout_premium": {
+    "title": "Late checkout hasta las 14:00",
+    "description": "Salida extendida para alargar la estancia sin prisas.",
+    "price_label": "+30€ / estancia"
+  },
+  "chef_experience": {
+    "title": "Experiencia gastronómica del chef",
+    "description": "Menú degustación o recomendación especial del restaurante del hotel.",
+    "price_label": "+55€ / persona"
+  },
+  "breakfast_buffet": {
+    "title": "Añadir desayuno buffet",
+    "description": "Desayuno completo con opción dulce, salada y productos locales.",
+    "price_label": "+18€ / persona / día"
+  },
+  "covered_parking": {
+    "title": "Parking cubierto",
+    "description": "Plaza garantizada durante la estancia para llegar con más comodidad.",
+    "price_label": "+16€ / noche"
+  },
+  "city_guided_tour": {
+    "title": "Visita guiada por la ciudad",
+    "description": "Ruta guiada de introducción al destino con reserva prioritaria.",
+    "price_label": "+24€ / persona"
+  },
+  "restaurant_tasting_menu": {
+    "title": "Menú degustación en el hotel",
+    "description": "Experiencia gastronómica con selección de platos destacados del chef.",
+    "price_label": "+36€ / persona"
+  },
+  "standard_room_upgrade": {
+    "title": "Upgrade de habitación",
+    "description": "Mejora de categoría sujeta a disponibilidad para ganar confort.",
+    "price_label": "+25€ / noche"
+  },
+  "late_checkout_light": {
+    "title": "Late checkout flexible",
+    "description": "Salida ampliada para aprovechar mejor el último día.",
+    "price_label": "+20€ / estancia"
+  },
+  "welcome_pack": {
+    "title": "Pack de bienvenida personalizado",
+    "description": "Detalle de bienvenida adaptado al perfil del huésped y su historial.",
+    "price_label": "+12€ / estancia"
+  },
+  "museum_pass": {
+    "title": "Entrada a museos y monumentos",
+    "description": "Acceso prioritario a espacios culturales cercanos al hotel.",
+    "price_label": "+22€ / persona"
+  },
+  "local_tasting": {
+    "title": "Reserva gastronómica recomendada",
+    "description": "Mesa prioritaria y propuesta local seleccionada para el huésped.",
+    "price_label": "+32€ / persona"
+  },
+  "terrace_pool_pack": {
+    "title": "Pack terraza o piscina",
+    "description": "Acceso con amenities de relax para disfrutar del hotel al aire libre.",
+    "price_label": "+25€ / estancia"
+  },
+  "nature_excursion": {
+    "title": "Excursión guiada en naturaleza",
+    "description": "Actividad outdoor o senderismo adaptada al destino y temporada.",
+    "price_label": "+29€ / persona"
+  }
+}

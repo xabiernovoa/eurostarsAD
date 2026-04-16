@@ -368,8 +368,7 @@
     /* ── Pintar acciones ─────────────────────────────────── */
 
     function renderActions(recommendations) {
-        var sourceLabel = recommendations.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
-        if (refs.recSource) refs.recSource.textContent = sourceLabel;
+        if (refs.recSource) refs.recSource.textContent = "Motor heurístico";
         var cards = [
             { title: "Redes sociales", key: "rrss" },
             { title: "Dentro del hotel", key: "hotel" },
@@ -495,7 +494,7 @@
         if (source && role === "assistant") {
             var src = document.createElement("div");
             src.className = "chat-msg-source";
-            src.textContent = source === "anthropic" ? "Anthropic" : "Motor heurístico";
+            src.textContent = "Motor heurístico";
             msg.appendChild(src);
         }
         refs.chatMessages.insertBefore(msg, refs.chatTyping);
@@ -592,7 +591,7 @@
 
     function renderProposals(data) {
         currentProposals = data.proposals || [];
-        if (genSource) genSource.textContent = data.source === "anthropic" ? "Generado con Anthropic" : "Motor heurístico";
+        if (genSource) genSource.textContent = "Motor heurístico";
 
         if (!currentProposals.length) {
             proposalGrid.innerHTML = '<p class="form-help" style="text-align:center;padding:32px">No se generaron propuestas. Verifica que el dashboard tenga datos cargados.</p>';

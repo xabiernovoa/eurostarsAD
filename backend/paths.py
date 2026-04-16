@@ -13,6 +13,8 @@ TEMPLATES_DIR = BACKEND_DIR / "campaigns" / "templates"
 
 CUSTOMERS_PATH = RAW_DATA_DIR / "customer_data.csv"
 HOTELS_PATH = RAW_DATA_DIR / "hotel_data.csv"
+EVENTS_PATH = RAW_DATA_DIR / "city_events.json"
+UPSELLS_PATH = RAW_DATA_DIR / "upsell_catalog.json"
 EMBEDDINGS_PATH = GENERATED_DATA_DIR / "embeddings.json"
 SEGMENTS_PATH = GENERATED_DATA_DIR / "segments.json"
 CAMPAIGN_LOG_PATH = GENERATED_DATA_DIR / "campaign_log.json"

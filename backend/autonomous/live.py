@@ -401,8 +401,7 @@ def iter_tick(
             "cooldown_days": cooldown_days,
             "recommender_workers": recommender_workers,
             "campaigns_per_tick": campaigns_per_tick,
-            "travel_prediction_mode": timing_mode or "heuristic/env",
-            "regression_send_offset_days": send_offset_days,
+            "travel_prediction_mode": "heuristic",
             "gemini_available": gemini_client.is_available() and not force_mock,
             "model": (
                 config.GEMINI_MODEL

@@ -163,9 +163,10 @@ def _normalize_hotel_id(raw_hotel_id: object, hotel_info: dict[str, dict]) -> st
     return hotel_id
 
 
-def _collect_visited_context(user_id: str, embeddings_data: dict) -> dict[str, set[str]]:
+def _collect_visited_context(user_id: str, embeddings_data: dict) -> dict[str, object]:
     """Recupera el contexto histórico del usuario a partir de los hoteles visitados."""
     visited_hotels: set[str] = set()
+    hotel_visit_counts: dict[str, int] = {}
     hotel_info = embeddings_data.get("hotel_info", {})
     for user_info in embeddings_data.get("user_info", []):
         if str(user_info.get("id")) == str(user_id):
@@ -173,6 +174,13 @@ def _collect_visited_context(user_id: str, embeddings_data: dict) -> dict[str, s
                 _normalize_hotel_id(hotel_id, hotel_info)
                 for hotel_id in user_info.get("HOTELS_VISITED", [])
             }
+            raw_counts = user_info.get("HOTEL_VISIT_COUNTS", {}) or {}
+            if isinstance(raw_counts, dict):
+                hotel_visit_counts = {
+                    _normalize_hotel_id(hotel_id, hotel_info): int(count)
+                    for hotel_id, count in raw_counts.items()
+                    if str(hotel_id).strip()
+                }
             break
 
     visited_cities: set[str] = set()
@@ -190,12 +198,52 @@ def _collect_visited_context(user_id: str, embeddings_data: dict) -> dict[str, s
         if brand:
             visited_brands.add(brand)
 
+    favorite_hotels: set[str] = set()
+    if hotel_visit_counts:
+        max_visits = max(hotel_visit_counts.values())
+        if max_visits > 1:
+            favorite_hotels = {
+                hotel_id for hotel_id, count in hotel_visit_counts.items() if count == max_visits
+            }
+
     return {
         "hotels": visited_hotels,
         "cities": visited_cities,
         "countries": visited_countries,
         "brands": visited_brands,
+        "hotel_visit_counts": hotel_visit_counts,
+        "favorite_hotels": favorite_hotels,
     }
+
+
+def _loyalty_labels(segment: dict | None) -> set[str]:
+    """Devuelve todas las etiquetas de fidelidad disponibles para el segmento."""
+    if not isinstance(segment, dict):
+        return set()
+
+    tags = segment.get("tags", {})
+    if not isinstance(tags, dict):
+        return set()
+
+    loyalty = tags.get("fidelidad", {})
+    if not isinstance(loyalty, dict):
+        return set()
+
+    labels: set[str] = set()
+    principal = str(loyalty.get("principal", "")).strip()
+    if principal:
+        labels.add(principal)
+
+    secondary = loyalty.get("secundarias", [])
+    if isinstance(secondary, list):
+        labels.update(str(label).strip() for label in secondary if str(label).strip())
+
+    return labels
+
+
+def _allow_visited_hotels(segment: dict | None) -> bool:
+    """Permite recomendar hoteles ya visitados solo a perfiles con fidelidad clara."""
+    return bool(_loyalty_labels(segment) & {"repetidor", "fiel_pocos_hoteles"})
 
 
 def _hotel_level_score(hotel_vector: dict[str, float]) -> float:
@@ -210,7 +258,7 @@ def _tag_rerank_score(
     hotel_vector: dict[str, float],
     embeddings_data: dict,
     segment: dict | None,
-    visited_context: dict[str, set[str]],
+    visited_context: dict[str, object],
 ) -> float:
     """Calcula un score 0-1 a partir de etiquetas para reordenar recomendaciones."""
     if not segment:
@@ -240,15 +288,30 @@ def _tag_rerank_score(
     hotel_country = str(hotel_info.get("COUNTRY_ID", "")).strip()
     hotel_city = str(hotel_info.get("CITY_NAME", "")).strip()
 
-    loyalty = tags.get("fidelidad", {}) or {}
-    loyalty_principal = str(loyalty.get("principal", "")).strip()
+    loyalty_labels = _loyalty_labels(segment)
+    visited_hotels = visited_context.get("hotels", set())
+    favorite_hotels = visited_context.get("favorite_hotels", set())
+    if not isinstance(visited_hotels, set):
+        visited_hotels = set()
+    if not isinstance(favorite_hotels, set):
+        favorite_hotels = set()
+
     if not any(visited_context.values()):
         loyalty_score = 0.5
-    elif loyalty_principal in {"repetidor", "fiel_pocos_hoteles"}:
+    elif loyalty_labels & {"repetidor", "fiel_pocos_hoteles"}:
+        hotel_match = 1.0 if hotel_id in visited_hotels else 0.0
+        favorite_hotel_bonus = 1.0 if hotel_id in favorite_hotels else 0.0
         brand_match = 1.0 if hotel_brand and hotel_brand in visited_context["brands"] else 0.0
         country_match = 1.0 if hotel_country and hotel_country in visited_context["countries"] else 0.0
         city_match = 1.0 if hotel_city and hotel_city in visited_context["cities"] else 0.0
-        loyalty_score = 0.55 * brand_match + 0.25 * country_match + 0.20 * city_match
+        loyalty_score = min(
+            1.0,
+            0.45 * hotel_match
+            + 0.25 * brand_match
+            + 0.15 * country_match
+            + 0.05 * city_match
+            + 0.10 * favorite_hotel_bonus,
+        )
     else:
         brand_novelty = 1.0 if hotel_brand and hotel_brand not in visited_context["brands"] else 0.0
         country_novelty = 1.0 if hotel_country and hotel_country not in visited_context["countries"] else 0.0
@@ -346,6 +409,10 @@ def build(hotel_path: str | None = None, customer_path: str | None = None) -> di
             "AGE": first["AGE_RANGE"],
             "AVG_SCORE": float(first["AVG_SCORE"]),
             "HOTELS_VISITED": sorted(set(str(h) for h in visited_hotels)),
+            "HOTEL_VISIT_COUNTS": {
+                str(hotel_id): int(count)
+                for hotel_id, count in grp["HOTEL_ID"].value_counts().to_dict().items()
+            },
         })
 
     logger.info("Construidos embeddings para %d usuarios", len(user_embeddings))
@@ -372,6 +439,7 @@ def recommend_hotel(
 
     Usa la similitud coseno como base y, si recibe ``segment``, reordena con una
     segunda capa basada en etiquetas de afinidad, nivel, comportamiento y fidelidad.
+    Los hoteles ya visitados solo se excluyen para perfiles sin señales claras de repetición.
     """
     user_emb = embeddings_data["user_embeddings"].get(str(user_id))
     if user_emb is None:
@@ -379,6 +447,7 @@ def recommend_hotel(
 
     visited_context = _collect_visited_context(user_id, embeddings_data)
     visited = visited_context["hotels"]
+    allow_revisits = _allow_visited_hotels(segment)
 
     user_vec = np.array([user_emb[c] for c in FEATURE_COLS]).reshape(1, -1)
     user_norm = np.linalg.norm(user_vec)
@@ -387,7 +456,7 @@ def recommend_hotel(
 
     candidates = []
     for hid, hvec in embeddings_data["hotel_embeddings"].items():
-        if hid in visited:
+        if hid in visited and not allow_revisits:
             continue
         h_vec = np.array([hvec[c] for c in FEATURE_COLS]).reshape(1, -1)
         hotel_norm = np.linalg.norm(h_vec)

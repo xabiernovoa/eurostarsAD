@@ -8,15 +8,13 @@ Construye un dashboard ejecutivo a partir de:
 - histórico de reservas
 - contexto de dirección, recepción y señales externas
 
-El motor puede usar Anthropic para recomendaciones narrativas.
-Si no hay API key, cae a un modelo heurístico determinista.
+Las recomendaciones del dashboard se generan con un modelo heurístico determinista.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -377,70 +375,12 @@ def _heuristic_recommendations(rows: list[dict], context: dict, segment_cards: l
     }
 
 
-def _build_ai_prompt(payload: dict) -> str:
-    context = payload.get("context", {})
-    return f"""
-Eres un director de marketing hotelero. Analiza los datos resumidos y devuelve SOLO JSON.
-
-OBJETIVO:
-{context.get('strategic_priority', '')}
-
-RESUMEN KPI:
-{json.dumps(payload['kpis'], ensure_ascii=False)}
-
-SEGMENTOS PRIORITARIOS:
-{json.dumps(payload['segment_cards'][:4], ensure_ascii=False)}
-
-SEÑALES DE RECEPCIÓN:
-{json.dumps(context.get('reception_notes', []), ensure_ascii=False)}
-
-SEÑALES EXTERNAS:
-{json.dumps(context.get('external_signals', []), ensure_ascii=False)}
-
-Devuelve este JSON:
-{{
-  "rrss": {{
-    "summary": "resumen ejecutivo",
-    "actions": ["acción 1", "acción 2", "acción 3"]
-  }},
-  "hotel": {{
-    "summary": "resumen ejecutivo",
-    "actions": ["acción 1", "acción 2", "acción 3"]
-  }},
-  "ads": {{
-    "summary": "resumen ejecutivo",
-    "actions": ["acción 1", "acción 2", "acción 3"]
-  }}
-}}
-"""
-
-
 def _generate_recommendations(payload: dict) -> dict:
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-    if not api_key or api_key.startswith("sk-ant-xxxxx"):
-        return _heuristic_recommendations(payload["campaign_rows"], payload["context"], payload["segment_cards"])
-
-    try:
-        import anthropic
-
-        client = anthropic.Anthropic(api_key=api_key)
-        prompt = _build_ai_prompt(payload)
-        message = client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=900,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = message.content[0].text.strip()
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        data = json.loads(text)
-        data["source"] = "anthropic"
-        return data
-    except Exception as exc:
-        logger.warning("Han fallado las recomendaciones de IA de marketing: %s", exc)
-        return _heuristic_recommendations(payload["campaign_rows"], payload["context"], payload["segment_cards"])
+    return _heuristic_recommendations(
+        payload["campaign_rows"],
+        payload["context"],
+        payload["segment_cards"],
+    )
 
 
 def build_dashboard_data() -> dict:

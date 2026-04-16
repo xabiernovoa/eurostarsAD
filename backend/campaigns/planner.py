@@ -11,8 +11,10 @@ Gestiona tres momentos del ciclo de vida del cliente:
 import json
 import logging
 import sys
+from functools import lru_cache
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -30,7 +32,9 @@ from backend.personalization.segment_views import (
 from backend.personalization.travel_prediction import predict_next_trip
 from backend.storage.customers import load_customers_df
 from backend.storage.embeddings import load_embeddings
+from backend.storage.events import load_events
 from backend.storage.segments import load_segments as load_segments_data
+from backend.storage.upsells import load_upsells
 
 logging.basicConfig(
     level=logging.INFO,
@@ -45,49 +49,100 @@ SEASON_MAP = {
     9: "otoño", 10: "otoño", 11: "otoño",
 }
 
-# Base de eventos simulada como punto de enganche para una API real
-MOCK_EVENTS = {
-    "SEVILLA": [
-        {"name": "Festival de las Naciones", "date": "2025-10-01", "type": "cultural"},
-        {"name": "Bienal de Flamenco", "date": "2025-09-15", "type": "cultural"},
-    ],
-    "GRANADA": [
-        {"name": "Festival Internacional de Música", "date": "2025-06-20", "type": "cultural"},
-    ],
-    "LISBOA": [
-        {"name": "Festival de Fado", "date": "2025-06-10", "type": "música"},
-        {"name": "Festas de Lisboa", "date": "2025-06-13", "type": "cultural"},
-    ],
-    "OPORTO": [
-        {"name": "São João Festival", "date": "2025-06-23", "type": "fiesta"},
-    ],
-    "ROMA": [
-        {"name": "Estate Romana", "date": "2025-06-01", "type": "cultural"},
-        {"name": "Notte Bianca", "date": "2025-09-15", "type": "cultural"},
-    ],
-    "MADRID": [
-        {"name": "Madrid Design Festival", "date": "2025-02-10", "type": "diseño"},
-        {"name": "San Isidro", "date": "2025-05-15", "type": "fiesta"},
-    ],
-    "EL GROVE": [
-        {"name": "Fiesta del Marisco", "date": "2025-10-01", "type": "gastronomía"},
-    ],
-}
-
 
 def _load_data() -> tuple[dict, dict, pd.DataFrame]:
     """Carga embeddings, segmentos y reservas de clientes."""
     return load_embeddings(), load_segments_data(), load_customers_df()
 
 
-def _get_events(city: str, month: int) -> list[dict]:
-    """Obtiene eventos de la ciudad cercanos al mes previsto."""
-    eventos = MOCK_EVENTS.get(city.upper(), [])
-    coincidencias = []
+@lru_cache(maxsize=1)
+def _load_events_catalog() -> dict[str, list[dict[str, str]]]:
+    """Carga y normaliza el catálogo de eventos desde data/raw."""
+    try:
+        raw_events = load_events()
+    except (FileNotFoundError, OSError, ValueError, json.JSONDecodeError) as exc:
+        logger.warning("No se pudo cargar data/raw/city_events.json: %s", exc)
+        return {}
+
+    normalized: dict[str, list[dict[str, str]]] = {}
+    for city, events in raw_events.items():
+        city_key = str(city).strip().upper()
+        if not city_key or not isinstance(events, list):
+            continue
+
+        valid_events: list[dict[str, str]] = []
+        for event in events:
+            if not isinstance(event, dict):
+                continue
+
+            name = str(event.get("name", "")).strip()
+            event_date = str(event.get("date", "")).strip()
+            event_type = str(event.get("type", "")).strip()
+            if not name or not event_date:
+                continue
+
+            valid_events.append(
+                {
+                    "name": name,
+                    "date": event_date,
+                    "type": event_type,
+                }
+            )
+
+        if valid_events:
+            normalized[city_key] = valid_events
+
+    return normalized
+
+
+def _project_event_date(event_date: str, target_date: datetime) -> tuple[datetime, int] | None:
+    """Reubica un evento recurrente al año más cercano a la fecha objetivo."""
+    try:
+        base_date = datetime.strptime(event_date, "%Y-%m-%d")
+    except ValueError:
+        return None
+
+    candidates: list[tuple[int, datetime]] = []
+    for year in (target_date.year - 1, target_date.year, target_date.year + 1):
+        try:
+            occurrence = base_date.replace(year=year)
+        except ValueError:
+            continue
+        distance = abs((occurrence - target_date).days)
+        candidates.append((distance, occurrence))
+
+    if not candidates:
+        return None
+
+    distance, occurrence = min(candidates, key=lambda item: item[0])
+    return occurrence, distance
+
+
+def _get_events(city: str, target_date: datetime) -> list[dict[str, Any]]:
+    """Obtiene eventos de la ciudad cercanos a la fecha prevista de viaje."""
+    city_key = str(city).strip().upper()
+    eventos = _load_events_catalog().get(city_key, [])
+    coincidencias: list[dict[str, Any]] = []
     for ev in eventos:
-        ev_date = datetime.strptime(ev["date"], "%Y-%m-%d")
-        if ev_date.month == month or abs(ev_date.month - month) <= 1:
-            coincidencias.append(ev)
+        projected = _project_event_date(ev["date"], target_date)
+        if projected is None:
+            continue
+        occurrence, distance = projected
+        if distance > 45:
+            continue
+        coincidencias.append(
+            {
+                **ev,
+                "date": occurrence.strftime("%Y-%m-%d"),
+                "days_from_checkin": distance,
+            }
+        )
+    coincidencias.sort(
+        key=lambda event: (
+            event.get("days_from_checkin", 9999),
+            event.get("name", ""),
+        )
+    )
     return coincidencias
 
 
@@ -113,46 +168,113 @@ def _get_embedding_preferences(embedding: dict[str, float]) -> list[str]:
     return preferencias
 
 
-def _upsell_recommendations(segment: dict) -> list[str]:
-    """Genera recomendaciones de upsell a partir de las nuevas etiquetas."""
+@lru_cache(maxsize=1)
+def _load_upsell_catalog() -> dict[str, dict[str, str]]:
+    """Carga y normaliza el catalogo de upsells desde data/raw."""
+    try:
+        raw_upsells = load_upsells()
+    except (FileNotFoundError, OSError, ValueError, json.JSONDecodeError) as exc:
+        logger.warning("No se pudo cargar data/raw/upsell_catalog.json: %s", exc)
+        return {}
+
+    normalized: dict[str, dict[str, str]] = {}
+    for code, offer in raw_upsells.items():
+        if not isinstance(offer, dict):
+            continue
+
+        title = str(offer.get("title", "")).strip()
+        description = str(offer.get("description", "")).strip()
+        price_label = str(offer.get("price_label", "")).strip()
+        if not title or not price_label:
+            continue
+
+        normalized[str(code).strip()] = {
+            "code": str(code).strip(),
+            "title": title,
+            "description": description,
+            "price_label": price_label,
+        }
+
+    return normalized
+
+
+def _materialize_upsells(offer_codes: list[str]) -> list[dict[str, str]]:
+    """Convierte codigos de oferta en upsells estructurados y deduplicados."""
+    catalog = _load_upsell_catalog()
+    recommendations: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for code in offer_codes:
+        if code in seen:
+            continue
+        offer = catalog.get(code)
+        if not offer:
+            continue
+        recommendations.append(dict(offer))
+        seen.add(code)
+
+    return recommendations
+
+
+def _upsell_recommendations(segment: dict) -> list[dict[str, str]]:
+    """Genera recomendaciones de upsell a partir del segmento y un catalogo estructurado."""
     value_level = get_value_level(segment)
     affinities = set(get_affinities(segment))
     loyalty = get_loyalty_principal(segment)
 
     if value_level in {"premium", "lujo"}:
-        recs = [
-            "Upgrade a suite con vistas",
-            "Acceso premium al spa y zona wellness",
-            "Minibar premium (agua Fiji, champán Moët)",
-            "Late checkout hasta las 14:00",
-            "Experiencia gastronómica exclusiva del chef",
+        offer_codes = [
+            "suite_upgrade",
+            "spa_access_premium",
         ]
     elif value_level == "confort":
-        recs = [
-            "Desayuno buffet incluido",
-            "Parking gratuito durante la estancia",
-            "Visita guiada por la ciudad",
-            "Descuento del 15% en restaurante del hotel",
+        offer_codes = [
+            "breakfast_buffet",
+            "covered_parking",
         ]
-    else:  # STANDARD
-        recs = [
-            "Inscripción en programa de fidelización Eurostars Loyalty",
-            "Descuento del 10% en próxima reserva directa",
-            "Upgrade de habitación sujeto a disponibilidad",
+    else:  # Esencial o fallback
+        offer_codes = [
+            "standard_room_upgrade",
+            "late_checkout_light",
         ]
 
     if "cultural" in affinities:
-        recs.append("Entrada a museos y monumentos cercanos")
+        offer_codes.append("museum_pass")
     if "gastronomico" in affinities:
-        recs.append("Reserva prioritaria en restaurante local recomendado")
+        offer_codes.append("local_tasting")
     if "playero" in affinities or "clima_calido" in affinities or "mediterraneo" in affinities:
-        recs.append("Pack terraza o piscina con amenities de relax")
+        offer_codes.append("terrace_pool_pack")
     if "montana" in affinities:
-        recs.append("Excursión guiada de naturaleza o senderismo")
+        offer_codes.append("nature_excursion")
     if loyalty in {"repetidor", "fiel_pocos_hoteles"}:
-        recs.append("Detalle de bienvenida personalizado según historial")
+        offer_codes.append("welcome_pack")
 
-    return recs
+    if value_level in {"premium", "lujo"}:
+        offer_codes.extend(
+            [
+                "late_checkout_premium",
+                "chef_experience",
+                "premium_minibar",
+            ]
+        )
+    elif value_level == "confort":
+        offer_codes.extend(
+            [
+                "city_guided_tour",
+                "restaurant_tasting_menu",
+                "late_checkout_light",
+            ]
+        )
+    else:
+        offer_codes.extend(
+            [
+                "breakfast_buffet",
+                "covered_parking",
+                "welcome_pack",
+            ]
+        )
+
+    return _materialize_upsells(offer_codes)
 
 
 # ── Generadores de campañas ──────────────────────────────────────────────
@@ -199,7 +321,7 @@ def generate_pre_arrival(
     season = SEASON_MAP.get(checkin_dt.month, "primavera")
 
     # Eventos
-    events = _get_events(hotel.get("CITY_NAME", ""), checkin_dt.month)
+    events = _get_events(hotel.get("CITY_NAME", ""), checkin_dt)
 
     # Preferencias
     preferences = _get_embedding_preferences(user_emb)

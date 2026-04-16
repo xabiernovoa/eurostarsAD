@@ -1,0 +1,71 @@
+{
+  "SEVILLA": [
+    {
+      "name": "Festival de las Naciones",
+      "date": "2025-10-01",
+      "type": "cultural"
+    },
+    {
+      "name": "Bienal de Flamenco",
+      "date": "2025-09-15",
+      "type": "cultural"
+    }
+  ],
+  "GRANADA": [
+    {
+      "name": "Festival Internacional de Música",
+      "date": "2025-06-20",
+      "type": "cultural"
+    }
+  ],
+  "LISBOA": [
+    {
+      "name": "Festival de Fado",
+      "date": "2025-06-10",
+      "type": "música"
+    },
+    {
+      "name": "Festas de Lisboa",
+      "date": "2025-06-13",
+      "type": "cultural"
+    }
+  ],
+  "OPORTO": [
+    {
+      "name": "São João Festival",
+      "date": "2025-06-23",
+      "type": "fiesta"
+    }
+  ],
+  "ROMA": [
+    {
+      "name": "Estate Romana",
+      "date": "2025-06-01",
+      "type": "cultural"
+    },
+    {
+      "name": "Notte Bianca",
+      "date": "2025-09-15",
+      "type": "cultural"
+    }
+  ],
+  "MADRID": [
+    {
+      "name": "Madrid Design Festival",
+      "date": "2025-02-10",
+      "type": "diseño"
+    },
+    {
+      "name": "San Isidro",
+      "date": "2025-05-15",
+      "type": "fiesta"
+    }
+  ],
+  "EL GROVE": [
+    {
+      "name": "Fiesta del Marisco",
+      "date": "2025-10-01",
+      "type": "gastronomía"
+    }
+  ]
+}

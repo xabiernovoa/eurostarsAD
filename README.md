@@ -112,7 +112,6 @@ cp .env.example .env
 | `pandas`, `numpy` | Procesamiento de datos, embeddings y regresión temporal |
 | `jinja2`, `premailer` | Renderizado de plantillas HTML de email |
 | `google-genai` | Generación de copy y contexto con Gemini vía Vertex AI |
-| `anthropic` | Recomendaciones del dashboard (opcional) |
 | `Pillow` | Procesamiento de imágenes |
 | `sendgrid` | Envío real de emails (opcional) |
 | `python-dotenv` | Carga de variables de entorno |
@@ -135,15 +134,11 @@ El proyecto carga variables desde un archivo `.env` en la raíz. Copia `.env.exa
 | `SENDGRID_API_KEY` | No | Solo necesaria si ejecutas con `--send` |
 | `SENDER_EMAIL` | No | Remitente para SendGrid |
 | `CAMPAIGN_MAX_WORKERS` | No | Hilos para procesamiento paralelo de campañas |
-| `TRAVEL_PREDICTION_MODE` | No | `heuristic` o `regression` para campañas `pre_arrival` |
-| `TRAVEL_REGRESSION_SEND_OFFSET_DAYS` | No | Antelación simulada en días cuando se usa regresión (default: `21`) |
-| `TRAVEL_REGRESSION_MIN_HISTORY` | No | Historial mínimo para intentar regresión antes de caer al heurístico |
 
 ### Sistema autónomo
 
 | Variable | Obligatoria | Descripción |
 |----------|:-----------:|-------------|
-| `ANTHROPIC_API_KEY` | No | Habilita recomendaciones narrativas en el dashboard |
 | `AUTONOMOUS_DRY_RUN` | No | Default: `True` |
 | `AUTONOMOUS_ORACLE_INTERVAL_HOURS` | No | Frecuencia de refresco del Oráculo |
 | `AUTONOMOUS_HEARTBEAT_INTERVAL_MINUTES` | No | Intervalo del loop autónomo |
@@ -153,7 +148,6 @@ El proyecto carga variables desde un archivo `.env` en la raíz. Copia `.env.exa
 ### Comportamiento sin API keys
 
 - **Sin credenciales de Vertex AI**: el pipeline batch, el chat y el sistema autónomo generan copy mock y el Oráculo usa datos plausibles mock.
-- **Sin `ANTHROPIC_API_KEY`**: el dashboard usa recomendaciones heurísticas.
 - **Sin `SENDGRID_API_KEY`**: los emails se guardan en disco (`output/`) en vez de enviarse.
 - **El proyecto funciona completamente en local sin ninguna API key.** Todas las funcionalidades tienen fallback determinista.
 
@@ -191,12 +185,6 @@ python3 main.py --phase campaign --moment post_stay
 # Campaña para un usuario concreto
 python3 main.py --phase campaign --moment pre_arrival --guest_id 1014907189
 
-# Activar predicción temporal por regresión para pre-arrival
-python3 main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression
-
-# Simular envío 21 días antes de la fecha predicha por regresión
-python3 main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression --regression-send-offset-days 21
-
 # Fase 9: Snapshot del dashboard de marketing
 python3 main.py --phase marketing
 
@@ -220,9 +208,6 @@ python3 -m backend.autonomous.cli --mode loop
 
 # Forzar contenido mock (sin llamar a Gemini)
 python3 -m backend.autonomous.cli --mode demo --force-mock
-
-# Activar scheduling por regresión en el sistema autónomo
-python3 -m backend.autonomous.cli --mode tick --travel-prediction-mode regression --regression-send-offset-days 21
 
 # Logs detallados
 python3 -m backend.autonomous.cli --mode demo -v
@@ -350,7 +335,6 @@ Decide entre `email`, `sms` o `push` con reglas basadas en:
 - `dry_run=True` (default): guarda HTML en `output/`
 - `dry_run=False` + `--send`: envía vía SendGrid
 - El envío real del batch usa destinatarios placeholder `guest_<id>@example.com`; es un flujo de demo, no una integración productiva con los emails del CSV
-- Si se activa `--travel-prediction-mode regression`, el backend fuerza simulación y no envía emails reales
 - Registra cada acción en `data/generated/campaign_log.json`
 
 #### Fase 9 — Dashboard marketing
@@ -362,7 +346,7 @@ Construye un payload JSON completo para el dashboard:
 - KPIs agregados (campañas, audiencia, engagement, presión estratégica)
 - Tarjetas de segmento con engagement, ADR y canal dominante
 - Desglose por edad, perfil de viaje, valor de cliente y momento
-- Recomendaciones de RRSS, hotel y publicidad (heurísticas o vía Anthropic)
+- Recomendaciones de RRSS, hotel y publicidad mediante motor heurístico
 - Campañas recientes y ciudades en foco
 
 `backend/marketing/chat.py`
@@ -395,7 +379,7 @@ El sistema autónomo es una capa independiente que opera sobre el backend existe
 | Módulo | Función |
 |--------|---------|
 | `oracle.py` | Consulta y clasifica eventos/noticias por ciudad. Con Gemini genera inteligencia turística real; sin él, usa una base de datos mock de eventos plausibles por ciudad (Feria de Abril, Alhambra, Fiestas de Lisboa, etc.). Clasificación: `cultural_event`, `seasonal_offer`, `tourism_trend`, `travel_alert`, `extreme_weather` |
-| `scheduler.py` | Calcula la próxima fecha objetivo de contacto por usuario. En modo `heuristic` usa mes habitual + lead time; en modo `regression` ajusta una regresión lineal sobre fechas de check-in históricas y simula el envío antes de la fecha prevista. Aplica cooldown para evitar contacto repetitivo |
+| `scheduler.py` | Calcula la próxima fecha objetivo de contacto por usuario usando una heurística simple de mes habitual + lead time. Aplica cooldown para evitar contacto repetitivo |
 | `generator.py` | Reutiliza `campaign_engine`, `channel_selector` y `email_renderer` del pipeline. Genera el copy con Gemini cuando está disponible, incluyendo eventos del Oráculo como gancho. Con afinidad perfil-evento (explorador cultural → eventos culturales, aventurero → tendencias turísticas, lujo → ofertas estacionales) |
 | `heartbeat.py` | Bucle principal que coordina las 4 fases. Modo `tick` (una vez), `loop` (periódico) o `demo` (5 campañas + 1 genérica) |
 | `live.py` | Orquestador **multi-agente concurrente** para el dashboard: N workers de recomendación + 1 worker de propuestas operando sobre una cola compartida. Emite eventos NDJSON en streaming para visualización en tiempo real |

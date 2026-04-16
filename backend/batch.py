@@ -288,7 +288,6 @@ Ejemplos:
   python main.py --phase all
   python main.py --phase segment
   python main.py --phase campaign --moment pre_arrival
-  python main.py --phase campaign --moment pre_arrival --travel-prediction-mode regression
   python main.py --phase campaign --moment checkin_report --guest_id 1014907189
   python main.py --phase campaign --moment post_stay
   python main.py --phase marketing
@@ -324,37 +323,11 @@ Ejemplos:
         default=False,
         help="Enviar realmente los emails vía SendGrid (requiere API key)",
     )
-    parser.add_argument(
-        "--travel-prediction-mode",
-        choices=["heuristic", "regression"],
-        default=None,
-        help=(
-            "Estrategia para el momento pre-arrival. "
-            "'heuristic' mantiene la lógica de mes+leadtime; 'regression' predice el siguiente viaje "
-            "a partir del histórico y simula el envío 21 días antes por defecto."
-        ),
-    )
-    parser.add_argument(
-        "--regression-send-offset-days",
-        type=int,
-        default=None,
-        help="Con regression, número de días antes del viaje predicho para simular el envío (por defecto: 21).",
-    )
-
     args = parser.parse_args()
     dry_run = not args.send
-    if args.travel_prediction_mode == "regression" and args.send:
-        logger.warning(
-            "El modo regression solo simula el envío en este backend. Se ignora --send y se fuerza dry-run."
-        )
-        dry_run = True
 
     if args.phase == "all":
-        run_all(
-            dry_run=dry_run,
-            timing_mode=args.travel_prediction_mode,
-            send_offset_days=args.regression_send_offset_days,
-        )
+        run_all(dry_run=dry_run)
     elif args.phase == "embeddings":
         phase_embeddings()
     elif args.phase == "segment":
@@ -368,8 +341,6 @@ Ejemplos:
             args.moment,
             args.guest_id,
             dry_run=dry_run,
-            timing_mode=args.travel_prediction_mode,
-            send_offset_days=args.regression_send_offset_days,
         )
     elif args.phase == "marketing":
         phase_marketing()

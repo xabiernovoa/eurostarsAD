@@ -11,6 +11,7 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -97,6 +98,98 @@ def _format_segment_tags(seg: dict) -> str:
     )
 
 
+def _format_event_date(event_date: str) -> str:
+    """Formatea una fecha ISO a un texto corto legible para el copy."""
+    try:
+        parsed = datetime.strptime(event_date, "%Y-%m-%d")
+    except ValueError:
+        return event_date
+
+    month_names = {
+        1: "enero",
+        2: "febrero",
+        3: "marzo",
+        4: "abril",
+        5: "mayo",
+        6: "junio",
+        7: "julio",
+        8: "agosto",
+        9: "septiembre",
+        10: "octubre",
+        11: "noviembre",
+        12: "diciembre",
+    }
+    return f"{parsed.day} de {month_names.get(parsed.month, str(parsed.month))}"
+
+
+def _build_events_prompt_block(campaign_data: dict) -> str:
+    """Resume eventos del destino para que Gemini pueda mencionarlos si aportan valor."""
+    events = campaign_data.get("events", [])
+    if not isinstance(events, list) or not events:
+        return "EVENTOS EN DESTINO:\n- No hay eventos relevantes confirmados para esas fechas."
+
+    event_lines: list[str] = []
+    for event in events[:2]:
+        if not isinstance(event, dict):
+            continue
+
+        name = str(event.get("name", "")).strip()
+        if not name:
+            continue
+
+        details = [_format_event_date(str(event.get("date", "")).strip())]
+        event_type = str(event.get("type", "")).strip()
+        if event_type:
+            details.append(event_type)
+
+        distance = event.get("days_from_checkin")
+        if isinstance(distance, int):
+            details.append(f"a {distance} días del check-in")
+
+        event_lines.append(f"- {name} ({', '.join(details)})")
+
+    if not event_lines:
+        return "EVENTOS EN DESTINO:\n- No hay eventos relevantes confirmados para esas fechas."
+
+    return (
+        "EVENTOS EN DESTINO:\n"
+        + "\n".join(event_lines)
+        + "\n- Si alguno aporta valor real al mensaje, puedes mencionarlo brevemente en un "
+        + "body_paragraph.\n- No es obligatorio: omítelo si no encaja de forma natural."
+    )
+
+
+def _build_optional_event_paragraph(campaign_data: dict, age_segment: str) -> str | None:
+    """Genera una mención suave al evento más cercano cuando aporte valor al email."""
+    events = campaign_data.get("events", [])
+    if not isinstance(events, list) or not events or not isinstance(events[0], dict):
+        return None
+
+    featured_event = events[0]
+    hotel = campaign_data.get("recommended_hotel", {})
+    city = hotel.get("city", hotel.get("CITY_NAME", ""))
+    event_name = str(featured_event.get("name", "")).strip()
+    event_date = str(featured_event.get("date", "")).strip()
+    if not city or not event_name or not event_date:
+        return None
+
+    formatted_date = _format_event_date(event_date)
+    if age_segment == "JOVEN":
+        return (
+            f"Además, si te cuadra la fecha, {event_name} se celebra el {formatted_date} "
+            f"en {city} y puede ser el plan perfecto para redondear la escapada."
+        )
+    if age_segment == "SENIOR":
+        return (
+            f"Si su viaje coincide con esas fechas, {event_name}, previsto para el "
+            f"{formatted_date}, puede añadir un atractivo adicional a su visita a {city}."
+        )
+    return (
+        f"Además, durante esas fechas {city} acoge {event_name}, previsto para el "
+        f"{formatted_date}, una oportunidad excelente para enriquecer su estancia."
+    )
+
+
 def _build_prompt(campaign_data: dict, moment: str) -> str:
     """Construye el prompt para el modelo de IA."""
     seg = campaign_data["segment"]
@@ -112,12 +205,7 @@ def _build_prompt(campaign_data: dict, moment: str) -> str:
 
     if moment == "pre_arrival":
         hotel = campaign_data["recommended_hotel"]
-        events = campaign_data.get("events", [])
-        events_text = ""
-        if events:
-            events_text = "Eventos en el destino: " + ", ".join(
-                f"{e['name']} ({e['date']})" for e in events
-            )
+        events_block = _build_events_prompt_block(campaign_data)
 
         prompt = f"""Eres un copywriter experto de la cadena hotelera Eurostars. 
 Genera el contenido de un email pre-estancia personalizado en español.
@@ -148,7 +236,8 @@ CONTEXTO:
 - Duración sugerida: {campaign_data['stay_nights']} noches
 - Temporada: {campaign_data['season']}
 - Preferencias del usuario: {', '.join(campaign_data.get('preferences', []))}
-{events_text}
+
+{events_block}
 
 INSTRUCCIONES DE TONO:
 {tone}
@@ -290,7 +379,11 @@ def _mock_copy(campaign_data: dict, moment: str) -> dict:
                 "ps_line": f"PD: Para reservas telefónicas, llámenos al +34 900 100 200. Estaremos encantados de ayudarle.",
             },
         }
-        return copies.get(age, copies["ADULTO"])
+        copy = dict(copies.get(age, copies["ADULTO"]))
+        event_paragraph = _build_optional_event_paragraph(campaign_data, age)
+        if event_paragraph:
+            copy["body_paragraphs"] = [*copy.get("body_paragraphs", []), event_paragraph]
+        return copy
 
     elif moment == "post_stay":
         last = campaign_data["last_stay"]
