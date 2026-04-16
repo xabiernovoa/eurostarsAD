@@ -124,6 +124,7 @@ def load_guest_directory() -> dict[str, dict]:
                 "first_name": first_name,
                 "last_name": last_name,
                 "email": str(row.get("EMAIL", "")).strip(),
+                "phone": str(row.get("PHONE", "")).strip(),
                 "country": country,
                 "country_label": COUNTRY_LABELS.get(country, country),
                 "nationality": str(row.get("NATIONALITY", "")).strip(),

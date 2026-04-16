@@ -329,6 +329,8 @@ def generate_pre_arrival(
     return {
         "campaign_type": "pre_arrival",
         "guest_id": str(guest_id),
+        "contact_email": str(user_rows["EMAIL"].iloc[0]).strip() if "EMAIL" in user_rows.columns else "",
+        "contact_phone": str(user_rows["PHONE"].iloc[0]).strip() if "PHONE" in user_rows.columns else "",
         "segment": seg,
         "segment_overview": summarize_segment(seg),
         "recommended_hotel": {
@@ -387,12 +389,16 @@ def generate_checkin_report(guest_id: str, embeddings: dict, segments: dict,
     return {
         "campaign_type": "checkin_report",
         "guest_id": str(guest_id),
+        "contact_email": str(first.get("EMAIL", "")).strip(),
+        "contact_phone": str(first.get("PHONE", "")).strip(),
         "segment": seg,
         "segment_overview": summarize_segment(seg),
         "profile_summary": {
             "country": seg["country"],
             "gender": seg["gender"],
             "age_range": seg["age_range"],
+            "email": str(first.get("EMAIL", "")).strip(),
+            "phone": str(first.get("PHONE", "")).strip(),
             "total_stays": int(first["CONFIRMED_RESERVATIONS"]),
             "distinct_hotels": int(first["NUM_DISTINCT_HOTELS"]),
             "avg_score_given": float(first["AVG_SCORE"]),
@@ -439,6 +445,8 @@ def generate_post_stay(guest_id: str, embeddings: dict, segments: dict,
     return {
         "campaign_type": "post_stay",
         "guest_id": str(guest_id),
+        "contact_email": str(last.get("EMAIL", "")).strip(),
+        "contact_phone": str(last.get("PHONE", "")).strip(),
         "segment": seg,
         "segment_overview": summarize_segment(seg),
         "last_stay": {

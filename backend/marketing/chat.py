@@ -122,8 +122,8 @@ def _is_campaign_creation_request(message: str, history: list[dict] | None = Non
 
 def _extract_campaign_brief(message: str, history: list[dict] | None, dashboard: dict) -> dict:
     text = _conversation_text(message, history)
-    segment_cards = dashboard.get("segment_cards", [])
-    focus_cities = dashboard.get("focus_cities", [])
+    segment_cards = ((dashboard.get("segment_rankings") or {}).get("by_size") or [])
+    focus_cities = [item.get("city", "") for item in ((dashboard.get("signal_facts") or {}).get("cities") or [])]
 
     objective = None
     for label, hints in OBJECTIVE_HINTS.items():
@@ -235,18 +235,18 @@ def _campaign_clarification_reply(brief: dict) -> str | None:
 
 
 def _heuristic_campaign_reply(brief: dict, dashboard: dict) -> str:
-    kpis = dashboard.get("kpis", {})
-    top_segment = (dashboard.get("segment_cards") or [{}])[0]
+    top_segment = ((dashboard.get("segment_rankings") or {}).get("by_size") or [{}])[0]
+    top_hotel = (dashboard.get("top_hotels") or [{}])[0]
 
     objective = brief.get("objective") or "activación comercial"
     segment = brief.get("segment") or top_segment.get("segment_label", "segmento prioritario")
     channel = brief.get("channel") or "email"
     moment = brief.get("moment") or "pre-arrival"
-    destination = brief.get("destination") or (dashboard.get("focus_cities") or ["destino prioritario"])[0]
+    destination = brief.get("destination") or top_hotel.get("hotel", "destino prioritario")
     timing = brief.get("timing") or "las próximas 2 semanas"
 
     return (
-        "Perfecto. Con lo que me has dado, te propongo esta campaña:\n\n"
+        "Perfecto. Con lo que me has dado, te propongo esta campaña. Esto es una sugerencia asistida, no un dato observado.\n\n"
         f"- Objetivo: {objective}\n"
         f"- Público: {segment}\n"
         f"- Canal: {channel}\n"
@@ -259,7 +259,7 @@ def _heuristic_campaign_reply(brief: dict, dashboard: dict) -> str:
         f"- Mensaje principal: beneficio concreto y accionable para ese público.\n"
         f"- Activación: salida en {channel} con ventana {moment} durante {timing}.\n"
         f"- CTA: una sola acción prioritaria, sin fricción.\n"
-        f"- KPI a vigilar: conversión e interacción frente al índice medio actual del {round(kpis.get('avg_engagement_index', 0) * 100)}%.\n\n"
+        f"- KPI a vigilar: clics hacia la landing, reservas directas atribuidas y uso de la oferta propuesta.\n\n"
         "Si quieres, en el siguiente mensaje te la convierto ya en una versión completa con asunto, preview, cuerpo y rationale."
     )
 
@@ -267,68 +267,36 @@ def _heuristic_campaign_reply(brief: dict, dashboard: dict) -> str:
 def _build_system_prompt(dashboard: dict) -> str:
     """Construye el prompt de sistema con todo el contexto del dashboard."""
     context = dashboard.get("context", {})
-    kpis = dashboard.get("kpis", {})
-    segment_cards = dashboard.get("segment_cards", [])
-    perf_age = dashboard.get("performance_by_age", [])
-    perf_affinity = dashboard.get("performance_by_affinity", [])
-    perf_value = dashboard.get("performance_by_value_level", [])
-    perf_moment = dashboard.get("performance_by_moment", [])
-    recommendations = dashboard.get("recommendations", {})
-    focus_cities = dashboard.get("focus_cities", [])
-    recent_campaigns = dashboard.get("recent_campaigns", [])
+    overview = dashboard.get("overview_facts", {})
+    audience = dashboard.get("audience_facts", {})
+    channels = dashboard.get("channel_distribution", [])
+    moments = dashboard.get("moment_distribution", [])
+    top_hotels = dashboard.get("top_hotels", [])
+    signal_facts = dashboard.get("signal_facts", {})
+    segment_rankings = dashboard.get("segment_rankings", {})
+    recent_messages = dashboard.get("recent_messages", [])
+    focus_cities = [item.get("city", "") for item in (signal_facts.get("cities") or []) if item.get("city")]
 
-    perf_age_json = json.dumps(
-        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_age],
-        ensure_ascii=False,
-    )
-    perf_affinity_json = json.dumps(
-        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_affinity],
-        ensure_ascii=False,
-    )
-    perf_value_json = json.dumps(
-        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_value],
-        ensure_ascii=False,
-    )
-    perf_moment_json = json.dumps(
-        [{"label": s["label"], "index": s["avg_engagement_index"], "count": s["count"]} for s in perf_moment],
-        ensure_ascii=False,
-    )
-    top_segments_json = json.dumps(
-        [
-            {
-                "segment": s["segment_label"],
-                "users": s["users"],
-                "campaigns": s["campaigns"],
-                "engagement": s["avg_engagement_index"],
-                "adr": s["avg_adr"],
-                "channel": s["dominant_channel"],
-            }
-            for s in segment_cards[:6]
-        ],
-        ensure_ascii=False,
-    )
     recent_json = json.dumps(
         [
             {
-                "type": c["campaign_type"],
-                "segment": c["segment_label"],
-                "channel": c["channel"],
-                "hotel": c["hotel"],
-                "engagement": c["engagement_index"],
+                "type": c.get("campaign_type"),
+                "segment": c.get("segment_label"),
+                "channel": c.get("channel"),
+                "hotel": c.get("hotel"),
+                "subject": c.get("subject"),
             }
-            for c in recent_campaigns[:6]
+            for c in recent_messages[:6]
         ],
         ensure_ascii=False,
     )
-    rrss_summary = (recommendations.get("rrss") or {}).get("summary", "N/A")
-    hotel_summary = (recommendations.get("hotel") or {}).get("summary", "N/A")
-    ads_summary = (recommendations.get("ads") or {}).get("summary", "N/A")
 
     return f"""Eres el director de estrategia de marketing de Eurostars Hotel Company.
 Tienes acceso completo a los datos operativos de campañas, segmentación de clientes y señales del mercado.
 Responde siempre en español. Sé directo, concreto y profesional. No uses emojis.
 Cuando propongas acciones, deben ser específicas y ejecutables.
 Cuando analices datos, cita números concretos del dashboard.
+No presentes métricas sintéticas como si fueran datos observados. Si hablas de propuestas, deja claro que son sugerencias asistidas.
 
 CONTEXTO ESTRATÉGICO:
 - Prioridad actual: {context.get('strategic_priority', 'Sin definir')}
@@ -336,34 +304,35 @@ CONTEXTO ESTRATÉGICO:
 - Señales de recepción: {json.dumps(context.get('reception_notes', []), ensure_ascii=False)}
 - Señales externas: {json.dumps(context.get('external_signals', []), ensure_ascii=False)}
 
-KPIs ACTUALES:
-- Total campañas analizadas: {kpis.get('total_campaigns', 0)}
-- Tamaño audiencia: {kpis.get('audience_size', 0)} usuarios
-- Segmentos activos: {kpis.get('active_segments', 0)}
-- Índice medio de engagement: {kpis.get('avg_engagement_index', 0)}
-- Presión estratégica: {kpis.get('priority_pressure', 0)}/100
+HECHOS DEL DASHBOARD:
+- Usuarios segmentados: {overview.get('guest_count', 0)}
+- Piezas registradas en log: {overview.get('message_count', 0)}
+- Países en la base: {overview.get('country_count', 0)}
+- Hoteles distintos recomendados: {overview.get('hotel_count', 0)}
+- Eventos e insights externos activos: {overview.get('signal_count', 0)}
 
 CIUDADES EN FOCO: {', '.join(focus_cities)}
 
-RENDIMIENTO POR EDAD:
-{perf_age_json}
+MIX DE CANALES:
+{json.dumps(channels, ensure_ascii=False)}
 
-RENDIMIENTO POR AFINIDAD PRINCIPAL:
-{perf_affinity_json}
+MOMENTOS DEL VIAJE:
+{json.dumps(moments, ensure_ascii=False)}
 
-RENDIMIENTO POR NIVEL DE VALOR:
-{perf_value_json}
+HOTELES MÁS RECOMENDADOS:
+{json.dumps(top_hotels[:6], ensure_ascii=False)}
 
-RENDIMIENTO POR MOMENTO:
-{perf_moment_json}
+EVENTOS E INSIGHTS ACTIVOS:
+{json.dumps(signal_facts, ensure_ascii=False)}
 
-TOP SEGMENTOS:
-{top_segments_json}
+AUDIENCIA:
+{json.dumps(audience, ensure_ascii=False)}
 
-RECOMENDACIONES ACTIVAS:
-- RRSS: {rrss_summary}
-- Hotel: {hotel_summary}
-- Ads: {ads_summary}
+SEGMENTOS POR TAMAÑO:
+{json.dumps((segment_rankings.get('by_size') or [])[:6], ensure_ascii=False)}
+
+SEGMENTOS POR ADR:
+{json.dumps((segment_rankings.get('by_adr') or [])[:6], ensure_ascii=False)}
 
 CAMPAÑAS RECIENTES (últimas 6):
 {recent_json}
@@ -378,6 +347,8 @@ def _detect_intent(message: str) -> str:
 
     if any(w in msg for w in ["analizar", "análisis", "analiza", "situación", "estado", "cómo va", "resumen", "overview"]):
         return "analysis"
+    if any(w in msg for w in ["evento", "eventos", "insight", "insights", "contexto", "señal", "señales"]):
+        return "destinations"
     if any(w in msg for w in ["segmento", "audiencia", "perfil", "joven", "adulto", "senior", "lujo", "cultural", "aventurero", "gastro"]):
         return "segment"
     if any(w in msg for w in ["instagram", "tiktok", "redes", "rrss", "social", "contenido", "reels", "stories"]):
@@ -403,200 +374,175 @@ def _detect_intent(message: str) -> str:
 def _heuristic_reply(message: str, dashboard: dict) -> str:
     """Genera una respuesta contextual con datos del dashboard sin usar API de IA."""
     intent = _detect_intent(message)
-    kpis = dashboard.get("kpis", {})
+    overview = dashboard.get("overview_facts", {})
     context = dashboard.get("context", {})
-    segments = dashboard.get("segment_cards", [])
-    perf_age = dashboard.get("performance_by_age", [])
-    perf_affinity = dashboard.get("performance_by_affinity", [])
-    perf_value = dashboard.get("performance_by_value_level", [])
-    focus_cities = dashboard.get("focus_cities", [])
-    recommendations = dashboard.get("recommendations", {})
-    recent = dashboard.get("recent_campaigns", [])
+    channels = dashboard.get("channel_distribution", [])
+    moments = dashboard.get("moment_distribution", [])
+    top_hotels = dashboard.get("top_hotels", [])
+    signal_facts = dashboard.get("signal_facts", {})
+    segment_rankings = dashboard.get("segment_rankings", {})
+    audience_facts = dashboard.get("audience_facts", {})
+
+    segments_by_size = segment_rankings.get("by_size", [])
+    segments_by_adr = segment_rankings.get("by_adr", [])
+    countries = audience_facts.get("by_country", [])
+    values = audience_facts.get("by_value", [])
+    biggest_segment = segments_by_size[0] if segments_by_size else {}
+    top_adr_segment = segments_by_adr[0] if segments_by_adr else {}
+    top_hotel = top_hotels[0] if top_hotels else {}
+    top_country = countries[0] if countries else {}
 
     if intent == "analysis":
-        top_seg = segments[0] if segments else {}
-        worst_age = min(perf_age, key=lambda x: x["avg_engagement_index"]) if perf_age else {}
         return (
-            f"Situación actual del pipeline de marketing:\n\n"
-            f"Tenemos {kpis.get('total_campaigns', 0)} campañas activas sobre una base de "
-            f"{kpis.get('audience_size', 0)} usuarios segmentados en {kpis.get('active_segments', 0)} cruces de edad, afinidad y valor.\n\n"
-            f"El índice de engagement medio es del {round(kpis.get('avg_engagement_index', 0) * 100)}%, "
-            f"con una presión estratégica de {kpis.get('priority_pressure', 0)}/100.\n\n"
-            f"El segmento con mejor tracción es {top_seg.get('segment_label', 'N/A')} "
-            f"({top_seg.get('users', 0)} usuarios, engagement {round(top_seg.get('avg_engagement_index', 0) * 100)}%, "
-            f"ADR medio {round(top_seg.get('avg_adr', 0))}€).\n\n"
-            f"El segmento de edad con menor rendimiento es {worst_age.get('label', 'N/A')} "
-            f"({round(worst_age.get('avg_engagement_index', 0) * 100)}% engagement).\n\n"
-            f"Ciudades en foco: {', '.join(focus_cities)}.\n\n"
+            "Situación actual del dashboard:\n\n"
+            f"- Usuarios segmentados: {overview.get('guest_count', 0)}\n"
+            f"- Piezas registradas en el log: {overview.get('message_count', 0)}\n"
+            f"- Países en la base: {overview.get('country_count', 0)}\n"
+            f"- Hoteles distintos recomendados: {overview.get('hotel_count', 0)}\n"
+            f"- Eventos e insights externos activos: {overview.get('signal_count', 0)}\n\n"
+            f"El segmento más grande ahora es {biggest_segment.get('segment_label', 'N/A')} "
+            f"con {biggest_segment.get('users', 0)} usuarios y ADR medio de {round(biggest_segment.get('avg_adr', 0))}€.\n\n"
+            f"El segmento con mayor ADR es {top_adr_segment.get('segment_label', 'N/A')} "
+            f"con {top_adr_segment.get('users', 0)} usuarios y ADR medio de {round(top_adr_segment.get('avg_adr', 0))}€.\n\n"
+            f"El hotel recomendado con más presencia en el log es {top_hotel.get('hotel', 'N/A')} "
+            f"con {top_hotel.get('count', 0)} piezas.\n\n"
             f"Prioridad estratégica: {context.get('strategic_priority', 'Sin definir')}."
         )
 
     if intent == "segment":
         lines = ["Desglose de segmentos prioritarios:\n"]
-        for seg in segments[:5]:
+        for seg in segments_by_size[:5]:
             lines.append(
                 f"- {seg['segment_label']}: {seg['users']} usuarios, "
-                f"{seg['campaigns']} campañas, engagement {round(seg['avg_engagement_index'] * 100)}%, "
-                f"ADR medio {round(seg['avg_adr'])}€, canal dominante: {seg['dominant_channel']}"
+                f"ADR medio {round(seg['avg_adr'])}€, lead time medio {seg['avg_leadtime']} días, "
+                f"canal dominante: {seg.get('top_channel', 'N/A')}"
             )
-        lines.append("\nLos segmentos premium y lujo son los que más margen ofrecen para upselling.")
-        hv = [s for s in perf_value if s["label"] in {"Premium", "Lujo"}]
-        if hv:
+        premium = [s for s in values if s["label"] in {"Premium", "Lujo"}]
+        if premium:
             lines.append(
-                f"Los segmentos de mayor valor concentran un engagement del {round(hv[0]['avg_engagement_index'] * 100)}% "
-                f"sobre {hv[0]['count']} campañas."
+                f"\nEn la base actual hay {sum(item['count'] for item in premium)} usuarios de valor Premium o Lujo."
             )
         return "\n".join(lines)
 
     if intent == "social_media":
-        rrss = recommendations.get("rrss", {})
+        cities = signal_facts.get("cities", [])
+        city_names = [item["city"] for item in cities[:3]]
         return (
-            f"Plan de acción para redes sociales:\n\n"
-            f"{rrss.get('summary', 'Sin resumen disponible.')}\n\n"
-            f"Acciones concretas:\n" +
-            "\n".join(f"- {a}" for a in rrss.get("actions", [])) +
-            f"\n\nEl contenido debería priorizar los segmentos con mejor engagement: "
-            f"{', '.join(s['segment_label'] for s in segments[:3])}.\n\n"
-            f"Recomendación adicional: crear una serie de contenido visual centrado en las ciudades en foco "
-            f"({', '.join(focus_cities)}) con narrativa de experiencia local, no de hotel."
+            "Propuesta de trabajo para redes sociales:\n\n"
+            "- Crear una línea de contenido sobre experiencia local y no solo sobre habitación.\n"
+            f"- Priorizar los segmentos más grandes: {', '.join(seg['segment_label'] for seg in segments_by_size[:3]) or 'segmentos principales'}.\n"
+            f"- Conectar el contenido con los eventos e insights activos en {', '.join(city_names) or 'las ciudades activas'}.\n"
+            f"- Reutilizar como base visual los hoteles con más presencia en el log: {', '.join(item['hotel'] for item in top_hotels[:3]) or 'los hoteles principales'}.\n\n"
+            "Esto es una sugerencia asistida para planificación, no un dato observado."
         )
 
     if intent == "hotel_actions":
-        hotel = recommendations.get("hotel", {})
         reception = context.get("reception_notes", [])
         return (
-            f"Plan de acciones dentro del hotel:\n\n"
-            f"{hotel.get('summary', 'Sin resumen disponible.')}\n\n"
-            f"Acciones concretas:\n" +
-            "\n".join(f"- {a}" for a in hotel.get("actions", [])) +
-            f"\n\nSeñales detectadas por recepción:\n" +
+            "Propuesta de acciones dentro del hotel:\n\n"
+            "- Preparar scripts de recepción para upgrade, late checkout y experiencias locales.\n"
+            "- Alinear el mensaje pre-arrival con lo que recepción puede vender realmente.\n"
+            f"- Concentrar el esfuerzo primero en los hoteles con más actividad del log: {', '.join(item['hotel'] for item in top_hotels[:3]) or 'los hoteles más activos'}.\n\n"
+            "Observaciones actuales de recepción:\n" +
             "\n".join(f"- {r}" for r in reception) +
-            f"\n\nEstas señales indican oportunidades claras de upselling en el momento del check-in, "
-            f"especialmente para los perfiles culturales y gastronómicos."
+            "\n\nEsto es una recomendación operativa, no una métrica observada."
         )
 
     if intent == "advertising":
-        ads = recommendations.get("ads", {})
+        city_names = [item["city"] for item in signal_facts.get("cities", [])[:3]]
         return (
-            f"Estrategia de publicidad externa:\n\n"
-            f"{ads.get('summary', 'Sin resumen disponible.')}\n\n"
-            f"Acciones propuestas:\n" +
-            "\n".join(f"- {a}" for a in ads.get("actions", [])) +
-            f"\n\nSugerencia de campaña nueva:\n"
-            f"- Campaña de retargeting dinámico en Meta para usuarios que han visitado las páginas de "
-            f"{', '.join(focus_cities[:2])} en los últimos 30 días.\n"
-            f"- Audience lookalike basada en el segmento {segments[0]['segment_label'] if segments else 'top'} "
-            f"con exclusión de clientes existentes.\n"
-            f"- Budget split recomendado: 60% performance (reserva directa), 40% awareness (contenido de destino)."
+            "Propuesta de publicidad externa:\n\n"
+            f"- Priorizar ciudades con contexto activo: {', '.join(city_names) or 'las ciudades con eventos o insights activos'}.\n"
+            f"- Construir audiencias a partir de los segmentos más grandes: {', '.join(seg['segment_label'] for seg in segments_by_size[:2]) or 'segmentos principales'}.\n"
+            f"- Si buscas margen, vigilar especialmente segmentos de mayor ADR como {top_adr_segment.get('segment_label', 'los segmentos premium')}.\n"
+            f"- Separar campañas de captación y campañas de remarketing para medirlas mejor.\n\n"
+            "Esto es una sugerencia de planificación, no un resultado medido del canal."
         )
 
     if intent == "channel_mix":
         lines = ["Análisis del mix de canales:\n"]
-        channel_data = {}
-        for c in recent:
-            ch = c.get("channel", "email")
-            if ch not in channel_data:
-                channel_data[ch] = {"count": 0, "total_engagement": 0}
-            channel_data[ch]["count"] += 1
-            channel_data[ch]["total_engagement"] += c.get("engagement_index", 0)
-        for ch, data in sorted(channel_data.items(), key=lambda x: -x[1]["count"]):
-            avg = round(data["total_engagement"] / max(data["count"], 1) * 100)
-            lines.append(f"- {ch}: {data['count']} campañas recientes, engagement medio {avg}%")
+        for channel in channels:
+            lines.append(f"- {channel['label']}: {channel['count']} piezas ({round(channel['share'] * 100)}%)")
         lines.append(
-            f"\nEl canal dominante varía por segmento. Los jóvenes responden mejor a push, "
-            f"los adultos y senior a email. El SMS tiene mejor tracción con leadtimes cortos (<7 días)."
+            "\nEste bloque describe volumen del log. No implica rendimiento real de aperturas, clics o conversión."
         )
         return "\n".join(lines)
 
     if intent == "destinations":
-        lines = [f"Ciudades en foco actual: {', '.join(focus_cities)}.\n"]
-        external = context.get("external_signals", [])
-        if external:
-            lines.append("Señales externas activas:")
-            for s in external:
-                lines.append(f"- {s}")
-        city_campaigns = {}
-        for c in recent:
-            h = c.get("hotel", "")
-            if h:
-                city_campaigns[h] = city_campaigns.get(h, 0) + 1
-        if city_campaigns:
-            lines.append("\nActividad reciente por hotel/destino:")
-            for hotel, count in sorted(city_campaigns.items(), key=lambda x: -x[1]):
-                lines.append(f"- {hotel}: {count} campañas recientes")
+        lines = ["Destinos y contexto activo:\n"]
+        if top_hotels:
+            lines.append("Hoteles más presentes en el log:")
+            for hotel in top_hotels[:5]:
+                lines.append(f"- {hotel['hotel']}: {hotel['count']} piezas")
+        if signal_facts.get("signals"):
+            lines.append("\nEventos e insights externos:")
+            for signal in signal_facts["signals"]:
+                lines.append(f"- {signal['text']}")
         return "\n".join(lines)
 
     if intent == "new_ideas":
-        top = segments[:2] if len(segments) >= 2 else segments
-        top_names = [s["segment_label"] for s in top]
+        city_names = [item["city"] for item in signal_facts.get("cities", [])[:2]]
         return (
-            f"Ideas de campaña basadas en los datos actuales:\n\n"
-            f"1. Campaña \"48 horas en...\" para {top_names[0] if top_names else 'segmento top'}:\n"
-            f"   - Serie de emails + stories con itinerario curado de fin de semana\n"
-            f"   - Dirigida a perfiles culturales con engagement alto\n"
-            f"   - CTA: reserva directa con early check-in incluido\n\n"
-            f"2. Campaña de fidelización cruzada:\n"
-            f"   - Detectar huéspedes que han visitado 2+ destinos Eurostars\n"
-            f"   - Ofrecerles acceso a programa de experiencias exclusivas\n"
-            f"   - Canal: email personalizado + notificación push\n\n"
-            f"3. Activación gastronómica en {focus_cities[0] if focus_cities else 'destinos clave'}:\n"
-            f"   - Colaboración con restaurantes locales para paquetes de escapada\n"
-            f"   - Contenido en redes: behind-the-scenes con chef local\n"
-            f"   - Target: segmentos con afinidad gastronómica y cultural\n\n"
-            f"4. Campaña de re-engagement post-stay:\n"
-            f"   - Los post-stay actuales tienen un engagement del "
-            f"{round(next((p['avg_engagement_index'] for p in dashboard.get('performance_by_moment', []) if p['label'] == 'post_stay'), 0.5) * 100)}%\n"
-            f"   - Propuesta: añadir incentivo de reserva directa con descuento para próximo viaje\n"
-            f"   - A/B test: con incentivo vs sin incentivo"
+            "Ideas de campaña basadas en el dashboard actual:\n\n"
+            f"1. Campaña de reserva directa para {segments_by_size[0]['segment_label'] if segments_by_size else 'el segmento principal'}:\n"
+            "   - Mensaje centrado en beneficio concreto y experiencia local.\n"
+            "   - Canal sugerido: email o paid social según objetivo.\n\n"
+            f"2. Activación vinculada a contexto activo en {', '.join(city_names) or 'las ciudades con eventos'}:\n"
+            "   - Combinar contenido de destino, oferta hotelera y CTA único.\n\n"
+            f"3. Propuesta premium para {top_adr_segment.get('segment_label', 'segmentos de mayor ADR')}:\n"
+            "   - Upsell de experiencia, upgrade o pack exclusivo.\n\n"
+            "4. Trabajo coordinado marketing + recepción:\n"
+            "   - Mismo mensaje antes de la llegada y en el momento del check-in.\n\n"
+            "Todo lo anterior son sugerencias asistidas para ideación."
         )
 
     if intent == "weak_spots":
-        worst_segs = sorted(segments, key=lambda s: s["avg_engagement_index"])[:3]
         lines = ["Puntos débiles detectados:\n"]
-        for seg in worst_segs:
+        if overview.get("rows_without_hotel", 0):
             lines.append(
-                f"- {seg['segment_label']}: engagement {round(seg['avg_engagement_index'] * 100)}%, "
-                f"{seg['users']} usuarios, ADR {round(seg['avg_adr'])}€"
+                f"- Hay {overview.get('rows_without_hotel', 0)} piezas sin hotel recomendado en el log."
             )
-        worst_age = min(perf_age, key=lambda x: x["avg_engagement_index"]) if perf_age else {}
-        if worst_age:
-            lines.append(
-                f"\nEl segmento de edad con peor rendimiento es {worst_age['label']} "
-                f"({round(worst_age['avg_engagement_index'] * 100)}% engagement)."
-            )
+        checkin = next((item for item in moments if item.get("key") == "checkin_report"), None)
+        poststay = next((item for item in moments if item.get("key") == "post_stay"), None)
+        if checkin and checkin.get("without_hotel", 0):
+            lines.append("- El bloque de recepción no arrastra hotel recomendado en el dataset actual.")
+        if poststay and poststay.get("without_hotel", 0):
+            lines.append("- El bloque de postestancia tampoco arrastra hotel recomendado.")
+        if not signal_facts.get("signals"):
+            lines.append("- No hay eventos o insights externos cargados en contexto.")
         lines.append(
             "\nRecomendaciones para mejorar:\n"
-            "- Revisar creatividades y asuntos de email para los segmentos con bajo engagement\n"
-            "- Testear canales alternativos (push para jóvenes, SMS para leadtimes cortos)\n"
-            "- Considerar ajustar la frecuencia de contacto para evitar fatiga"
+            "- Completar mejor el dato de hotel en todas las piezas si quieres comparar destinos con más rigor.\n"
+            "- Mantener actualizado el contexto externo para que el generador y el chat sean más útiles.\n"
+            "- Separar siempre métricas observadas de sugerencias asistidas."
         )
         return "\n".join(lines)
 
     if intent == "top_performers":
-        best_segs = sorted(segments, key=lambda s: -s["avg_engagement_index"])[:3]
         lines = ["Segmentos con mejor rendimiento:\n"]
-        for seg in best_segs:
+        for seg in segments_by_size[:3]:
             lines.append(
-                f"- {seg['segment_label']}: engagement {round(seg['avg_engagement_index'] * 100)}%, "
-                f"{seg['users']} usuarios, ADR medio {round(seg['avg_adr'])}€, canal: {seg['dominant_channel']}"
+                f"- {seg['segment_label']}: {seg['users']} usuarios, ADR medio {round(seg['avg_adr'])}€, canal dominante {seg.get('top_channel', 'N/A')}"
             )
+        if top_hotels:
+            lines.append("\nHoteles más presentes en el log:")
+            for hotel in top_hotels[:3]:
+                lines.append(f"- {hotel['hotel']}: {hotel['count']} piezas")
         lines.append(
-            f"\nOportunidad: concentrar presupuesto en los 2-3 segmentos top para maximizar ROI, "
-            f"y usar aprendizajes de sus campañas como plantilla para mejorar los segmentos más débiles."
+            "\nOportunidad: concentrar primero el trabajo de activación en los segmentos más grandes y en los hoteles con más volumen registrado."
         )
         return "\n".join(lines)
 
     # General fallback
     return (
         f"Estoy aquí para ayudarte con la estrategia de marketing. Puedo:\n\n"
-        f"- Analizar la situación actual de campañas y segmentos\n"
-        f"- Proponer nuevas ideas de campañas de publicidad\n"
-        f"- Desglosar el rendimiento por segmento, canal o destino\n"
-        f"- Recomendar acciones para redes sociales o dentro del hotel\n"
-        f"- Identificar puntos débiles y oportunidades\n"
-        f"- Analizar el mix de canales\n\n"
-        f"Datos actuales: {kpis.get('total_campaigns', 0)} campañas, "
-        f"{kpis.get('audience_size', 0)} usuarios, engagement medio {round(kpis.get('avg_engagement_index', 0) * 100)}%."
+        f"- Resumir el estado actual del dashboard con datos reales\n"
+        f"- Desglosar segmentos, canales, hoteles y contexto activo\n"
+        f"- Señalar huecos de dato o inconsistencias operativas\n"
+        f"- Proponer campañas o acciones como sugerencias asistidas\n\n"
+        f"Datos actuales: {overview.get('message_count', 0)} piezas en el log, "
+        f"{overview.get('guest_count', 0)} usuarios segmentados y "
+        f"{overview.get('signal_count', 0)} eventos o insights externos activos."
     )
 
 
@@ -642,20 +588,28 @@ def _gemini_reply(message: str, history: list[dict], dashboard: dict) -> str | N
 
 def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
     """Genera propuestas de campaña diversas para todos los canales de marketing."""
-    segments = dashboard.get("segment_cards", [])
+    segments = ((dashboard.get("segment_rankings") or {}).get("by_size") or [])
+    high_adr_segments = ((dashboard.get("segment_rankings") or {}).get("by_adr") or [])
     context = dashboard.get("context", {})
-    kpis = dashboard.get("kpis", {})
-    focus_cities = dashboard.get("focus_cities", [])
+    overview = dashboard.get("overview_facts", {})
+    top_hotels = dashboard.get("top_hotels", [])
+    audience = dashboard.get("audience_facts", {})
+    signal_facts = dashboard.get("signal_facts", {})
     external = context.get("external_signals", [])
     reception = context.get("reception_notes", [])
-    perf_affinity = dashboard.get("performance_by_affinity", [])
 
     proposals = []
-    city1 = focus_cities[0] if focus_cities else "destino principal"
-    city2 = focus_cities[1] if len(focus_cities) >= 2 else "destino secundario"
+    signal_cities = [item.get("city", "") for item in (signal_facts.get("cities") or []) if item.get("city")]
+    city1 = signal_cities[0] if signal_cities else "destino principal"
+    city2 = signal_cities[1] if len(signal_cities) >= 2 else "destino secundario"
+    hotel1 = (top_hotels[0] or {}).get("hotel") if top_hotels else "hotel prioritario"
+    hotel2 = (top_hotels[1] or {}).get("hotel") if len(top_hotels) >= 2 else hotel1
     top_seg = segments[0] if segments else {}
-    cultural_seg = next((s for s in segments if s.get("primary_affinity") == "cultural"), segments[0] if segments else {})
-    gastro_seg = next((s for s in segments if s.get("primary_affinity") == "gastronomico"), segments[0] if segments else {})
+    cultural_seg = next((s for s in segments if "Cultural" in str(s.get("segment_label", ""))), segments[0] if segments else {})
+    premium_seg = next((s for s in high_adr_segments if s.get("users", 0) >= 3), high_adr_segments[0] if high_adr_segments else top_seg)
+    country_top = ((audience.get("by_country") or [{}])[0]).get("label", "la base principal")
+    message_count = overview.get("message_count", 0)
+    guest_count = overview.get("guest_count", 0)
 
     # ── 1. RRSS: Serie de contenido ──────────────────────────
     proposals.append({
@@ -666,22 +620,23 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "objective": "Awareness orgánico y tráfico a web de reserva directa",
         "segment": cultural_seg.get("segment_label", "Cultural"),
         "segment_users": cultural_seg.get("users", 0),
-        "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
         "channel": "Instagram + TikTok",
         "campaign_type": "contenido_rrss",
         "timing": "4 semanas · 3 piezas/semana",
-        "estimated_engagement": 0.74,
         "subject_line": "Descubre el barrio como un vecino",
         "preview_text": "Formato: Reels 30-60s y carruseles con rutas de barrio, restaurantes locales y detrás de cámaras del hotel.",
         "body_summary": (
             f"Serie de contenido visual para Instagram Reels y TikTok centrada en la vida local de {city1}. "
             f"3 pilares de contenido: 1) Ruta a pie por el barrio del hotel (60s), 2) Restaurante local con plato estrella (30s), "
-            f"3) Behind-the-scenes del hotel: rooftop, cocina, preparación de habitación premium. "
+            f"3) Behind-the-scenes del hotel y del destino: rooftop, cocina, preparación de habitación premium y ambientación local. "
             f"Cada pieza incluye CTA en bio hacia landing de reserva directa. Colaborar con micro-influencer local (5K-20K seguidores) para la serie."
         ),
         "deliverables": "12 Reels, 4 carruseles, 1 highlight permanente, 4 stories interactivas",
         "priority": "alta",
-        "rationale": f"El contenido experiencial orgánico tiene coste bajo y largo recorrido. Alineado con el segmento {cultural_seg.get('segment_label', '')} (engagement {round(cultural_seg.get('avg_engagement_index', 0)*100)}%).",
+        "rationale": (
+            f"Encaja con el peso del segmento {cultural_seg.get('segment_label', 'cultural')} "
+            f"({cultural_seg.get('users', 0)} usuarios en la base) y con el contexto activo en {city1}."
+        ),
     })
 
     # ── 2. Hotel: Decoración y señalización ──────────────────
@@ -689,19 +644,17 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "id": "camp-002",
         "category": "hotel",
         "category_label": "Acción en hotel",
-        "name": f"Rediseño de señalización y experiencia en {city1}",
+        "name": f"Rediseño de señalización y experiencia en {hotel1}",
         "objective": "Mejorar percepción de marca y facilitar upselling en el hotel",
         "segment": "Todos los huéspedes in-house",
-        "segment_users": kpis.get("audience_size", 0),
-        "segment_engagement": 0.90,
+        "segment_users": guest_count,
         "channel": "Físico / in-hotel",
         "campaign_type": "hotel_insite",
         "timing": "Implementación en 3-4 semanas",
-        "estimated_engagement": 0.85,
         "subject_line": "Programa de experiencia en hotel",
         "preview_text": "QR interactivos, decoración temática estacional y materiales de upsell en puntos clave del hotel.",
         "body_summary": (
-            f"Rediseño de la experiencia física dentro de {city1}: "
+            f"Rediseño de la experiencia física dentro de {hotel1}: "
             f"1) QR en caballete de recepción: lleva a landing con experiencias locales reservables (rutas, restaurantes, late checkout). "
             f"2) Decoración estacional en lobby: fotografía gran formato de la ciudad con narrativa 'Eurostars te conecta con la ciudad'. "
             f"3) Tarjetas en habitación con recomendaciones de barrio personalizadas por perfil (aventurero, cultural, gastronómico). "
@@ -710,7 +663,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         ),
         "deliverables": "Diseño de QR + landing, 3 formatos de cartelería, tarjetas habitación (3 versiones), contenido pantalla",
         "priority": "alta",
-        "rationale": f"Recepción detecta: «{reception[0] if reception else 'interés en experiencias locales'}». La señalización convierte un momento pasivo (espera) en oportunidad de venta.",
+        "rationale": (
+            f"Recepción ya está aportando observaciones útiles ({len(reception)} activas) y "
+            f"{hotel1} es uno de los hoteles con más presencia en el log."
+        ),
     })
 
     # ── 3. Localización: Partnerships locales ────────────────
@@ -720,13 +676,11 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "category_label": "Localización",
         "name": f"Programa de partnerships locales — {city1}",
         "objective": "Crear experiencias diferenciales y contenido auténtico",
-        "segment": gastro_seg.get("segment_label", "GASTRONOMÍA"),
-        "segment_users": gastro_seg.get("users", 0),
-        "segment_engagement": gastro_seg.get("avg_engagement_index", 0.80),
+        "segment": premium_seg.get("segment_label", "Segmentos de alto valor"),
+        "segment_users": premium_seg.get("users", 0),
         "channel": "Presencial + digital",
         "campaign_type": "local_partnership",
         "timing": "Activo de mayo a septiembre",
-        "estimated_engagement": 0.80,
         "subject_line": f"Alianzas locales en {city1}",
         "preview_text": "Acuerdos con restaurantes, bodegas y galerías locales para crear paquetes exclusivos Eurostars.",
         "body_summary": (
@@ -740,7 +694,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         ),
         "deliverables": "3-5 acuerdos firmados, kit co-branding, landing experiencias, material para partners",
         "priority": "alta",
-        "rationale": f"El segmento gastronómico ({gastro_seg.get('segment_label', '')}) tiene alto ADR ({round(gastro_seg.get('avg_adr', 0))}€) y valor aspiracional. Los partnerships generan contenido auténtico sin coste de producción.",
+        "rationale": (
+            f"Se apoya en segmentos con ADR alto como {premium_seg.get('segment_label', 'los perfiles premium')} "
+            f"y en destinos con contexto activo como {city1}."
+        ),
     })
 
     # ── 4. Branding: Imagen corporativa ──────────────────────
@@ -751,17 +708,15 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "name": "Refresh visual de temporada Eurostars",
         "objective": "Actualizar presencia visual e identidad de marca en todos los canales",
         "segment": "Todos los segmentos",
-        "segment_users": kpis.get("audience_size", 0),
-        "segment_engagement": 0.70,
+        "segment_users": guest_count,
         "channel": "Todos (digital + físico)",
         "campaign_type": "branding",
         "timing": "Desarrollo 2 semanas, roll-out progresivo",
-        "estimated_engagement": 0.68,
         "subject_line": "Línea visual primavera-verano 2026",
         "preview_text": "Nueva paleta cromática, fotografía de destino y plantillas de comunicación para la temporada.",
         "body_summary": (
             "Crear una línea visual de temporada que unifique todos los puntos de contacto: "
-            "1) Fotografía: nueva sesión en los 3 hoteles en foco con modelo + lifestyle local (no solo habitación vacía). "
+            f"1) Fotografía: nueva sesión en {hotel1} y {hotel2} con modelo + lifestyle local (no solo habitación vacía). "
             "2) Paleta estacional: tonos cálidos dorados + verdes mediterráneos para headers, banners y señalización. "
             "3) Kit de plantillas: email (banner + footer), stories (3 templates), feed (carrusel + single), firma de email corporativa. "
             "4) Adaptación de portadas de RRSS, headers de Booking/Expedia y web propia. "
@@ -769,7 +724,9 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         ),
         "deliverables": "Sesión fotográfica (50+ imágenes), kit plantillas (15 formatos), guía de tono, portadas RRSS",
         "priority": "media",
-        "rationale": "Una imagen de marca cohesiva aumenta el reconocimiento y la confianza. Los activos generados alimentan 3-4 meses de comunicación.",
+        "rationale": (
+            f"Con {message_count} piezas registradas en el log, tener un sistema visual coherente ayuda a unificar email, RRSS y soportes in-hotel."
+        ),
     })
 
     # ── 5. Geolocalización: Push y SMS ───────────────────────
@@ -780,13 +737,11 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             "category_label": "Geolocalización",
             "name": f"Campaña de proximidad en {city1}",
             "objective": "Captar reservas de último minuto y walk-ins premium",
-            "segment": "Adulto · Afinidad mixta · Confort",
+            "segment": top_seg.get("segment_label", "Segmento principal"),
             "segment_users": top_seg.get("users", 0),
-            "segment_engagement": top_seg.get("avg_engagement_index", 0.75),
             "channel": "Push + SMS + Google Ads local",
             "campaign_type": "geolocalizacion",
             "timing": "Activo en continuo (jueves a domingo)",
-            "estimated_engagement": 0.65,
             "subject_line": f"Estás cerca de {city1} — tu habitación te espera",
             "preview_text": f"Notificación push y SMS geolocalizado para usuarios en un radio de 50km del hotel.",
             "body_summary": (
@@ -799,7 +754,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             ),
             "deliverables": "Configuración geofencing, 3 creatividades push, 2 plantillas SMS, campaña Google Ads local, diseño cartelería",
             "priority": "media",
-            "rationale": "Las reservas de último minuto tienen menor coste de adquisición. El targeting por proximidad alcanza usuarios con intención real de viaje.",
+            "rationale": (
+                f"Tiene sentido probarlo sobre el segmento más voluminoso ({top_seg.get('segment_label', 'segmento principal')}) "
+                f"y sobre destinos con eventos o insights activos."
+            ),
         })
 
     # ── 6. Hotel: Upsell pre-arrival automatizado ────────────
@@ -811,12 +769,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             "name": "Automatización de upsell pre-check-in",
             "objective": "Incrementar revenue por reserva con upgrades y experiencias",
             "segment": "Todos los segmentos con reserva confirmada",
-            "segment_users": kpis.get("audience_size", 0),
-            "segment_engagement": kpis.get("avg_engagement_index", 0.75),
+            "segment_users": guest_count,
             "channel": "Email + WhatsApp",
             "campaign_type": "pre_arrival",
             "timing": "48h antes del check-in (automatizado)",
-            "estimated_engagement": 0.78,
             "subject_line": "Mejora tu estancia antes de llegar",
             "preview_text": "Late checkout, upgrade y experiencias locales a precio especial para ti.",
             "body_summary": (
@@ -825,11 +781,13 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
                 f"2) Si no abre el email en 12h, enviar recordatorio por WhatsApp Business con carrusel visual. "
                 f"3) Incluir mapa interactivo con los partnerships locales activos y botón de reserva directa. "
                 f"4) Variante para premium y lujo: ofrecer acceso exclusivo a experiencia privada (cata, rooftop sunset). "
-                f"Basado en señal de recepción: «{reception[0]}»."
+                f"Basado en esta observación de recepción: «{reception[0]}»."
             ),
             "deliverables": "Flujo automatizado (email + WhatsApp), 3 plantillas segmentadas, mapa interactivo, landing upsell",
             "priority": "alta",
-            "rationale": f"Recepción detecta demanda real de upgrades. Automatizar maximiza la conversión sin carga operativa.",
+            "rationale": (
+                f"Hay {guest_count} usuarios segmentados y recepción ya está aportando observaciones que pueden convertirse en ofertas previas a la llegada."
+            ),
         })
 
     # ── 7. Evento: Activación especial ───────────────────────
@@ -843,11 +801,9 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             "objective": "Captar demanda del evento y generar contenido de marca",
             "segment": cultural_seg.get("segment_label", "Cultural"),
             "segment_users": cultural_seg.get("users", 0),
-            "segment_engagement": cultural_seg.get("avg_engagement_index", 0.75),
             "channel": "Multicanal (email + RRSS + hotel + partners)",
             "campaign_type": "evento",
             "timing": "Pre-evento (2 semanas), durante y post",
-            "estimated_engagement": 0.82,
             "subject_line": f"Tu hotel para vivir {signal[:40]}",
             "preview_text": "Paquete exclusivo: alojamiento + itinerario del evento + experiencia Eurostars.",
             "body_summary": (
@@ -860,7 +816,7 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
             ),
             "deliverables": "Pack de emails (3), 15 stories, roll-up de lobby, detalle de bienvenida, reels postevento, email UGC",
             "priority": "alta",
-            "rationale": f"Señal externa activa. Los eventos generan picos de demanda predecibles y contenido de alto valor para RRSS.",
+            "rationale": f"Parte de un evento o insight que ya está cargado en el contexto activo: «{signal}».",
         })
 
     # ── 8. Decoración: Rediseño espacios comunes ─────────────
@@ -871,12 +827,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         "name": f"Intervención artística en zonas comunes — {city1}",
         "objective": "Crear momentos 'Instagrameables' y reforzar identidad de destino",
         "segment": "JOVEN + ADULTO · Todos los perfiles",
-        "segment_users": kpis.get("audience_size", 0),
-        "segment_engagement": 0.72,
+        "segment_users": guest_count,
         "channel": "Físico / in-hotel",
         "campaign_type": "decoracion",
         "timing": "Instalación en 2 semanas, rotación trimestral",
-        "estimated_engagement": 0.70,
         "subject_line": f"El arte de la ciudad, dentro del hotel",
         "preview_text": f"Intervención artística y fotográfica que conecta {city1} con la experiencia Eurostars.",
         "body_summary": (
@@ -889,7 +843,10 @@ def _generate_heuristic_proposals(dashboard: dict) -> list[dict]:
         ),
         "deliverables": "Briefing artista, diseño rincón foto, plan de rotación anual, selección editorial, difusor de aroma",
         "priority": "media",
-        "rationale": "Los espacios 'Instagrameables' generan UGC gratuito. El 73% de viajeros millennials elige hotel con espacios fotogénicos (Booking Insights 2025).",
+        "rationale": (
+            f"Es una propuesta de marca pensada para hoteles con volumen como {hotel1} y para públicos amplios "
+            f"como {country_top} o los segmentos jóvenes y adultos de la base."
+        ),
     })
 
     return proposals
@@ -911,10 +868,10 @@ def _generate_ai_proposals(dashboard: dict) -> list[dict] | None:
         "Genera exactamente 5 propuestas de campaña de marketing. "
         "Para cada una devuelve un objeto JSON con estos campos: "
         "id, name, objective, segment, segment_users (int), "
-        "segment_engagement (float 0-1), channel, campaign_type "
-        "(pre_arrival/post_stay/checkin_report), timing, "
-        "estimated_engagement (float 0-1), subject_line, preview_text, "
-        "body_summary, priority (alta/media/baja), rationale.\n\n"
+        "channel, campaign_type, timing, subject_line, preview_text, "
+        "body_summary, priority (alta/media/baja), rationale.\n"
+        "No inventes estudios, porcentajes, benchmarks ni métricas observadas que no estén en el dashboard. "
+        "Si justificas una propuesta, apóyate en conteos, segmentos, hoteles o eventos del panel.\n\n"
         "Devuelve únicamente un array JSON, sin markdown ni explicación."
     )
 
@@ -982,6 +939,7 @@ def generate_single_campaign_proposal(
         "  category_label (etiqueta legible en español de la categoría),\n"
         "  objective (1 frase),\n"
         "  segment (etiqueta del segmento objetivo),\n"
+        "  segment_users (int),\n"
         "  channel (canal o combinación),\n"
         "  timing (string temporal: '4 semanas', 'jueves a domingo', etc.),\n"
         "  subject_line (asunto breve si aplica),\n"
@@ -990,7 +948,8 @@ def generate_single_campaign_proposal(
         "tarjeta del dashboard; no cortes ideas),\n"
         "  priority ('alta', 'media' o 'baja'),\n"
         "  rationale (1-3 frases explicando por qué esta propuesta encaja "
-        "con los datos actuales del dashboard).\n\n"
+        "con los datos actuales del dashboard).\n"
+        "No inventes benchmarks, estudios o métricas observadas ajenas al panel.\n\n"
         "No incluyas markdown ni explicaciones fuera del JSON."
     )
 
@@ -1033,7 +992,7 @@ def _modify_messaging_heuristic(campaign: dict, instructions: str) -> dict:
         modified["body_summary"] += " Adaptar contenido a formato corto para notificación/SMS (max 160 caracteres)."
 
     if any(w in msg for w in ["instagram", "tiktok", "redes", "rrss"]):
-        modified["channel"] = "push"
+        modified["channel"] = "Instagram / TikTok"
         modified["body_summary"] += " Adaptar para formato visual de redes sociales: copy corto, CTA en bio."
 
     modified["_modification_applied"] = instructions
@@ -1084,24 +1043,26 @@ def generate_campaign_proposals() -> dict:
     return {"proposals": proposals, "source": "heuristic"}
 
 
-def handle_modify_messaging(campaign_id: str, instructions: str) -> dict:
+def handle_modify_messaging(campaign_id: str, instructions: str, campaign: dict | None = None) -> dict:
     """
     Modifica el mensaje de una campaña generada a partir de instrucciones.
 
     Devuelve: {"campaign": {...}, "source": "gemini"|"heuristic"}
     """
-    dashboard = _get_dashboard()
-    proposals = _generate_heuristic_proposals(dashboard)
+    resolved_campaign = campaign if isinstance(campaign, dict) and campaign.get("name") else None
+    if resolved_campaign is None:
+        dashboard = _get_dashboard()
+        proposals = _generate_heuristic_proposals(dashboard)
+        resolved_campaign = next((p for p in proposals if p["id"] == campaign_id), None)
 
-    campaign = next((p for p in proposals if p["id"] == campaign_id), None)
-    if not campaign:
+    if not resolved_campaign:
         return {"error": f"Campaña {campaign_id} no encontrada", "campaign": None, "source": "heuristic"}
 
-    ai = _modify_messaging_ai(campaign, instructions)
+    ai = _modify_messaging_ai(resolved_campaign, instructions)
     if ai:
         return {"campaign": ai, "source": "gemini"}
 
-    modified = _modify_messaging_heuristic(campaign, instructions)
+    modified = _modify_messaging_heuristic(resolved_campaign, instructions)
     return {"campaign": modified, "source": "heuristic"}
 
 

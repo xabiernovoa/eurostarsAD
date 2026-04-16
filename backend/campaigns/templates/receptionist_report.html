@@ -82,6 +82,18 @@
             margin-left: 12px;
         }
 
+        .header-contact {
+            margin-top: 14px;
+            font-size: 11px;
+            color: #6f6f6f;
+            line-height: 1.7;
+        }
+
+        .header-contact strong {
+            color: #3a3a3a;
+            font-weight: 600;
+        }
+
         /* ==========  METRICS  ========== */
         .metrics-bar {
             display: flex;
@@ -413,6 +425,13 @@
                     GUEST ID: {{ profile.guest_id }}
                     <span>{{ segment_value_badge }}</span>
                 </p>
+                {% if profile.phone or profile.email %}
+                <p class="header-contact">
+                    {% if profile.phone %}<strong>Tel:</strong> {{ profile.phone }}{% endif %}
+                    {% if profile.phone and profile.email %}<br>{% endif %}
+                    {% if profile.email %}<strong>Email:</strong> {{ profile.email }}{% endif %}
+                </p>
+                {% endif %}
             </div>
             {% set last_visit = visit_history[-1] if visit_history else none %}
             {% set header_last_checkin = profile.last_checkin or (last_visit.checkin if last_visit else '') %}

@@ -120,6 +120,9 @@ def send_campaign(
         "status": "pending",
         "dry_run": dry_run,
     }
+    contact_phone = str(campaign_data.get("contact_phone", "")).strip()
+    if contact_phone:
+        log_entry["phone_target"] = contact_phone
 
     # Extraer información del hotel
     hotel = campaign_data.get("recommended_hotel", campaign_data.get("last_stay", {}))

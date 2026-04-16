@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """
-dashboard_engine.py — Motor de insights de marketing.
+dashboard_engine.py — Motor factual del dashboard de marketing.
 
-Construye un dashboard ejecutivo a partir de:
+Construye un panel ejecutivo a partir de:
 - logs de ejecución de campañas
 - segmentación de audiencia
 - histórico de reservas
 - contexto de dirección, recepción y señales externas
-
-Las recomendaciones del dashboard se generan con un modelo heurístico determinista.
 """
 
 from __future__ import annotations
 
 import json
-import logging
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime
@@ -34,15 +31,10 @@ except ModuleNotFoundError:
 
 from backend.paths import MARKETING_CONTEXT_PATH
 from backend.personalization.segment_views import (
-    get_age_key,
-    get_age_order,
-    get_loyalty_principal,
-    get_primary_affinity,
+    get_age_label,
     get_primary_affinity_label,
     get_segment_label,
     get_value_label,
-    get_value_level,
-    get_value_weight,
 )
 from backend.storage.campaign_log import load_campaign_log as load_campaign_log_data
 from backend.storage.customers import load_customers_df
@@ -53,8 +45,6 @@ from backend.storage.marketing_context import (
 from backend.storage.segments import load_segments as load_segments_data
 
 load_dotenv()
-
-logger = logging.getLogger("marketing_dashboard")
 
 CONTEXT_PATH = MARKETING_CONTEXT_PATH
 
@@ -80,17 +70,34 @@ DEFAULT_CONTEXT = {
     ],
 }
 
-MOMENT_WEIGHT = {"pre_arrival": 0.68, "post_stay": 0.56, "checkin_report": 0.61}
-CHANNEL_WEIGHT = {"email": 0.72, "sms": 0.67, "push": 0.75, "internal_report": 0.58}
-AFFINITY_BOOST = {
-    "cultural": 0.08,
-    "montana": 0.09,
-    "gastronomico": 0.07,
-    "playero": 0.06,
-    "clima_calido": 0.05,
-    "mediterraneo": 0.06,
-    "continental": 0.05,
+MOMENT_LABELS = {
+    "pre_arrival": "Prellegada",
+    "checkin_report": "Recepción",
+    "post_stay": "Postestancia",
 }
+
+CHANNEL_LABELS = {
+    "email": "Email",
+    "sms": "SMS",
+    "push": "Push",
+    "internal_report": "Informe interno",
+}
+
+COUNTRY_LABELS = {
+    "ES": "España",
+    "PT": "Portugal",
+    "IT": "Italia",
+}
+
+KNOWN_SIGNAL_CITIES = (
+    "Lisboa",
+    "Sevilla",
+    "Madrid",
+    "Roma",
+    "Oporto",
+    "Granada",
+    "El Grove",
+)
 
 
 def ensure_context_file() -> Path:
@@ -129,6 +136,10 @@ def _normalize_lines(value: list | str) -> list[str]:
     if isinstance(value, str):
         return [line.strip() for line in value.splitlines() if line.strip()]
     return [str(item).strip() for item in value if str(item).strip()]
+
+
+def _share(count: int, total: int) -> float:
+    return round(count / max(total, 1), 2)
 
 
 def _load_segments() -> dict:
@@ -175,35 +186,6 @@ def _build_reservation_metrics(customers: pd.DataFrame) -> dict[str, dict]:
     return metrics
 
 
-def _engagement_index(segment: dict, campaign: dict, reservation: dict) -> float:
-    value_score = get_value_weight(segment)
-    moment_score = MOMENT_WEIGHT.get(campaign.get("campaign_type", "pre_arrival"), 0.55)
-    channel_score = CHANNEL_WEIGHT.get(campaign.get("channel", "email"), 0.65)
-    profile_score = AFFINITY_BOOST.get(get_primary_affinity(segment), 0.04)
-    quality_score = min(max((reservation.get("avg_score", 7.0) - 5.0) / 5.0, 0.0), 1.0) * 0.15
-    stay_score = min(reservation.get("avg_stay", 2.0) / 5.0, 1.0) * 0.08
-    leadtime = reservation.get("avg_leadtime", 15.0)
-    leadtime_fit = 0.08 if 10 <= leadtime <= 35 else 0.03
-
-    raw = value_score + moment_score * 0.35 + channel_score * 0.22 + profile_score + quality_score + stay_score + leadtime_fit
-    return round(min(raw / 1.45, 0.99), 2)
-
-
-def _channel_alignment(segment: dict, campaign: dict, reservation: dict) -> str:
-    channel = campaign.get("channel", "email")
-    age_segment = get_age_key(segment)
-    leadtime = reservation.get("avg_leadtime", 15.0)
-    if channel == "push" and age_segment == "JOVEN":
-        return "Alta"
-    if channel == "sms" and leadtime < 7:
-        return "Alta"
-    if channel == "email" and age_segment in {"ADULTO", "SENIOR"}:
-        return "Alta"
-    if channel == "internal_report":
-        return "Operativa"
-    return "Media"
-
-
 def _build_campaign_rows(
     campaigns: list[dict],
     segments: dict,
@@ -214,8 +196,6 @@ def _build_campaign_rows(
         guest_id = str(entry.get("guest_id", ""))
         segment = segments.get(guest_id, {})
         reservation = reservations.get(guest_id, {})
-        engagement = _engagement_index(segment, entry, reservation)
-        primary_affinity = get_primary_affinity(segment)
         rows.append({
             "guest_id": guest_id,
             "campaign_type": entry.get("campaign_type", ""),
@@ -224,163 +204,228 @@ def _build_campaign_rows(
             "hotel": entry.get("hotel_recommended", ""),
             "status": entry.get("status", ""),
             "timestamp": entry.get("timestamp", ""),
-            "demographic_age": get_age_key(segment),
-            "primary_affinity": primary_affinity,
-            "primary_affinity_label": get_primary_affinity_label(segment),
-            "value_level": get_value_level(segment),
-            "value_label": get_value_label(segment),
-            "loyalty": get_loyalty_principal(segment),
             "segment_label": get_segment_label(segment),
             "avg_leadtime": round(reservation.get("avg_leadtime", 0.0), 1),
             "avg_stay": round(reservation.get("avg_stay", 0.0), 1),
             "avg_score": round(reservation.get("avg_score", segment.get("avg_score", 0.0)), 1),
             "avg_adr": round(reservation.get("avg_adr", 0.0), 2),
-            "engagement_index": engagement,
-            "channel_alignment": _channel_alignment(segment, entry, reservation),
         })
     rows.sort(key=lambda row: row["timestamp"], reverse=True)
     return rows
 
 
-def _build_segment_cards(rows: list[dict], segments: dict, reservations: dict) -> list[dict]:
-    cards = []
+def _segment_country(segment: dict | None) -> str:
+    segment = segment if isinstance(segment, dict) else {}
+    tags = segment.get("tags", {})
+    demographics = tags.get("demografia", {}) if isinstance(tags, dict) else {}
+    country = str(segment.get("country") or demographics.get("pais") or "").strip().upper()
+    return country or "N/D"
+
+
+def _build_real_distribution(items: list[tuple[str, dict]], label_key: str) -> list[dict]:
+    total = len(items)
     grouped: dict[str, list[dict]] = defaultdict(list)
-    for row in rows:
-        key = row["segment_label"]
-        grouped[key].append(row)
-
-    for key, items in grouped.items():
-        guest_ids = {item["guest_id"] for item in items}
-        revenue = sum(reservations.get(guest_id, {}).get("avg_adr", 0.0) for guest_id in guest_ids)
-        cards.append({
-            "segment_label": key,
-            "demographic_age": items[0]["demographic_age"],
-            "primary_affinity": items[0]["primary_affinity"],
-            "primary_affinity_label": items[0]["primary_affinity_label"],
-            "value_level": items[0]["value_level"],
-            "value_label": items[0]["value_label"],
-            "users": len(guest_ids),
-            "campaigns": len(items),
-            "avg_engagement_index": round(sum(item["engagement_index"] for item in items) / len(items), 2),
-            "avg_adr": round(revenue / max(len(guest_ids), 1), 2),
-            "dominant_channel": Counter(item["channel"] for item in items).most_common(1)[0][0],
-            "dominant_moment": Counter(item["campaign_type"] for item in items).most_common(1)[0][0],
-            "share_of_base": round(len(guest_ids) / max(len(segments), 1), 2),
-        })
-
-    cards.sort(
-        key=lambda item: (
-            -item["avg_engagement_index"],
-            -item["users"],
-            get_age_order({"tags": {"demografia": {"edad": item["demographic_age"].lower()}}}),
-        )
-    )
-    return cards[:8]
-
-
-def _build_kpis(rows: list[dict], segments: dict, context: dict) -> dict:
-    campaigns_count = len(rows)
-    active_segments = len({row["segment_label"] for row in rows})
-    avg_index = round(sum(row["engagement_index"] for row in rows) / max(campaigns_count, 1), 2)
-    priority_pressure = min(
-        100,
-        48 + len(context.get("manager_notes", [])) * 7 + len(context.get("external_signals", [])) * 4,
-    )
-    return {
-        "total_campaigns": campaigns_count,
-        "audience_size": len(segments),
-        "active_segments": active_segments,
-        "avg_engagement_index": avg_index,
-        "priority_pressure": priority_pressure,
-    }
-
-
-def _build_breakdown(rows: list[dict], key: str, label: str) -> list[dict]:
-    grouped: dict[str, list[dict]] = defaultdict(list)
-    for row in rows:
-        grouped[str(row.get(key, "N/A"))].append(row)
+    for label, reservation in items:
+        grouped[label].append(reservation)
 
     data = []
-    for group_name, items in grouped.items():
+    for label, reservations in grouped.items():
+        count = len(reservations)
         data.append({
-            "label": group_name,
-            "count": len(items),
-            "share": round(len(items) / max(len(rows), 1), 2),
-            "avg_engagement_index": round(sum(item["engagement_index"] for item in items) / len(items), 2),
-            "best_channel": Counter(item["channel"] for item in items).most_common(1)[0][0],
-            "top_hotel": Counter(item["hotel"] for item in items if item["hotel"]).most_common(1)[0][0] if any(item["hotel"] for item in items) else "Sin asignar",
-            "group": label,
+            "label": label,
+            "count": count,
+            "share": _share(count, total),
+            "avg_adr": round(sum(item.get("avg_adr", 0.0) for item in reservations) / max(count, 1), 2),
+            "avg_stay": round(sum(item.get("avg_stay", 0.0) for item in reservations) / max(count, 1), 1),
+            "avg_leadtime": round(sum(item.get("avg_leadtime", 0.0) for item in reservations) / max(count, 1), 1),
+            "group": label_key,
         })
-    data.sort(key=lambda item: (-item["avg_engagement_index"], -item["count"], item["label"]))
+    data.sort(key=lambda item: (-item["count"], item["label"]))
     return data
 
 
-def _city_mentions(rows: list[dict], context: dict) -> list[str]:
-    city_counts = Counter()
-    for row in rows:
-        hotel = row.get("hotel", "")
-        if hotel:
-            city_counts[hotel] += 1
-    for signal in context.get("external_signals", []):
-        for city in ("Lisboa", "Sevilla", "Madrid", "Roma", "Oporto", "Granada"):
-            if city.lower() in signal.lower():
-                city_counts[city] += 2
-    return [name for name, _ in city_counts.most_common(3)]
+def _build_audience_facts(segments: dict, reservations: dict) -> dict:
+    age_items = []
+    value_items = []
+    affinity_items = []
+    country_items = []
 
-
-def _heuristic_recommendations(rows: list[dict], context: dict, segment_cards: list[dict]) -> dict:
-    top_segments = segment_cards[:3]
-    top_segment_names = [card["segment_label"] for card in top_segments]
-    focus_cities = _city_mentions(rows, context)
-    manager_priority = context.get("strategic_priority", "")
-    reception_notes = context.get("reception_notes", [])
-    external_signals = context.get("external_signals", [])
-
-    rrss_summary = (
-        f"Activar una línea de contenido short-form para {', '.join(top_segment_names[:2]) or 'los segmentos con más tracción'}, "
-        f"con foco en {' y '.join(focus_cities[:2]) or 'los destinos urbanos principales'}. "
-        f"El contenido debe mezclar escapada, gastronomía y prueba social de estancia."
-    )
-    rrss_actions = [
-        "Lanzar una serie de Reels/TikToks con itinerarios de 48 horas para perfiles culturales y aventureros.",
-        "Replicar en paid social las creatividades de los asuntos con mejor índice estimado y añadir CTA a reserva directa.",
-        "Usar testimonios y UGC de check-in para reforzar confianza en segmentos de mayor ADR."
-    ]
-
-    hotel_summary = (
-        f"Recepción está detectando señales convertibles en upsell: {reception_notes[0] if reception_notes else 'interés en experiencias y upgrades'}. "
-        "La oportunidad está en preparar el terreno antes del check-in y rematarla en lobby y habitaciones."
-    )
-    hotel_actions = [
-        "Crear un mini welcome journey con QR en recepción para rooftop, gastronomía y late checkout.",
-        "Sincronizar el mensaje del email pre-arrival con ofertas visibles en lobby y ascensores.",
-        "Activar scripts de recepción por segmento para vender upgrades sin fricción."
-    ]
-
-    ads_summary = (
-        f"El esfuerzo externo debería alinearse con '{manager_priority or 'las reservas directas de alto margen'}'. "
-        f"Las señales externas más útiles ahora son: {external_signals[0] if external_signals else 'los eventos urbanos de primavera'}."
-    )
-    ads_actions = [
-        "Concentrar inversión en búsqueda y metasearch para ciudades con señales externas activas y mejor ADR medio.",
-        "Abrir campañas lookalike desde segmentos premium y confort con histórico cultural y gastronómico.",
-        "Separar campañas de branding y performance para medir mejor qué creatividad empuja reserva directa."
-    ]
+    for guest_id, segment in segments.items():
+        reservation = reservations.get(str(guest_id), {})
+        age_items.append((get_age_label(segment), reservation))
+        value_items.append((get_value_label(segment), reservation))
+        affinity_items.append((get_primary_affinity_label(segment), reservation))
+        country_code = _segment_country(segment)
+        country_items.append((COUNTRY_LABELS.get(country_code, country_code), reservation))
 
     return {
-        "source": "heuristic",
-        "rrss": {"summary": rrss_summary, "actions": rrss_actions},
-        "hotel": {"summary": hotel_summary, "actions": hotel_actions},
-        "ads": {"summary": ads_summary, "actions": ads_actions},
+        "by_age": _build_real_distribution(age_items, "age"),
+        "by_value": _build_real_distribution(value_items, "value"),
+        "by_affinity": _build_real_distribution(affinity_items, "affinity"),
+        "by_country": _build_real_distribution(country_items, "country"),
     }
 
 
-def _generate_recommendations(payload: dict) -> dict:
-    return _heuristic_recommendations(
-        payload["campaign_rows"],
-        payload["context"],
-        payload["segment_cards"],
-    )
+def _build_channel_distribution(rows: list[dict]) -> list[dict]:
+    total = len(rows)
+    counts = Counter(str(row.get("channel") or "unknown") for row in rows)
+    order = ["email", "sms", "push", "internal_report"]
+    data = []
+    for channel in order:
+        count = counts.get(channel, 0)
+        if count == 0:
+            continue
+        data.append({
+            "key": channel,
+            "label": CHANNEL_LABELS.get(channel, channel),
+            "count": count,
+            "share": _share(count, total),
+        })
+    return data
+
+
+def _build_moment_distribution(rows: list[dict]) -> list[dict]:
+    total = len(rows)
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    for row in rows:
+        grouped[str(row.get("campaign_type") or "unknown")].append(row)
+
+    order = ["pre_arrival", "checkin_report", "post_stay"]
+    data = []
+    for moment in order:
+        items = grouped.get(moment, [])
+        if not items:
+            continue
+        with_hotel = sum(1 for item in items if item.get("hotel"))
+        with_subject = sum(1 for item in items if item.get("subject"))
+        counts_by_channel = Counter(str(item.get("channel") or "unknown") for item in items)
+        data.append({
+            "key": moment,
+            "label": MOMENT_LABELS.get(moment, moment),
+            "count": len(items),
+            "share": _share(len(items), total),
+            "with_hotel": with_hotel,
+            "without_hotel": len(items) - with_hotel,
+            "with_subject": with_subject,
+            "without_subject": len(items) - with_subject,
+            "channels": [
+                {
+                    "key": channel,
+                    "label": CHANNEL_LABELS.get(channel, channel),
+                    "count": counts_by_channel[channel],
+                    "share": _share(counts_by_channel[channel], len(items)),
+                }
+                for channel in ("email", "sms", "push", "internal_report")
+                if counts_by_channel.get(channel, 0) > 0
+            ],
+        })
+    return data
+
+
+def _build_top_hotels(rows: list[dict]) -> list[dict]:
+    counts = Counter(str(row.get("hotel") or "").strip() for row in rows if str(row.get("hotel") or "").strip())
+    total = sum(counts.values())
+    return [
+        {
+            "hotel": hotel,
+            "count": count,
+            "share": _share(count, total),
+        }
+        for hotel, count in counts.most_common(8)
+    ]
+
+
+def _build_signal_facts(context: dict) -> dict:
+    signals = []
+    city_counts = Counter()
+
+    for raw in context.get("external_signals", []):
+        matched_city = next((city for city in KNOWN_SIGNAL_CITIES if city.lower() in raw.lower()), "")
+        if matched_city:
+            city_counts[matched_city] += 1
+        signals.append({
+            "text": raw,
+            "city": matched_city,
+        })
+
+    return {
+        "signals": signals,
+        "cities": [
+            {"city": city, "count": count}
+            for city, count in city_counts.most_common(6)
+        ],
+    }
+
+
+def _build_segment_facts(
+    segments: dict,
+    reservations: dict,
+    campaign_rows: list[dict],
+) -> list[dict]:
+    grouped_users: dict[str, list[dict]] = defaultdict(list)
+    grouped_countries: dict[str, Counter] = defaultdict(Counter)
+    grouped_channels: dict[str, Counter] = defaultdict(Counter)
+    grouped_moments: dict[str, Counter] = defaultdict(Counter)
+
+    for guest_id, segment in segments.items():
+        label = get_segment_label(segment)
+        grouped_users[label].append(reservations.get(str(guest_id), {}))
+        grouped_countries[label][_segment_country(segment)] += 1
+
+    for row in campaign_rows:
+        label = str(row.get("segment_label") or "Sin segmento")
+        grouped_channels[label][str(row.get("channel") or "unknown")] += 1
+        grouped_moments[label][str(row.get("campaign_type") or "unknown")] += 1
+
+    data = []
+    total_users = len(segments)
+    for label, users in grouped_users.items():
+        count = len(users)
+        top_country = grouped_countries[label].most_common(1)[0][0] if grouped_countries[label] else "N/D"
+        top_channel = grouped_channels[label].most_common(1)[0][0] if grouped_channels[label] else ""
+        top_moment = grouped_moments[label].most_common(1)[0][0] if grouped_moments[label] else ""
+        data.append({
+            "segment_label": label,
+            "users": count,
+            "share": _share(count, total_users),
+            "avg_adr": round(sum(item.get("avg_adr", 0.0) for item in users) / max(count, 1), 2),
+            "avg_stay": round(sum(item.get("avg_stay", 0.0) for item in users) / max(count, 1), 1),
+            "avg_leadtime": round(sum(item.get("avg_leadtime", 0.0) for item in users) / max(count, 1), 1),
+            "avg_reservations": round(sum(item.get("reservations", 0.0) for item in users) / max(count, 1), 1),
+            "message_count": sum(grouped_channels[label].values()),
+            "top_country": COUNTRY_LABELS.get(top_country, top_country),
+            "top_channel": CHANNEL_LABELS.get(top_channel, top_channel),
+            "top_moment": MOMENT_LABELS.get(top_moment, top_moment),
+        })
+    return data
+
+
+def _build_factual_overview(
+    campaign_rows: list[dict],
+    segments: dict,
+    context: dict,
+    audience_facts: dict,
+    top_hotels: list[dict],
+) -> dict:
+    valid_timestamps = [str(row.get("timestamp")) for row in campaign_rows if row.get("timestamp")]
+    first_activity = min(valid_timestamps) if valid_timestamps else ""
+    last_activity = max(valid_timestamps) if valid_timestamps else ""
+    rows_with_hotel = sum(1 for row in campaign_rows if row.get("hotel"))
+    rows_with_subject = sum(1 for row in campaign_rows if row.get("subject"))
+
+    return {
+        "guest_count": len(segments),
+        "message_count": len(campaign_rows),
+        "country_count": len(audience_facts["by_country"]),
+        "hotel_count": len({str(row.get("hotel") or "").strip() for row in campaign_rows if str(row.get("hotel") or "").strip()}),
+        "signal_count": len(context.get("external_signals", [])),
+        "rows_with_hotel": rows_with_hotel,
+        "rows_without_hotel": len(campaign_rows) - rows_with_hotel,
+        "rows_with_subject": rows_with_subject,
+        "rows_without_subject": len(campaign_rows) - rows_with_subject,
+        "first_activity_at": first_activity,
+        "last_activity_at": last_activity,
+    }
 
 
 def build_dashboard_data() -> dict:
@@ -391,23 +436,39 @@ def build_dashboard_data() -> dict:
     reservations = _build_reservation_metrics(customers)
     campaigns = _latest_campaigns(_load_campaign_log())
     campaign_rows = _build_campaign_rows(campaigns, segments, reservations)
-    segment_cards = _build_segment_cards(campaign_rows, segments, reservations)
-    kpis = _build_kpis(campaign_rows, segments, context)
     payload = {
         "generated_at": datetime.now().isoformat(),
         "context": context,
-        "kpis": kpis,
         "campaign_rows": campaign_rows,
-        "segment_cards": segment_cards,
-        "performance_by_age": _build_breakdown(campaign_rows, "demographic_age", "age"),
-        "performance_by_affinity": _build_breakdown(campaign_rows, "primary_affinity_label", "affinity"),
-        "performance_by_value_level": _build_breakdown(campaign_rows, "value_label", "value"),
-        "performance_by_loyalty": _build_breakdown(campaign_rows, "loyalty", "loyalty"),
-        "performance_by_moment": _build_breakdown(campaign_rows, "campaign_type", "moment"),
     }
-    payload["recommendations"] = _generate_recommendations(payload | {"context": context})
-    payload["focus_cities"] = _city_mentions(campaign_rows, context)
-    payload["recent_campaigns"] = campaign_rows[:12]
+    audience_facts = _build_audience_facts(segments, reservations)
+    top_hotels = _build_top_hotels(campaign_rows)
+    segment_facts = _build_segment_facts(segments, reservations, campaign_rows)
+    signal_facts = _build_signal_facts(context)
+
+    payload["overview_facts"] = _build_factual_overview(
+        campaign_rows,
+        segments,
+        context,
+        audience_facts,
+        top_hotels,
+    )
+    payload["audience_facts"] = audience_facts
+    payload["channel_distribution"] = _build_channel_distribution(campaign_rows)
+    payload["moment_distribution"] = _build_moment_distribution(campaign_rows)
+    payload["top_hotels"] = top_hotels
+    payload["signal_facts"] = signal_facts
+    payload["segment_rankings"] = {
+        "by_size": sorted(
+            segment_facts,
+            key=lambda item: (-item["users"], -item["avg_adr"], item["segment_label"]),
+        )[:10],
+        "by_adr": sorted(
+            [item for item in segment_facts if item["users"] >= 3],
+            key=lambda item: (-item["avg_adr"], -item["users"], item["segment_label"]),
+        )[:10],
+    }
+    payload["recent_messages"] = campaign_rows[:40]
     return payload
 
 

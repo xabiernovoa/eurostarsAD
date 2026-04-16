@@ -4,557 +4,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eurostars · Centro de Control de Marketing</title>
+    <title>Eurostars · Dashboard de Marketing</title>
     <meta name="description"
-        content="Panel operativo de marketing para Eurostars Hotel Company. Análisis de campañas, segmentos de audiencia y acciones recomendadas.">
+        content="Dashboard de marketing para Eurostars Hotel Company con analítica factual y un generador asistido de campañas separado de los datos observados.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <div class="app-shell">
-
-        <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
         <aside class="sidebar">
-            <div class="sidebar-brand">
-                <svg viewBox="0 -5 252 40" class="sidebar-logo" aria-label="Eurostars">
-                    <g>
-                        <path
-                            d="M10.9,32.1h16.9v-1.9H11.1v-13.7h13.1v-1.9h-13.1V2.1h16.7V.2H0c0,.3.1.6.4.8.2.2,1.4.8,1.8,1.4.2.2.6,1,.6,2h0v27.8h8.2Z">
-                        </path>
-                        <path
-                            d="M45.5,32.3c7.8,0,12-4.4,12-11.5V.4h-2.3v19.9c0,4.7-1.9,8.8-7.5,8.8s-7.7-4.1-7.7-8.8V.4h-6.5v20.4c0,7.1,4.1,11.5,12,11.5h0Z">
-                        </path>
-                        <path
-                            d="M79.4,17.3c4.6-1.1,7.6-3.7,7.6-8.1S81.6.4,74.1.4h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6ZM72.8,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                        </path>
-                        <path
-                            d="M123.3,16.2C123.3,6.4,117.1,0,107.7,0s-15.6,6.3-15.6,16.2,6.1,16.2,15.6,16.2,15.6-6.4,15.6-16.2ZM99.2,16.1c0-9,2.6-14.3,8.6-14.3s8.5,5.4,8.5,14.4-2.6,14.4-8.5,14.4-8.6-5-8.6-14.5Z">
-                        </path>
-                        <path
-                            d="M147.9,23c0-11-14.5-9.9-14.5-16.6s2.4-4.5,5.2-4.5,5,.8,7,2.6l.9-.8c-1.9-1.9-4.2-3.7-8.3-3.7-6.6,0-10.2,3.3-10.2,8.3,0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4h0Z">
-                        </path>
-                        <polygon
-                            points="172.8 .4 150.2 .4 150.2 2.3 158.4 2.3 158.4 31.9 165.1 31.9 165.1 2.3 172.8 2.3 172.8 .4">
-                        </polygon>
-                        <path
-                            d="M182.8.4l-11.3,31.5h2.2l3.4-9.4h12.7l3,9.5h6.8L189.6.4h-6.8ZM177.8,20.6l6-16.8,5.4,16.8h-11.4Z">
-                        </path>
-                        <path
-                            d="M228.2,9.2c0-6.1-5.4-8.8-12.8-8.8h-10.2v31.5h6.7v-14h1.7l9.2,14h7.6l-9.7-14.6c4.6-1.1,7.6-3.7,7.6-8.1ZM214.1,16h-2.2V2.3h2.3c4.5,0,7.2,2.5,7.2,7.1s-2.7,6.7-7.2,6.7h0Z">
-                        </path>
-                        <path
-                            d="M239.3,6.4c0-3.1,2.4-4.5,5.2-4.5s5,.8,7,2.6l.9-.8C250.5,1.8,248.2,0,244.1,0,237.5,0,233.9,3.3,233.9,8.3c0,10.1,14.5,8.9,14.5,16.9s-2.3,5.2-6.1,5.2-6.9-1.8-8.8-3.5l-.8.9c2.1,2.3,5.6,4.6,10.4,4.6s10.6-3.4,10.6-9.4c0-11-14.5-9.9-14.5-16.6h0Z">
-                        </path>
-                    </g>
-                </svg>
-                <div class="sidebar-label">Centro de Control de Marketing</div>
+            <div class="brand-block">
+                <div class="brand-kicker">Eurostars Hotel Company</div>
+                <div class="brand-title">Dashboard de marketing</div>
+                <p class="brand-note">Analítica factual para leer la base y herramientas asistidas para construir campañas sin mezclar una cosa con la otra.</p>
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-section-label">Panel</div>
-                <button class="nav-item active" data-section="overview" id="navOverview">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    Resumen
-                </button>
-                <button class="nav-item" data-section="audience" id="navAudience">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    Audiencia
-                </button>
-                <button class="nav-item" data-section="campaigns" id="navCampaigns">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                    Campañas
-                </button>
-                <div class="nav-section-label">Ejecución</div>
-                <button class="nav-item" data-section="actions" id="navActions">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                    </svg>
-                    Acciones
-                </button>
-                <button class="nav-item" data-section="generator" id="navGenerator">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                        <path d="M2 17l10 5 10-5"></path>
-                        <path d="M2 12l10 5 10-5"></path>
-                    </svg>
-                    Generador
-                </button>
-                <button class="nav-item" data-section="autonomous" id="navAutonomous">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <path d="M12 7v5l3 2"></path>
-                    </svg>
-                    Modo autónomo
-                </button>
-                <button class="nav-item" data-section="config" id="navConfig">
-                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path
-                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                        </path>
-                    </svg>
-                    Configuración
-                </button>
+                <button class="nav-item active" data-section="overview">Resumen</button>
+                <button class="nav-item" data-section="audience">Audiencia</button>
+                <button class="nav-item" data-section="context">Contexto</button>
+                <button class="nav-item" data-section="generator">Generador</button>
             </nav>
 
             <div class="sidebar-footer">
-                <p class="sidebar-footer-text" id="sidebarUpdated">Sincronizando…</p>
+                <div class="footer-label">Ultima actualizacion</div>
+                <div class="footer-value" id="sidebarUpdated">Sincronizando…</div>
             </div>
         </aside>
 
-        <!-- ═══════════════════ MAIN ═══════════════════ -->
         <main class="main-content">
-
-            <!-- ── RESUMEN ────────────────────── -->
-            <div class="section-view active" id="viewOverview">
-                <div class="section-header">
-                    <h1 class="section-title">Resumen ejecutivo</h1>
-                </div>
+            <section class="section-view active" id="viewOverview">
+                <header class="section-header">
+                    <div>
+                        <div class="section-eyebrow">Panel factual</div>
+                        <h1 class="section-title">Resumen ejecutivo</h1>
+                        <p class="section-subtitle">Vision general del log, la base segmentada y los eventos e insights activos.</p>
+                    </div>
+                    <div class="header-badge" id="overviewWindow">Cargando…</div>
+                </header>
                 <div class="section-body">
-                    <div class="kpi-row" id="kpiGrid"></div>
-
-                    <div class="opportunity-row" id="opportunityRow"></div>
-
-                    <div class="priority-block">
-                        <div class="priority-eyebrow">Prioridad estratégica</div>
-                        <p class="priority-text" id="priorityText"></p>
+                    <div class="notice-card">
+                        La analitica del panel no muestra indicadores estimados ni recomendaciones heuristicas.
+                        Las sugerencias asistidas viven en la pestaña Generador y quedan separadas de los datos observados.
                     </div>
 
-                    <div class="cities-row" id="citiesRow">
-                        <span class="cities-label">Ciudades en foco</span>
+                    <div class="stats-grid" id="overviewStats"></div>
+
+                    <div class="grid-two">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Mix de canales</h2>
+                                <p>Distribucion real de las piezas registradas en el log.</p>
+                            </div>
+                            <div id="channelDistribution"></div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Momentos del viaje</h2>
+                                <p>Volumen por momento y cobertura real del hotel recomendado.</p>
+                            </div>
+                            <div id="momentDistribution"></div>
+                        </article>
                     </div>
 
-                    <div class="viz-row">
-                        <div class="viz-card">
-                            <h3>Distribución por afinidad principal</h3>
-                            <div id="donutProfile"></div>
-                        </div>
-                        <div class="viz-card">
-                            <h3>Interacción: canal × segmento de edad</h3>
-                            <div id="heatmapGrid"></div>
-                        </div>
+                    <div class="grid-two">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Hoteles mas recomendados</h2>
+                                <p>Solo se cuentan las piezas con hotel recomendado disponible.</p>
+                            </div>
+                            <div id="topHotels"></div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Eventos e insights activos</h2>
+                                <p>Contexto externo guardado manualmente para orientar decisiones.</p>
+                            </div>
+                            <div id="signalFacts"></div>
+                        </article>
                     </div>
 
-                    <div class="section-divider"></div>
-                    <h2 class="section-subtitle">Rendimiento por audiencia</h2>
-                    <div class="breakdown-grid">
-                        <div class="breakdown-card">
-                            <h3>Edad</h3>
-                            <div id="ageBreakdown"></div>
+                    <article class="card">
+                        <div class="card-head">
+                            <h2>Calidad y cobertura del dato</h2>
+                            <p>Qué campos estan realmente presentes en el log disponible.</p>
                         </div>
-                        <div class="breakdown-card">
-                            <h3>Afinidad principal</h3>
-                            <div id="profileBreakdown"></div>
-                        </div>
-                        <div class="breakdown-card">
-                            <h3>Nivel de valor</h3>
-                            <div id="valueBreakdown"></div>
-                        </div>
-                        <div class="breakdown-card">
-                            <h3>Momento campaña</h3>
-                            <div id="momentBreakdown"></div>
-                        </div>
-                    </div>
+                        <div class="quality-grid" id="dataQuality"></div>
+                    </article>
                 </div>
-            </div>
+            </section>
 
-            <!-- ── AUDIENCE ───────────────────── -->
-            <div class="section-view" id="viewAudience">
-                <div class="section-header">
-                    <h1 class="section-title">Audiencia</h1>
-                </div>
+            <section class="section-view" id="viewAudience">
+                <header class="section-header">
+                    <div>
+                        <div class="section-eyebrow">Base segmentada</div>
+                        <h1 class="section-title">Audiencia</h1>
+                        <p class="section-subtitle">Distribuciones reales por usuario y segmentos relevantes por tamaño y ADR.</p>
+                    </div>
+                </header>
                 <div class="section-body">
-                    <div class="viz-row">
-                        <div class="viz-card">
-                            <h3>Distribución por nivel de valor</h3>
-                            <div id="donutValue"></div>
-                        </div>
-                        <div class="viz-card">
-                            <h3>Usuarios por país</h3>
-                            <div class="country-row" id="countryRow"></div>
-                        </div>
+                    <div class="grid-two">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Usuarios por edad</h2>
+                            </div>
+                            <div id="audienceAge"></div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Usuarios por nivel de valor</h2>
+                            </div>
+                            <div id="audienceValue"></div>
+                        </article>
                     </div>
 
-                    <h2 class="section-subtitle">Segmentos prioritarios</h2>
-                    <p class="form-help" style="margin-bottom:16px">Segmentos con mayor tracción y potencial de
-                        conversión, ordenados por índice de interacción.</p>
-                    <div class="segment-grid" id="segmentGrid"></div>
-                </div>
-            </div>
+                    <div class="grid-two">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Usuarios por afinidad principal</h2>
+                            </div>
+                            <div id="audienceAffinity"></div>
+                        </article>
 
-            <!-- ── CAMPAÑAS ───────────────────── -->
-            <div class="section-view" id="viewCampaigns">
-                <div class="section-header">
-                    <h1 class="section-title">Campañas</h1>
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Usuarios por pais</h2>
+                            </div>
+                            <div id="audienceCountry"></div>
+                        </article>
+                    </div>
+
+                    <div class="grid-two">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Segmentos mas grandes</h2>
+                                <p>Ordenados por numero de usuarios.</p>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Segmento</th>
+                                            <th>Usuarios</th>
+                                            <th>ADR medio</th>
+                                            <th>Lead time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="segmentsBySize"></tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Segmentos con mayor ADR</h2>
+                                <p>Solo segmentos con al menos 3 usuarios.</p>
+                            </div>
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Segmento</th>
+                                            <th>Usuarios</th>
+                                            <th>ADR medio</th>
+                                            <th>Pais principal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="segmentsByAdr"></tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
                 </div>
+            </section>
+
+            <section class="section-view" id="viewGenerator">
+                <header class="section-header">
+                    <div>
+                        <div class="section-eyebrow">Asistencia al equipo</div>
+                        <h1 class="section-title">Generador de campañas</h1>
+                        <p class="section-subtitle">Propuestas asistidas y agente conversacional para ayudar al equipo de marketing.</p>
+                    </div>
+                    <button class="btn-primary" id="generateBtn">Generar propuestas</button>
+                </header>
                 <div class="section-body">
-                    <div class="campaign-counters" id="campaignCounters"></div>
-                    <div class="table-filters" id="campaignFilters">
-                        <button class="filter-chip active" data-filter="all">Todas</button>
-                        <button class="filter-chip" data-filter="pre_arrival">Prellegada</button>
-                        <button class="filter-chip" data-filter="post_stay">Postestancia</button>
-                        <button class="filter-chip" data-filter="checkin_report">Recepción</button>
+                    <div class="notice-card">
+                        Una propuesta generada no es un dato observado. Es una sugerencia asistida construida a partir del dashboard actual, el contexto y la segmentación disponible.
                     </div>
-                    <div class="table-wrapper">
-                        <table class="campaign-table">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Tipo</th>
-                                    <th>Segmento</th>
-                                    <th>Canal</th>
-                                    <th>Hotel</th>
-                                    <th>Índice</th>
-                                </tr>
-                            </thead>
-                            <tbody id="campaignTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
 
-            <!-- ── ACCIONES ───────────────────── -->
-            <div class="section-view" id="viewActions">
-                <div class="section-header">
-                    <h1 class="section-title">Acciones recomendadas</h1>
+                    <div class="assistant-grid">
+                        <article class="card">
+                            <div class="card-head">
+                                <h2>Propuestas de campaña</h2>
+                                <p id="generatorMeta">Ideas accionables para marketing, claramente separadas de la analítica factual.</p>
+                            </div>
+                            <div id="proposalGrid"></div>
+                        </article>
+
+                        <article class="card chat-card">
+                            <div class="card-head">
+                                <h2>Agente de marketing</h2>
+                                <p>Puedes pedirle análisis del panel o que te ayude a construir una campaña concreta.</p>
+                            </div>
+                            <div class="helper-note">
+                                Si preguntas por datos, debe apoyarse en el dashboard actual. Si propones una campaña, la respuesta es una sugerencia asistida.
+                            </div>
+                            <div class="suggestion-row" id="chatSuggestions">
+                                <button class="filter-chip" data-msg="Resume el estado actual del dashboard con datos reales">Situación actual</button>
+                                <button class="filter-chip" data-msg="Qué segmentos son más grandes y cuáles tienen mayor ADR">Segmentos</button>
+                                <button class="filter-chip" data-msg="Propón una campaña para reservas directas en Sevilla">Nueva campaña</button>
+                                <button class="filter-chip" data-msg="Qué eventos e insights externos están activos">Eventos activos</button>
+                            </div>
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="chat-empty">Todavía no hay conversación.</div>
+                                <div class="chat-typing" id="chatTyping">Escribiendo…</div>
+                            </div>
+                            <div class="chat-input-row">
+                                <textarea id="chatInput" rows="3" placeholder="Ejemplo: Quiero una campaña para adultos premium en Lisboa por email pre-arrival"></textarea>
+                                <button class="btn-primary" id="chatSendBtn">Enviar</button>
+                            </div>
+                        </article>
+                    </div>
                 </div>
+            </section>
+
+            <section class="section-view" id="viewContext">
+                <header class="section-header">
+                    <div>
+                        <div class="section-eyebrow">Contexto editable</div>
+                        <h1 class="section-title">Contexto</h1>
+                        <p class="section-subtitle">Aquí se fija el brief operativo del momento: qué quiere mover marketing, qué detectan los hoteles y qué está ocurriendo fuera.</p>
+                    </div>
+                    <button class="btn-primary" id="contextSaveBtn">Guardar contexto</button>
+                </header>
                 <div class="section-body">
-                    <p class="form-help" style="margin-bottom:20px">Acciones priorizadas a partir del rendimiento de
-                        campañas, señales de recepción y contexto externo.</p>
-                    <div class="action-grid" id="actionGrid"></div>
+                    <div class="context-intro">
+                        <div class="notice-card">
+                            Una "señal" es una observación cualitativa que ayuda a contextualizar decisiones. Puede ser un evento externo, un insight de mercado o una observación de recepción.
+                        </div>
+                        <div class="context-guide">
+                            <article class="guide-card">
+                                <div class="guide-step">1</div>
+                                <h3>Define la prioridad</h3>
+                                <p>Escribe qué quieres mover ahora: reserva directa, upsell, notoriedad o reactivación.</p>
+                            </article>
+                            <article class="guide-card">
+                                <div class="guide-step">2</div>
+                                <h3>Recoge lo que pasa</h3>
+                                <p>Añade notas de marketing, observaciones de recepción y eventos externos que importen esta semana.</p>
+                            </article>
+                            <article class="guide-card">
+                                <div class="guide-step">3</div>
+                                <h3>Úsalo en el generador</h3>
+                                <p>Después ve a Generador para convertir ese contexto en campañas, ideas y copys más aterrizados.</p>
+                            </article>
+                        </div>
+                    </div>
+
+                    <article class="card context-editor-card">
+                        <div class="card-head">
+                            <h2>Editar contexto</h2>
+                            <p>Cada línea se guarda como un elemento independiente para que el panel y el generador puedan usarla después.</p>
+                        </div>
+                        <form class="context-form" id="contextForm">
+                            <div class="field-group field-span">
+                                <label for="strategicPriority">Prioridad estrategica</label>
+                                <p class="field-helper">Describe el foco actual en una sola frase. Ejemplo: impulsar reservas directas premium en Sevilla y Lisboa.</p>
+                                <textarea id="strategicPriority" rows="3" placeholder="Ejemplo: impulsar reservas directas premium en escapadas urbanas entre mayo y julio"></textarea>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="managerNotes">Notas del manager</label>
+                                <p class="field-helper">Qué quiere reforzar marketing: narrativa, segmentos, canales o margen.</p>
+                                <textarea id="managerNotes" rows="8" placeholder="Una línea por nota. Ejemplo: priorizar segmentos de mayor margen"></textarea>
+                            </div>
+
+                            <div class="field-group">
+                                <label for="receptionNotes">Observaciones de recepcion</label>
+                                <p class="field-helper">Qué escucha o detecta el hotel en la operativa diaria: upgrades, rooftops, dudas frecuentes.</p>
+                                <textarea id="receptionNotes" rows="8" placeholder="Una línea por observación. Ejemplo: hay interés en late checkout y rooftops"></textarea>
+                            </div>
+
+                            <div class="field-group field-span">
+                                <label for="externalSignals">Eventos e insights externos</label>
+                                <p class="field-helper">Qué está pasando fuera: eventos, búsquedas, estacionalidad o tendencias del destino.</p>
+                                <textarea id="externalSignals" rows="6" placeholder="Una línea por evento o insight. Ejemplo: festival, city break premium, puente o búsquedas al alza"></textarea>
+                            </div>
+
+                            <div class="form-actions context-actions">
+                                <button type="submit" class="btn-primary">Guardar y recalcular</button>
+                                <div class="form-note">Guardar aquí actualiza el brief del sistema. No modifica el histórico de campañas.</div>
+                            </div>
+                        </form>
+                    </article>
                 </div>
-            </div>
+            </section>
 
-            <!-- ── GENERATOR ──────────────────── -->
-            <div class="section-view" id="viewGenerator">
-                <div class="section-header">
-                    <h1 class="section-title">Generador de campañas</h1>
-                    <div class="section-actions">
-                        <button class="btn btn-primary" id="generateBtn">Generar campañas</button>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <p class="form-help" style="margin-bottom:20px">Campañas recomendadas generadas automáticamente a
-                        partir de los datos de audiencia, rendimiento y señales activas. Puedes modificar el mensaje de
-                        cada campaña con instrucciones personalizadas.</p>
-                    <div id="proposalGrid"></div>
-                </div>
-            </div>
-
-            <!-- ── AUTÓNOMO ───────────────────── -->
-            <div class="section-view" id="viewAutonomous">
-                <div class="section-header">
-                    <h1 class="section-title">Modo autónomo</h1>
-                    <div class="section-actions">
-                        <label class="auto-toggle" title="Throttle total entre recomendaciones (se reparte entre los agentes concurrentes)">
-                            Pausa
-                            <input type="number" id="autoDelayInput" min="0" max="60" step="1" value="10"
-                                style="width:52px;margin-left:6px">s
-                        </label>
-                        <label class="auto-toggle"
-                            title="Agentes concurrentes generando recomendaciones en paralelo">
-                            Agentes
-                            <input type="number" id="autoWorkersInput" min="1" max="6" step="1" value="3"
-                                style="width:46px;margin-left:6px">
-                        </label>
-                        <label class="auto-toggle"
-                            title="Propuestas de campaña estilo Generador a emitir en esta sesión">
-                            Campañas
-                            <input type="number" id="autoCampaignsInput" min="0" max="10" step="1" value="5"
-                                style="width:46px;margin-left:6px">
-                        </label>
-                        <label class="auto-toggle" title="Usar datos mock sin llamar al modelo">
-                            <input type="checkbox" id="autoForceMock"> Forzar mock
-                        </label>
-                        <button class="btn btn-primary auto-toggle-btn" id="autoToggleBtn" data-state="idle">
-                            <span class="auto-toggle-icon" aria-hidden="true">
-                                <svg class="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                    <polygon points="6 4 20 12 6 20 6 4"></polygon>
-                                </svg>
-                                <svg class="icon-stop" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                    <rect x="6" y="6" width="12" height="12" rx="1"></rect>
-                                </svg>
-                            </span>
-                            <span class="auto-toggle-label" id="autoToggleLabel">Iniciar modo autónomo</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <p class="form-help" style="margin-bottom:16px">
-                        El sistema consulta al Oráculo (noticias y tendencias), decide a qué usuarios contactar
-                        en función de su patrón histórico y lead time, y genera campañas personalizadas con Gemini.
-                        Las recomendaciones aparecen aquí en vivo a medida que se generan.
-                    </p>
-
-                    <div class="auto-status" id="autoStatus">
-                        <div class="auto-status-dot" id="autoStatusDot"></div>
-                        <div class="auto-status-text" id="autoStatusText">En espera. Pulsa «Iniciar modo autónomo»
-                            para comenzar.</div>
-                        <div class="auto-status-model" id="autoStatusModel"></div>
-                    </div>
-
-                    <div class="agent-panel" id="agentPanel">
-                        <div class="agent-chip" data-agent="oracle">
-                            <span class="agent-dot"></span>
-                            <div class="agent-body">
-                                <div class="agent-name">Oráculo</div>
-                                <div class="agent-state" id="agentOracleState">en espera</div>
-                            </div>
-                        </div>
-                        <div class="agent-chip" data-agent="recommender">
-                            <span class="agent-dot"></span>
-                            <div class="agent-body">
-                                <div class="agent-name">Recomendador</div>
-                                <div class="agent-state" id="agentRecommenderState">en espera</div>
-                            </div>
-                        </div>
-                        <div class="agent-chip" data-agent="campaigns">
-                            <span class="agent-dot"></span>
-                            <div class="agent-body">
-                                <div class="agent-name">Campañas</div>
-                                <div class="agent-state" id="agentCampaignsState">en espera</div>
-                            </div>
-                        </div>
-                        <div class="agent-chip" data-agent="embeddings">
-                            <span class="agent-dot"></span>
-                            <div class="agent-body">
-                                <div class="agent-name">Embeddings</div>
-                                <div class="agent-state" id="agentEmbeddingsState">listo</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="auto-metrics" id="autoMetrics">
-                        <div class="auto-metric">
-                            <div class="auto-metric-label">Oráculo</div>
-                            <div class="auto-metric-value" id="autoMetricOracle">—</div>
-                        </div>
-                        <div class="auto-metric">
-                            <div class="auto-metric-label">Candidatos</div>
-                            <div class="auto-metric-value" id="autoMetricCandidates">—</div>
-                        </div>
-                        <div class="auto-metric">
-                            <div class="auto-metric-label">Recomendaciones</div>
-                            <div class="auto-metric-value" id="autoMetricCampaigns">—</div>
-                        </div>
-                        <div class="auto-metric">
-                            <div class="auto-metric-label">Bloqueadas</div>
-                            <div class="auto-metric-value" id="autoMetricBlocked">—</div>
-                        </div>
-                        <div class="auto-metric">
-                            <div class="auto-metric-label">Campañas</div>
-                            <div class="auto-metric-value" id="autoMetricProposals">—</div>
-                        </div>
-                    </div>
-
-                    <div class="auto-columns auto-columns-3">
-                        <aside class="auto-col auto-col-oracle">
-                            <h2 class="auto-col-title">Oráculo · contexto externo</h2>
-                            <div class="auto-list" id="autoOracleList">
-                                <p class="form-help">Las señales externas aparecerán aquí…</p>
-                            </div>
-                        </aside>
-                        <section class="auto-col auto-col-feed">
-                            <div class="auto-feed-header">
-                                <h2 class="auto-col-title">Recomendaciones individuales</h2>
-                                <span class="auto-feed-sub" id="autoFeedSub">en espera</span>
-                            </div>
-                            <div class="auto-list auto-feed" id="autoCampaignList">
-                                <p class="form-help">El sistema generará recomendaciones dirigidas a usuarios concretos
-                                    de forma continua, incorporando el contexto del Oráculo.</p>
-                            </div>
-                        </section>
-                        <aside class="auto-col auto-col-campaigns">
-                            <div class="auto-feed-header">
-                                <h2 class="auto-col-title">Campañas</h2>
-                                <span class="auto-feed-sub" id="autoCampaignsSub">en espera</span>
-                            </div>
-                            <div class="auto-list" id="autoCampaignsList">
-                                <p class="form-help">Un agente independiente genera propuestas de campaña
-                                    en paralelo con las recomendaciones individuales.</p>
-                            </div>
-                        </aside>
-                    </div>
-
-                    <details class="auto-log" id="autoLogDetails">
-                        <summary>Log detallado del tick</summary>
-                        <pre id="autoLog"></pre>
-                    </details>
-                </div>
-            </div>
-
-            <!-- ── Email preview modal ───────────── -->
-            <div class="email-preview-overlay" id="emailPreviewOverlay" style="display:none"></div>
-
-            <!-- ── Modify Modal ──────────────────── -->
             <div class="modify-overlay" id="modifyOverlay">
                 <div class="modify-modal">
                     <div class="modify-header">
-                        <h3 class="modify-title">Modificar comunicación</h3>
-                        <button class="chat-close-btn" id="modifyCloseBtn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
+                        <h3>Refinar propuesta</h3>
+                        <button class="modal-close" id="modifyCloseBtn" aria-label="Cerrar">✕</button>
                     </div>
                     <div class="modify-body">
+                        <div class="summary-row">
+                            <div class="summary-label">Propuesta</div>
+                            <div class="summary-value" id="modifyCampaignName">—</div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-label">Asunto actual</div>
+                            <div class="summary-value" id="modifyCurrentSubject">—</div>
+                        </div>
+                        <div class="summary-row">
+                            <div class="summary-label">Preview actual</div>
+                            <div class="summary-value" id="modifyCurrentPreview">—</div>
+                        </div>
                         <div class="field-group">
-                            <label class="field-label">Campaña seleccionada</label>
-                            <p id="modifyCampaignName" style="font-size:13px;color:var(--text-primary);font-weight:700">
-                            </p>
+                            <label for="modifyInstructions">Instrucciones</label>
+                            <textarea id="modifyInstructions" rows="5" placeholder="Ejemplo: hazlo más premium, más directo y orientado a reserva directa"></textarea>
                         </div>
-                        <div class="modify-current">
-                            <div class="field-group">
-                                <label class="field-label">Asunto actual</label>
-                                <p id="modifyCurrentSubject" style="font-size:13px;color:var(--text-secondary)"></p>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label">Preview actual</label>
-                                <p id="modifyCurrentPreview" style="font-size:13px;color:var(--text-secondary)"></p>
-                            </div>
+                        <div class="suggestion-row" id="modifySuggestions">
+                            <button class="filter-chip" data-instr="Hazlo más urgente con sensación de escasez">Urgencia</button>
+                            <button class="filter-chip" data-instr="Tono premium y exclusivo">Premium</button>
+                            <button class="filter-chip" data-instr="Incluir oferta con descuento directo">Descuento</button>
+                            <button class="filter-chip" data-instr="Tono más cercano e informal">Más cercano</button>
                         </div>
-                        <div class="section-divider"></div>
-                        <div class="field-group">
-                            <label class="field-label" for="modifyInstructions">Instrucciones de modificación</label>
-                            <textarea class="field-textarea" id="modifyInstructions" rows="4"
-                                placeholder="Ej: Hazlo más urgente con oferta limitada, cambia a tono premium, adapta para SMS…"></textarea>
-                        </div>
-                        <div class="modify-suggestions">
-                            <button class="chat-suggestion"
-                                data-instr="Hazlo más urgente con sensación de escasez">Urgencia</button>
-                            <button class="chat-suggestion" data-instr="Tono premium y exclusivo">Premium</button>
-                            <button class="chat-suggestion" data-instr="Incluir oferta con descuento directo">Con
-                                descuento</button>
-                            <button class="chat-suggestion" data-instr="Tono más cercano e informal">Más
-                                cercano</button>
-                            <button class="chat-suggestion" data-instr="Tono formal y corporativo">Formal</button>
-                            <button class="chat-suggestion" data-instr="Adaptar para enviar por SMS corto">Para
-                                SMS</button>
-                        </div>
-                        <button class="btn btn-primary btn-full" id="modifyApplyBtn">Aplicar modificación</button>
-                        <div id="modifyResult" style="display:none; margin-top:16px"></div>
+                        <button class="btn-primary" id="modifyApplyBtn">Aplicar</button>
+                        <div id="modifyResult"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- ── CONFIG ─────────────────────── -->
-            <div class="section-view" id="viewConfig">
-                <div class="section-header">
-                    <h1 class="section-title">Configuración</h1>
-                    <div class="section-actions">
-                        <button class="btn btn-primary" id="configSaveBtn">Guardar y recalcular</button>
-                    </div>
-                </div>
-                <div class="section-body">
-                    <div class="config-layout">
-                        <p class="form-help" style="margin-bottom:20px">Cada línea se guarda como una señal
-                            independiente y alimenta las recomendaciones del dashboard.</p>
-                        <form id="contextForm" class="form-grid">
-                            <div class="field-group">
-                                <label class="field-label" for="strategicPriority">Prioridad estratégica</label>
-                                <textarea class="field-textarea" id="strategicPriority" rows="3"></textarea>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label" for="managerNotes">Notas del jefe de marketing</label>
-                                <textarea class="field-textarea" id="managerNotes" rows="5"
-                                    placeholder="Una línea por nota"></textarea>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label" for="receptionNotes">Señales de recepción</label>
-                                <textarea class="field-textarea" id="receptionNotes" rows="5"
-                                    placeholder="Una línea por señal"></textarea>
-                            </div>
-                            <div class="field-group">
-                                <label class="field-label" for="externalSignals">Señales externas y eventos</label>
-                                <textarea class="field-textarea" id="externalSignals" rows="5"
-                                    placeholder="Una línea por evento o insight externo"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-full">Guardar y recalcular</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
         </main>
-    </div>
-
-    <!-- ═══════════════════ CHAT ═══════════════════ -->
-    <button class="chat-fab" id="chatFab" title="Hablar con el agente de marketing">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-        </svg>
-    </button>
-
-    <div class="chat-overlay" id="chatOverlay"></div>
-    <div class="chat-panel" id="chatPanel">
-        <div class="chat-header">
-            <div>
-                <div class="chat-header-title">Agente de Marketing</div>
-                <div class="chat-header-sub">Analiza datos y propone acciones</div>
-            </div>
-            <button class="chat-close-btn" id="chatCloseBtn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <div class="chat-suggestions" id="chatSuggestions">
-            <button class="chat-suggestion" data-msg="Analiza la situación actual de campañas">Situación actual</button>
-            <button class="chat-suggestion" data-msg="Propón nuevas ideas de campaña">Ideas de campaña</button>
-            <button class="chat-suggestion" data-msg="Analiza el rendimiento por segmento">Análisis segmentos</button>
-            <button class="chat-suggestion" data-msg="Qué acciones propones para redes sociales">Plan RRSS</button>
-            <button class="chat-suggestion" data-msg="Cuáles son los puntos débiles actuales">Puntos débiles</button>
-            <button class="chat-suggestion" data-msg="Propón acciones para mejorar dentro del hotel">Acciones
-                hotel</button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="chat-typing" id="chatTyping">
-                <span class="chat-typing-dot"></span>
-                <span class="chat-typing-dot"></span>
-                <span class="chat-typing-dot"></span>
-            </div>
-        </div>
-        <div class="chat-input-area">
-            <textarea class="chat-input" id="chatInput" placeholder="Pregunta sobre campañas, segmentos, ideas…"
-                rows="1"></textarea>
-            <button class="chat-send-btn" id="chatSendBtn" title="Enviar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
-        </div>
     </div>
 
     <script src="app.js"></script>

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import http.server
 import json
+import os
 import socketserver
 import sys
 import urllib.parse
@@ -23,12 +24,16 @@ except ModuleNotFoundError:
 
 from backend import config as autonomous_config
 from backend.autonomous.live import iter_tick
-from backend.marketing.chat import handle_chat_message, refresh_dashboard_cache
+from backend.marketing.chat import (
+    generate_campaign_proposals,
+    handle_chat_message,
+    handle_modify_messaging,
+    refresh_dashboard_cache,
+)
 from backend.marketing.dashboard import build_dashboard_data, load_context, save_context
-from backend.marketing.proposals import generate_campaign_proposals
-from backend.marketing.rewrite import handle_modify_messaging
 
-PORT = 3003
+HOST = os.environ.get("MARKETING_HOST", "")
+PORT = int(os.environ.get("MARKETING_PORT", "3003"))
 BASE_DIR = Path(__file__).parent.resolve()
 
 MIME_TYPES = {
@@ -202,11 +207,12 @@ class MarketingHandler(http.server.BaseHTTPRequestHandler):
                 payload = self._read_json_body()
                 campaign_id = payload.get("campaign_id", "").strip()
                 instructions = payload.get("instructions", "").strip()
-                if not campaign_id or not instructions:
+                campaign = payload.get("campaign")
+                if (not campaign_id and not isinstance(campaign, dict)) or not instructions:
                     self._send(400, "application/json; charset=utf-8",
-                               json.dumps({"error": "campaign_id e instructions son obligatorios"}, ensure_ascii=False))
+                               json.dumps({"error": "campaign_id o campaign, e instructions son obligatorios"}, ensure_ascii=False))
                     return
-                result = handle_modify_messaging(campaign_id, instructions)
+                result = handle_modify_messaging(campaign_id, instructions, campaign)
                 self._send(200, "application/json; charset=utf-8",
                            json.dumps(result, ensure_ascii=False))
             except Exception as exc:
@@ -285,12 +291,36 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
 
 
 def main():
-    server = ThreadedHTTPServer(("", PORT), MarketingHandler)
-    print(f"\n  Panel de marketing de Eurostars ejecutándose en http://localhost:{PORT}\n")
+    bind_host = HOST or "localhost"
+    try:
+        server = ThreadedHTTPServer((HOST, PORT), MarketingHandler)
+    except PermissionError as exc:
+        print(
+            "\n  No se ha podido abrir el socket del servidor.\n"
+            "  Causa probable: el entorno donde se ejecuta no permite abrir puertos locales.\n"
+            f"  Detalle técnico: {exc}\n"
+            "  Si estás en un entorno restringido, tendrás que ejecutar el servidor fuera del sandbox.\n"
+            "  Si estás en tu máquina, prueba también con otro puerto:\n"
+            "  `MARKETING_PORT=3004 python3 demos/marketing/server.py`\n"
+        )
+        raise SystemExit(1) from exc
+    except OSError as exc:
+        if exc.errno == 98:
+            print(
+                f"\n  El puerto {PORT} ya está en uso.\n"
+                "  Prueba con otro puerto, por ejemplo:\n"
+                "  `MARKETING_PORT=3004 python3 demos/marketing/server.py`\n"
+            )
+            raise SystemExit(1) from exc
+        print(f"\n  No se pudo iniciar el servidor: {exc}\n")
+        raise SystemExit(1) from exc
+
+    print(f"\n  Panel de marketing de Eurostars ejecutándose en http://{bind_host}:{PORT}\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\n  Servidor detenido.")
+    finally:
         server.server_close()
 
 

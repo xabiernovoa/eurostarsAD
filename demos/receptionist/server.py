@@ -119,7 +119,7 @@ def build_guest_index() -> list:
                 {
                     key: value
                     for key, value in guest_directory.get(guest_id, {}).items()
-                    if key in {"name", "email", "first_name", "last_name", "nationality"}
+                    if key in {"name", "email", "phone", "first_name", "last_name", "nationality"}
                 }
             )
             guests.append(guest)
@@ -171,6 +171,7 @@ class ReceptionHandler(http.server.BaseHTTPRequestHandler):
                     or search in g.get("guest_number", "").lower()
                     or search in g.get("name", "").lower()
                     or search in g.get("email", "").lower()
+                    or search in g.get("phone", "").lower()
                     or search in g.get("first_name", "").lower()
                     or search in g.get("last_name", "").lower()
                     or search in g.get("profile", "").lower()

@@ -382,6 +382,8 @@ body::-webkit-scrollbar {
     color: #888888;
     display: flex;
     gap: 16px;
+    flex-wrap: wrap;
+    row-gap: 6px;
 }
 
 .guest-value-tag {

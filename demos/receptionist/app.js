@@ -87,7 +87,10 @@
                 .filter(Boolean).join(' · ');
             const isActive = g.id === activeGuestId;
             const displayName = g.name || `Huésped ${g.id.toString().slice(-4)}`;
-            const subMeta = [meta, g.profile, g.email || `ID ${g.id}`]
+            const contactMeta = [g.phone, g.email]
+                .filter(Boolean)
+                .join(' · ');
+            const subMeta = [meta, g.profile, contactMeta || `ID ${g.id}`]
                 .filter(Boolean)
                 .join(' · ');
 
@@ -187,6 +190,7 @@
             (g.guest_number && g.guest_number.toLowerCase().includes(q)) ||
             (g.name && g.name.toLowerCase().includes(q)) ||
             (g.email && g.email.toLowerCase().includes(q)) ||
+            (g.phone && g.phone.toLowerCase().includes(q)) ||
             (g.first_name && g.first_name.toLowerCase().includes(q)) ||
             (g.last_name && g.last_name.toLowerCase().includes(q)) ||
             (g.profile && g.profile.toLowerCase().includes(q)) ||
